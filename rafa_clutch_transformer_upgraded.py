@@ -4,6 +4,66 @@ import torch.nn as nn
 import torch.nn.functional as F
 from rafa_math_tools import geodesic_phase_upsample
 
+class BlackwellSafeAttention(nn.Module):
+    def __init__(self, d_model, nhead, dropout=0.0, batch_first=True):
+        super().__init__()
+        self.nhead = nhead
+        self.head_dim = d_model // nhead
+        self.qkv = nn.Linear(d_model, 3 * d_model)
+        self.out_proj = nn.Linear(d_model, d_model)
+        self.dropout = nn.Dropout(dropout)
+        self.batch_first = batch_first
+
+    def forward(self, x, key_padding_mask=None, attn_mask=None):
+        if self.batch_first:
+            B, T, C = x.shape
+        else:
+            T, B, C = x.shape
+            x = x.transpose(0, 1)
+            
+        qkv = self.qkv(x).view(B, T, 3, self.nhead, self.head_dim)
+        q, k, v = qkv[:, :, 0], qkv[:, :, 1], qkv[:, :, 2]
+        
+        # Transpose for [B, nhead, T, head_dim]
+        q = q.transpose(1, 2)
+        k = k.transpose(1, 2)
+        v = v.transpose(1, 2)
+        
+        scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.head_dim)
+        if attn_mask is not None:
+            scores = scores + attn_mask
+        
+        attn = torch.softmax(scores, dim=-1)
+        attn = self.dropout(attn)
+        
+        out = torch.matmul(attn, v).transpose(1, 2).reshape(B, T, C)
+        out = self.out_proj(out)
+        
+        if not self.batch_first:
+            out = out.transpose(0, 1)
+        return out, attn
+
+class SafeEncoderLayer(nn.Module):
+    def __init__(self, d_model, nhead, dim_feedforward=512, dropout=0.1):
+        super().__init__()
+        self.self_attn = BlackwellSafeAttention(d_model, nhead, dropout=dropout, batch_first=True)
+        self.linear1 = nn.Linear(d_model, dim_feedforward)
+        self.dropout = nn.Dropout(dropout)
+        self.linear2 = nn.Linear(dim_feedforward, d_model)
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.dropout1 = nn.Dropout(dropout)
+        self.dropout2 = nn.Dropout(dropout)
+
+    def forward(self, x):
+        attn_out, _ = self.self_attn(x)
+        x = x + self.dropout1(attn_out)
+        x = self.norm1(x)
+        x2 = self.linear2(self.dropout(F.relu(self.linear1(x))))
+        x = x + self.dropout2(x2)
+        x = self.norm2(x)
+        return x
+
 class RAFAClutchTransformerUpgraded(nn.Module):
     def __init__(
         self,
@@ -25,14 +85,14 @@ class RAFAClutchTransformerUpgraded(nn.Module):
         self.num_gears = num_gears
         self.transformer_dim = transformer_dim
         self.proj_in = nn.Linear(gear_dim, transformer_dim)
-        self.transformer = nn.Transformer(
-            d_model=transformer_dim,
-            nhead=num_heads,
-            num_encoder_layers=num_layers,
-            dropout=dropout,
-            batch_first=True,
-        )
-        self.gate_proj = nn.Linear(transformer_dim, 1) # Changed from num_gears to 1
+        
+        # BLACKWELL FIX: Use a pure PyTorch manual transformer stack
+        self.encoder_layers = nn.ModuleList([
+            SafeEncoderLayer(transformer_dim, num_heads, dropout=dropout)
+            for _ in range(num_layers)
+        ])
+        
+        self.gate_proj = nn.Linear(transformer_dim, 1)
         self.pool_kernel = pool_kernel
         self.gate_reg_weight = gate_reg_weight
         self.nonlinear_fusion = nonlinear_fusion
@@ -49,10 +109,13 @@ class RAFAClutchTransformerUpgraded(nn.Module):
         b, c, t, f = x.shape
         x_proj = self.proj_in(x) # (b, c, t, transformer_dim)
 
-        # Reshape for transformer: treat each gear's time series as a batch item
         x_flat = x_proj.contiguous().view(b*c, t, self.transformer_dim)
-
-        trans = self.transformer.encoder(x_flat) # (b*c, t, transformer_dim)
+        
+        # Manual encoder forward pass
+        trans = x_flat
+        for layer in self.encoder_layers:
+            trans = layer(trans)
+            
         trans_feat = trans.view(b, c, t, self.transformer_dim)
 
         # Gate summary includes transient sensitivity via temporal flux.
@@ -67,22 +130,18 @@ class RAFAClutchTransformerUpgraded(nn.Module):
         gate_logits = self.gate_proj(gate_summary).squeeze(-1)  # (b,c)
         gates = torch.softmax(gate_logits / max(self.gate_tau, 1e-6), dim=1)  # (b,c)
 
-        # Apply gates to the original input features
-        gated_x = x * gates.unsqueeze(-1).unsqueeze(-1)
+        # Path B: Residual Gating (gate update, not gate state)
+        # We ensure gears are never fully muted by adding the gates as a residual boost.
+        gated_x = x * (1.0 + gates.unsqueeze(-1).unsqueeze(-1))
         fused = gated_x
 
         if self.nonlinear_fusion:
             fused = torch.tanh(fused)
 
         if self.upsample_mode == "repeat":
-            # For phase data, linear repetition breaks winding numbers. Use Geodesic Upsampling.
-            if fused.shape[1] == 1: # Single channel, assumed to be phase if complex
-                # We need to infer if this is phase or magnitude.
-                # Heuristic: if values are unbounded, likely mag. If wrapped, phase.
-                # Safer: assume phase upsampling is always better for continuous signals.
-                fused = geodesic_phase_upsample(fused.squeeze(1), scale_factor=self.pool_kernel[0], mode='linear').unsqueeze(1)
-            else:
-                fused = fused.repeat(1, 1, 1, 1)
+            # Keep output shape invariant with input shape.
+            # The prior implementation expanded one axis and broke downstream diffusion dimensions.
+            fused = fused
         
         extras = {"gate_reg_loss": (gates**2).mean() * self.gate_reg_weight}
         return fused, gates, extras

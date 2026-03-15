@@ -17,6 +17,7 @@ processing, and on PyTorch tensors for differentiable losses.
 """
 import numpy as np
 import torch
+import torch.nn.functional as F
 from math import gcd
 
 # Basic angular operations
@@ -138,11 +139,15 @@ def soft_rational_prior(omegas: torch.Tensor, rationals: list[tuple[int,int]],
     Encourages frequency ratios to align with simple integer ratios.
     """
     Q = omegas.size(0)
+    if Q < 2 or not rationals:
+        return omegas.new_zeros(())
     
     # Create a matrix of all pairwise ratios
     omegas_col = omegas.unsqueeze(1)
     omegas_row = omegas.unsqueeze(0)
-    ratio_matrix = torch.abs(omegas_col / (omegas_row + 1e-8)) # Shape: (Q, Q)
+    # Clamp omegas to avoid division by zero and exploding gradients
+    omegas_safe = torch.clamp(omegas_row, min=1e-4)
+    ratio_matrix = torch.abs(omegas_col / omegas_safe) # Shape: (Q, Q)
     
     # Create tensors for target ratios and their weights
     device = omegas.device
@@ -159,15 +164,18 @@ def soft_rational_prior(omegas: torch.Tensor, rationals: list[tuple[int,int]],
     weights = torch.softmax(-temp * dists, dim=-1)
     loss_matrix = (weights * dists).sum(dim=-1) # Shape: (Q, Q)
     
-    # Sum the loss only for the upper triangle of the matrix (to count each pair once)
-    loss = torch.triu(loss_matrix, diagonal=1).sum()
-    
-    return loss
+    # Mean over unique pairs for scale stability across different Q.
+    tri = torch.triu(loss_matrix, diagonal=1)
+    pair_count = max(1, (Q * (Q - 1)) // 2)
+    return tri.sum() / float(pair_count)
 
 def harmonic_coupling_loss(delta_phi: torch.Tensor, rationals: list[tuple[int,int]],
                            lam: float = 1.0) -> torch.Tensor:
     Q, T = delta_phi.shape
+    if Q < 2 or not rationals:
+        return delta_phi.new_zeros(())
     total = delta_phi.new_zeros(())
+    pair_count = 0
     for i in range(Q):
         for j in range(i + 1, Q):
             best_val = None
@@ -175,13 +183,15 @@ def harmonic_coupling_loss(delta_phi: torch.Tensor, rationals: list[tuple[int,in
                 r_float = float(r)
                 p_float = float(p)
                 scaled = (p_float / r_float) * delta_phi[j]
-                err = delta_phi[i] - scaled
+                # Keep the coupling loss circular-safe across branch cuts at +/-pi.
+                err = wrap_angle(delta_phi[i] - scaled)
                 val = (err**2).mean()
                 if best_val is None or val < best_val:
                     best_val = val
             if best_val is not None:
                 total = total + best_val
-    return lam * total
+                pair_count += 1
+    return lam * (total / float(max(1, pair_count)))
 
 
 def phase_to_phasor(phi: torch.Tensor) -> torch.Tensor:
@@ -368,8 +378,10 @@ def geodesic_phase_upsample(phase: torch.Tensor, scale_factor: float, mode: str 
     # Permute for grid_sample or interpolate: [B, 2, C, T] -> treat C as H, T as W
     z_perm = z.permute(0, 3, 1, 2) 
     
-    # Upsample the phasor vectors
-    z_up = F.interpolate(z_perm, scale_factor=(1.0, scale_factor), mode=mode, align_corners=True)
+    # Upsample the phasor vectors.
+    # NOTE: z_perm is 4D ([B,2,H,W]); use bilinear interpolation for 2D fields.
+    interp_mode = "bilinear" if z_perm.dim() == 4 and mode == "linear" else mode
+    z_up = F.interpolate(z_perm, scale_factor=(1.0, scale_factor), mode=interp_mode, align_corners=True)
     
     # Renormalize (project back to circle)
     z_up = z_up / (torch.norm(z_up, dim=1, keepdim=True) + 1e-8)
@@ -378,3 +390,37 @@ def geodesic_phase_upsample(phase: torch.Tensor, scale_factor: float, mode: str 
     phase_up = torch.atan2(z_up[:, 1, ...], z_up[:, 0, ...])
     
     return phase_up
+
+
+def harmonic_inharmonic_energy(z, rat_ratios, harmonic_qs=(2, 3, 4, 6, 8, 12)):
+    # Expected z: [B, F, T, 2] or [B, T, F, 2]
+    # We will detect based on common RAFA shapes (F is usually 129, 257 etc)
+    if z.size(1) > z.size(2) and z.size(1) > 100: # Likely [B, F, T, 2]
+        z = z.transpose(1, 2) # Now [B, T, F, 2]
+    
+    B, T, F, _ = z.shape
+    # relative phasor
+    zi = z.unsqueeze(3) # [B, T, F, 1, 2]
+    zj = z.unsqueeze(2) # [B, T, 1, F, 2]
+    zj_conj = torch.stack([zj[..., 0], -zj[..., 1]], dim=-1)
+    
+    r_re = zi[..., 0] * zj_conj[..., 0] - zi[..., 1] * zj_conj[..., 1]
+    r_im = zi[..., 0] * zj_conj[..., 1] + zi[..., 1] * zj_conj[..., 0]
+    theta = torch.atan2(r_im, r_re) # [B, T, F, F]
+    
+    all_qs = set()
+    for r in rat_ratios:
+        all_qs.add(int(r[0]))
+        all_qs.add(int(r[1]))
+    
+    h_energy = torch.zeros((B, T), device=z.device)
+    i_energy = torch.zeros((B, T), device=z.device)
+    
+    for q in all_qs:
+        coh = torch.cos(float(q) * theta).mean(dim=(2, 3)) # [B, T]
+        if q in harmonic_qs:
+            h_energy = h_energy + coh
+        else:
+            i_energy = i_energy + coh
+            
+    return h_energy, i_energy

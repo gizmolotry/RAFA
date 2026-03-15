@@ -1,0 +1,142 @@
+data:
+  sample_rate: 16000
+  stft:
+    n_fft: 256
+    hop: 128
+    win_length: 256
+    window: hann
+  clip_seconds: 2
+  local_wav_root: wav_files
+  manifest_train_csv: manifest_train.csv
+  manifest_val_csv: manifest_val.csv
+  local_min_rms: 0.005
+  local_target_rms: 0.05
+  force_local_wavs: true
+  load_tension: true
+model:
+  text_conditioned: false
+  text_encoder: laion/clap-htsat-unfused
+  learn_grid: true
+  clutch_gate_tau: 0.5
+  sequence_backend: hyena # FORCED FOR BLACKWELL COMPATIBILITY
+  hyena_conductor_enabled: true
+  d_model: 256
+  gears:
+  - time_scale: 1
+    d_model: 256
+    n_heads: 8
+    n_layers: 3
+    sequence_backend: hyena
+  - time_scale: 2
+    d_model: 256
+    n_heads: 8
+    n_layers: 3
+    sequence_backend: hyena
+  - time_scale: 4
+    d_model: 256
+    n_heads: 8
+    n_layers: 3
+    sequence_backend: hyena
+training:
+  epochs: 9999
+  batch_size: 16
+  lr: 1.0e-05
+  driver_lr: 1.0e-05
+  navigator_lr: 1.0e-05
+  mechanic_lr: 1.0e-05
+  grad_clip: 0.1
+  checkpoint_dir: checkpoints_diffusion_master_definitive
+  checkpoint_every_steps: 1000
+  max_steps_per_epoch: null
+  losses:
+    use_r2_modular_embed: true
+    use_r5_adaptive_von_mises: true
+    use_mag_mse: true
+    use_rat_prior: false
+    use_harmonic_coupling: true
+    use_crystal_rel: true
+    use_monotonic_freqs: false
+    use_band_clamp: false
+    use_ifs_intermediate_consistency: false
+    use_latent_alignment: true
+  weights:
+    w_r1: 1.0
+    w_r2: 0.1
+    w_r5: 0.1
+    w_mag: 1.0
+    w_rat: 0.05
+    w_harm: 0.05
+    w_crystal: 0.05
+    w_clutch_iso: 0.1
+    w_clutch_balance: 0.05
+    w_ifs_intermediate: 0.01
+    w_latent_align: 1.0
+    w_diffusion: 0.0
+  rational_ratios:
+  - - 1
+    - 1
+  - - 2
+    - 1
+  - - 3
+    - 2
+  - - 4
+    - 3
+  - - 5
+    - 4
+  - - 3
+    - 1
+  - - 5
+    - 2
+  crystal_qs:
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 8
+  - 12
+  crystal_gamma: 1.0
+  crystal_alpha: 1.0
+  crystal_temp: 1.0
+phase_native_ifs:
+  enabled: true
+  num_steps: 8
+  num_maps: 4
+  delta_max: 0.35
+  routing_tau: 1.0
+  routing_tau_min: 0.5
+  routing_tau_decay: 0.99
+  router_entropy_weight: 0.01
+  slow_clock_enabled: false # DISABLED TO BYPASS BLACKWELL GRU BUG
+  slow_pool: 16
+  memory_enabled: false # DISABLED TO BYPASS BLACKWELL ATTN BUG
+  memory_dim: 128
+  impedance_enabled: true
+  use_triton: true
+  mode: full
+  h0_anchor_enabled: false
+  h0_anchor_lambda: 0.15
+  h0_anchor_lambda_min: 0.05
+  h0_anchor_decay: 0.9
+  intermediate_consistency_enabled: false
+  intermediate_consistency_detach_target: true
+diffusion:
+  enabled: true
+  model_type: rafa
+  timesteps: 1000
+  beta_start: 0.0001
+  beta_end: 0.02
+  predict_target: epsilon
+  sample_steps: 50
+  eval_every_steps: 500
+  checkpoint_every_steps: 1000
+  eval_sample_steps: 32
+  use_clap_cond: false
+  text_condition_mode: film
+  use_cfg: false
+  guidance_scale: 3.0
+  p_uncond: 0.15
+  cond_mag_scale: 0.1
+  text_ifs_control_strength: 0.25
+  use_manifest_prompts: true
+  require_clap_cond: false

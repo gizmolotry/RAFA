@@ -1,0 +1,19 @@
+name: RAFA_SM120_STABLE
+channels:
+  - pytorch-nightly
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - scipy
+  - einops
+  # Force the nightly build with the latest CUDA toolkit available for Blackwell
+  - pytorch
+  - pytorch-cuda=12.4 
+  - pip:
+      - ninja
+      - triton
+      # If flash-attn is needed, force it to compile from source against the nightly binaries
+      # - flash-attn --no-build-isolation
