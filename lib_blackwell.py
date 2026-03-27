@@ -3,8 +3,8 @@ import torch.nn.functional as F
 import math
 from triton_kernels import ramanujan_summary_triton
 
-# --- RAFA-S (30M) BLACKWELL TRITON-ACCELERATED LIBRARY ---
-# Environment: rafa-triton (C:\Users\Andrew\miniconda3\envs\rafa-triton)
+# --- RAFA-M (80M) POLYGLOT BLACKWELL CORE ---
+# Supports both Formal Control Matrices and Legacy Text Embeddings.
 
 def init_weight(shape, dev='cuda'):
     w = torch.empty(*shape, device=dev, dtype=torch.float32)
@@ -56,70 +56,80 @@ class NakedDenoiser:
         return pred_mag, pred_z
 
 class NakedRAFA:
-    def __init__(self, d_model=256, freq_bins=129, dev='cuda'):
+    def __init__(self, d_model=768, freq_bins=129, dev='cuda'):
         self.d_model = d_model
         self.freq_bins = freq_bins
-        h_dim = 256
+        h_dim = 1024
+        
         self.weights = {
+            # --- LEGACY EMBEDDING PORT ---
             "lexicon_phasors": init_weight((256, freq_bins * 2), dev),
+            
+            # --- FORMAL CONTROL PORTS ---
+            "mode_seeds": init_weight((10, freq_bins, 2), dev),
+            "spectrum_biases": init_weight((4, freq_bins), dev),
+            
+            # Spine
             "sp_w_proj": init_weight((d_model, 6 * freq_bins), dev),
             "sp_b_proj": init_weight((d_model,), dev),
             "sp_w_res": init_weight((d_model, d_model), dev),
             "sp_b_res": init_weight((d_model,), dev),
             "g1_w_ph": init_weight((freq_bins, d_model), dev),
             "g1_w_mag": init_weight((freq_bins, d_model), dev),
+            
+            # Brain
             "ps_w_ih": init_weight((3 * h_dim, freq_bins), dev),
             "ps_w_hh": init_weight((3 * h_dim, h_dim), dev),
             "ps_b_ih": init_weight((3 * h_dim,), dev),
             "ps_b_hh": init_weight((3 * h_dim,), dev),
             "ps_slow_proj": init_weight((freq_bins * 3, h_dim), dev),
-            "ps_z0": init_weight((1, freq_bins, 2), dev),
+            "ps_z0_default": init_weight((1, freq_bins, 2), dev),
         }
-        # Buffer for Triton
         self.qset = torch.tensor([2, 3, 4, 5, 6, 8, 12], dtype=torch.int32, device=dev)
         self.qw = torch.tensor([1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5], dtype=torch.float32, device=dev)
 
-    def forward(self, mag, phase, text_tokens=None, num_steps=4):
+    def forward(self, mag, phase, control_matrix=None, text_tokens=None, num_steps=4):
         B, F_dim, T = mag.shape
         w = self.weights
         
-        # --- 1. THE SPINE (Residual Linear) ---
-        x_in = torch.cat([mag]*6, dim=1).transpose(1, 2)
-        x = F.relu(F.linear(x_in, w["sp_w_proj"], w["sp_b_proj"]))
+        if control_matrix and "spectrum_id" in control_matrix and control_matrix["spectrum_id"] is not None:
+            s_idx = control_matrix["spectrum_id"]
+            s_bias = torch.sigmoid(w["spectrum_biases"][s_idx]).unsqueeze(-1) if not isinstance(s_idx, int) else torch.sigmoid(w["spectrum_biases"][s_idx]).view(1, F_dim, 1)
+            mag = mag * s_bias
+            
+        x = torch.cat([mag]*6, dim=1).transpose(1, 2)
+        x = F.relu(F.linear(x, w["sp_w_proj"], w["sp_b_proj"]))
         x = x + F.relu(F.linear(x, w["sp_w_res"], w["sp_b_res"]))
-        
         p_seed = F.linear(x, w["g1_w_ph"]).transpose(1, 2)
         m_seed = F.linear(x, w["g1_w_mag"]).transpose(1, 2)
         
-        # --- 2. THE BRAIN (Triton Accelerated) ---
-        z_in = torch.stack([torch.cos(p_seed), torch.sin(p_seed)], dim=-1).permute(0, 2, 1, 3)
-        z_prev = _renorm(w["ps_z0"]).expand(B, -1, -1)
+        # --- POLYGLOT INITIALIZATION ---
+        if control_matrix and "mode_id" in control_matrix and control_matrix["mode_id"] is not None:
+            m_idx = control_matrix["mode_id"]
+            z_prev = _renorm(w["mode_seeds"][m_idx]).expand(B, -1, -1) if isinstance(m_idx, int) else _renorm(w["mode_seeds"][m_idx])
+        else:
+            z_prev = _renorm(w["ps_z0_default"]).expand(B, -1, -1)
+            
+        # Legacy Injection Support
         if text_tokens is not None:
             token_p = F.embedding(text_tokens, w["lexicon_phasors"]).view(B, -1, self.freq_bins, 2)
             z_prev = _renorm(z_prev + token_p.sum(1))
             
-        h_slow = z_in.new_zeros(B, 256)
+        z_in = torch.stack([torch.cos(p_seed), torch.sin(p_seed)], dim=-1).permute(0, 2, 1, 3)
+        h_slow = z_in.new_zeros(B, 1024)
         h_slow_list = []
         outs = []
         for t in range(T):
-            # Proprioception via Triton
-            # Extract 5 features: re, im, entropy, diag, coherence
-            features = ramanujan_summary_triton(z_in[:, t], self.qset, self.qw) # [B, F, 5]
-            f_v = features.mean(dim=1) # [B, 5] - we boost resolution to 5 features
-            
-            # Slow Clock step
-            # Note: ps_w_ih must be re-initialized if input dim changed from 129 to 5
-            ih, hh = F.linear(f_v, w["ps_w_ih"][:, :5], w["ps_b_ih"]), F.linear(h_slow, w["ps_w_hh"], w["ps_b_hh"])
+            f_v = mag[:, :, t]
+            ih, hh = F.linear(f_v, w["ps_w_ih"], w["ps_b_ih"]), F.linear(h_slow, w["ps_w_hh"], w["ps_b_hh"])
             i_r, i_z, i_n = ih.chunk(3, dim=-1); h_r, h_z, h_n = hh.chunk(3, dim=-1)
             r, z_gate = torch.sigmoid(i_r + h_r), torch.sigmoid(i_z + h_z)
             h_slow = (1.0 - z_gate) * torch.tanh(i_n + r * h_n) + z_gate * h_slow
             h_slow_list.append(h_slow)
-            
             brain_ctrl = F.linear(h_slow, w["ps_slow_proj"]).view(B, self.freq_bins, 3)
             brain_delta = 0.5 * torch.tanh(brain_ctrl[:, :, :2])
             brain_z = torch.stack([torch.cos(brain_delta[..., 0]), torch.sin(brain_delta[..., 1])], dim=-1)
             coupling_gate = torch.sigmoid(brain_ctrl[:, :, 2:3])
-            
             z_iter = (1.0 - coupling_gate) * z_in[:, t] + coupling_gate * z_prev
             for _ in range(num_steps):
                 z_iter_re = z_iter[..., 0] * brain_z[..., 0] - z_iter[..., 1] * brain_z[..., 1]
