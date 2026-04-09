@@ -4,11 +4,15 @@
   "checkpoint_schema": "circleworld_v0",
   "canonical_entrypoint": "runtimes/circleworld_proto/run_ablation.py",
   "training_entrypoint": "runtimes/circleworld_proto/train_circleworld.py",
+  "specialized_training_entrypoint": "runtimes/circleworld_proto/train_circleworld_real_anchor.py",
+  "benchmark_entrypoint": "runtimes/circleworld_proto/benchmark_circleworld_real_anchor.py",
   "implementation_entrypoint": "lineages/04_positive_replacement/ablate_formalization.py",
+  "canonical_output": "outputs/circleworld_proto/inference_2026-04-09_realanchor_band_ab",
+  "canonical_benchmark": "outputs/circleworld_proto/benchmark_2026-04-09_realanchor_band",
   "shared_modules": [
     "lineages/04_positive_replacement/circleworld.py",
     "core/lib_blackwell.py",
     "rafa_math_tools.py"
   ],
-  "notes": "Positive-replacement formalization prototype with recursive packetization, ablation harness, and isolated parameter-training lane."
+  "notes": "Positive-replacement formalization prototype with recursive packetization, ablation harness, mixed-seed trainer, real-anchor trainer, and bit-stable benchmark/listen lane."
 }
