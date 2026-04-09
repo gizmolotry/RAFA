@@ -115,9 +115,17 @@
       "path": "checkpoints_circleworld_proto/training_run_2026-04-09_realanchor_band/circleworld_real_anchor_config_cem_v1.json",
       "schema": "circleworld_v0",
       "runtime": "circleworld_proto",
+      "role": "former_listen_baseline",
+      "canonical_entrypoint": "runtimes/circleworld_proto/train_circleworld_real_anchor.py",
+      "notes": "Former Circleworld real-anchor band baseline. Superseded by the constrained hard-case config later on 2026-04-09."
+    },
+    {
+      "path": "checkpoints_circleworld_proto/training_run_2026-04-09_realanchor_constrained/circleworld_real_anchor_config_cem_v1.json",
+      "schema": "circleworld_v0",
+      "runtime": "circleworld_proto",
       "role": "canonical_current_listen_baseline",
       "canonical_entrypoint": "runtimes/circleworld_proto/train_circleworld_real_anchor.py",
-      "notes": "Current best Circleworld real-anchor band objective config. Canonical listening and benchmark baseline as of 2026-04-09."
+      "notes": "Current best Circleworld constrained real-anchor config. Beats the prior band baseline on both the standard and expanded bit-stable benchmarks as of 2026-04-09."
     }
   ]
 }

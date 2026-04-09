@@ -28,6 +28,13 @@ DEFAULT_CASES = {
 }
 
 
+def _load_cases_json(path: Path | None) -> dict[str, Path]:
+    if path is None:
+        return dict(DEFAULT_CASES)
+    payload = json.loads(path.read_text(encoding="utf-8-sig"))
+    return {str(name): Path(str(wav_path)) for name, wav_path in payload.items()}
+
+
 def _wav_bytes(path: Path) -> bytes:
     return path.read_bytes()
 
@@ -86,11 +93,13 @@ def run_benchmark(
     clip_seconds: int,
     phase_blend: float,
     rerender_check: bool = True,
+    cases: dict[str, Path] | None = None,
 ) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
+    active_cases = dict(cases or DEFAULT_CASES)
 
-    for name, wav_path in DEFAULT_CASES.items():
+    for name, wav_path in active_cases.items():
         ref_path = out_dir / f"{name}_reference.wav"
         ref_meta = render_reference_audio(
             wav_path=wav_path,
@@ -148,6 +157,7 @@ def run_benchmark(
         "clip_seconds": int(clip_seconds),
         "phase_blend": float(phase_blend),
         "rerender_check": bool(rerender_check),
+        "cases": {name: str(path) for name, path in active_cases.items()},
         "mean_mse": float(sum(r["mse"] for r in rows) / len(rows)),
         "mean_mae": float(sum(r["mae"] for r in rows) / len(rows)),
         "mean_corr": float(sum(r["corr"] for r in rows) / len(rows)),
@@ -166,6 +176,7 @@ def main() -> None:
     ap.add_argument("--clip-seconds", type=int, default=10)
     ap.add_argument("--phase-blend", type=float, default=1.0)
     ap.add_argument("--no-rerender-check", action="store_true")
+    ap.add_argument("--cases-json", default=None, help="Optional JSON file mapping case names to WAV paths.")
     args = ap.parse_args()
 
     summary = run_benchmark(
@@ -175,6 +186,7 @@ def main() -> None:
         clip_seconds=args.clip_seconds,
         phase_blend=args.phase_blend,
         rerender_check=not bool(args.no_rerender_check),
+        cases=_load_cases_json(Path(args.cases_json)) if args.cases_json else None,
     )
     print(json.dumps(summary, indent=2))
 

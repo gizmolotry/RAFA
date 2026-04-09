@@ -44,10 +44,30 @@ def _window_penalty(value: float, low: float | None, high: float | None) -> floa
     return 0.0
 
 
-def _anchor_dataset(device_name: str, clip_seconds: int) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def _case_weight_for(item: dict[str, Any], case_weights: dict[str, float] | None) -> float:
+    if not case_weights:
+        return 1.0
+    haystacks = [
+        str(item.get("name", "")),
+        str(item.get("wav_path", "")),
+    ]
+    for key, value in case_weights.items():
+        if any(key in hay for hay in haystacks):
+            return float(value)
+    return 1.0
+
+
+def _anchor_dataset(
+    device_name: str,
+    clip_seconds: int,
+    extra_train_wavs: list[str] | None = None,
+    extra_val_wavs: list[str] | None = None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     cfg = load_config()
     stft_cfg = cfg["data"]["stft"]
     train_wavs, val_wavs = _graduation_anchor_wavs()
+    train_wavs = list(train_wavs) + list(extra_train_wavs or [])
+    val_wavs = list(val_wavs) + list(extra_val_wavs or [])
     device = _safe_device(device_name)
 
     def _build(paths: list[str]) -> list[dict[str, Any]]:
@@ -80,6 +100,8 @@ def _evaluate_cfg_on_dataset(
     dataset: list[dict[str, Any]],
     phase_blend: float,
     score_cfg: dict[str, float],
+    case_weights: dict[str, float] | None = None,
+    baseline_rows: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     for item in dataset:
@@ -112,11 +134,22 @@ def _evaluate_cfg_on_dataset(
             score_cfg.get("mae_low"),
             score_cfg.get("mae_high"),
         )
+        row_weight = _case_weight_for(item, case_weights)
+        baseline_row = baseline_rows.get(item["name"]) if baseline_rows else None
+        corr_regret = 0.0
+        mae_regret = 0.0
+        if baseline_row is not None:
+            corr_margin = float(score_cfg.get("baseline_corr_margin", 0.0))
+            mae_margin = float(score_cfg.get("baseline_mae_margin", 0.0))
+            corr_regret = max(0.0, float(baseline_row["corr"]) - corr - corr_margin)
+            mae_regret = max(0.0, mae - float(baseline_row["mae"]) - mae_margin)
         score = (
             - score_cfg["w_corr"] * abs(corr - score_cfg["target_corr"])
             - score_cfg["w_mae"] * abs(mae - score_cfg["target_mae"])
             - score_cfg.get("w_corr_band", 0.0) * corr_band
             - score_cfg.get("w_mae_band", 0.0) * mae_band
+            - score_cfg.get("w_baseline_corr", 0.0) * corr_regret
+            - score_cfg.get("w_baseline_mae", 0.0) * mae_regret
             - score_cfg["w_dom"] * abs(dom - score_cfg["target_dom"])
             - score_cfg["w_entropy"] * abs(ent - score_cfg["target_entropy"])
             - score_cfg["w_promote"] * max(0.0, score_cfg["min_promotions"] - promos)
@@ -135,12 +168,20 @@ def _evaluate_cfg_on_dataset(
                 "corr": corr,
                 "corr_band_penalty": corr_band,
                 "mae_band_penalty": mae_band,
+                "corr_regret": corr_regret,
+                "mae_regret": mae_regret,
+                "row_weight": row_weight,
                 **summary,
             }
         )
 
     def _mean(key: str) -> float:
-        return float(sum(r[key] for r in rows) / len(rows)) if rows else 0.0
+        if not rows:
+            return 0.0
+        denom = sum(float(r.get("row_weight", 1.0)) for r in rows)
+        if denom <= 0.0:
+            return 0.0
+        return float(sum(float(r[key]) * float(r.get("row_weight", 1.0)) for r in rows) / denom)
 
     return {
         "num_samples": len(rows),
@@ -150,12 +191,15 @@ def _evaluate_cfg_on_dataset(
         "mean_corr": _mean("corr"),
         "mean_corr_band_penalty": _mean("corr_band_penalty"),
         "mean_mae_band_penalty": _mean("mae_band_penalty"),
+        "mean_corr_regret": _mean("corr_regret"),
+        "mean_mae_regret": _mean("mae_regret"),
         "mean_major_gain": _mean("major_gain"),
         "mean_residue_drop": _mean("residue_drop"),
         "mean_promotability_gain": _mean("promotability_gain"),
         "mean_dominant_q_share": _mean("dominant_q_share"),
         "mean_q_entropy": _mean("q_entropy"),
         "mean_num_promotions": _mean("num_promotions"),
+        "total_weight": float(sum(float(r.get("row_weight", 1.0)) for r in rows)),
         "rows": rows,
     }
 
@@ -172,14 +216,24 @@ def train_circleworld_real_anchor(
     phase_blend: float,
     init_config_path: Path,
     score_cfg: dict[str, float],
+    case_weights: dict[str, float] | None = None,
+    extra_train_wavs: list[str] | None = None,
+    extra_val_wavs: list[str] | None = None,
 ) -> dict[str, Any]:
     _set_seed(seed)
     device = _safe_device(device_name)
     base_cfg = _load_circle_cfg(init_config_path)
-    train_set, val_set = _anchor_dataset(device_name=device_name, clip_seconds=clip_seconds)
+    train_set, val_set = _anchor_dataset(
+        device_name=device_name,
+        clip_seconds=clip_seconds,
+        extra_train_wavs=extra_train_wavs,
+        extra_val_wavs=extra_val_wavs,
+    )
 
-    baseline_train = _evaluate_cfg_on_dataset(base_cfg, train_set, phase_blend=phase_blend, score_cfg=score_cfg)
-    baseline_val = _evaluate_cfg_on_dataset(base_cfg, val_set, phase_blend=phase_blend, score_cfg=score_cfg)
+    baseline_train = _evaluate_cfg_on_dataset(base_cfg, train_set, phase_blend=phase_blend, score_cfg=score_cfg, case_weights=case_weights)
+    baseline_val = _evaluate_cfg_on_dataset(base_cfg, val_set, phase_blend=phase_blend, score_cfg=score_cfg, case_weights=case_weights)
+    baseline_train_rows = {row["name"]: row for row in baseline_train["rows"]}
+    baseline_val_rows = {row["name"]: row for row in baseline_val["rows"]}
 
     mean = {
         "q_weights": list(base_cfg.q_weights),
@@ -207,8 +261,22 @@ def train_circleworld_real_anchor(
         for _ in range(population):
             cand = _candidate_from_mean_std(mean, std, rng)
             cfg = _materialize_cfg(base_cfg, cand)
-            train_eval = _evaluate_cfg_on_dataset(cfg, train_set, phase_blend=phase_blend, score_cfg=score_cfg)
-            val_eval = _evaluate_cfg_on_dataset(cfg, val_set, phase_blend=phase_blend, score_cfg=score_cfg)
+            train_eval = _evaluate_cfg_on_dataset(
+                cfg,
+                train_set,
+                phase_blend=phase_blend,
+                score_cfg=score_cfg,
+                case_weights=case_weights,
+                baseline_rows=baseline_train_rows,
+            )
+            val_eval = _evaluate_cfg_on_dataset(
+                cfg,
+                val_set,
+                phase_blend=phase_blend,
+                score_cfg=score_cfg,
+                case_weights=case_weights,
+                baseline_rows=baseline_val_rows,
+            )
             row = {
                 "iteration": step,
                 "candidate": cand,
@@ -267,8 +335,22 @@ def train_circleworld_real_anchor(
 
     assert best_state is not None
     best_cfg = _materialize_cfg(base_cfg, best_state["materialized_cfg"])
-    best_train = _evaluate_cfg_on_dataset(best_cfg, train_set, phase_blend=phase_blend, score_cfg=score_cfg)
-    best_val = _evaluate_cfg_on_dataset(best_cfg, val_set, phase_blend=phase_blend, score_cfg=score_cfg)
+    best_train = _evaluate_cfg_on_dataset(
+        best_cfg,
+        train_set,
+        phase_blend=phase_blend,
+        score_cfg=score_cfg,
+        case_weights=case_weights,
+        baseline_rows=baseline_train_rows,
+    )
+    best_val = _evaluate_cfg_on_dataset(
+        best_cfg,
+        val_set,
+        phase_blend=phase_blend,
+        score_cfg=score_cfg,
+        case_weights=case_weights,
+        baseline_rows=baseline_val_rows,
+    )
 
     out_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -286,6 +368,7 @@ def train_circleworld_real_anchor(
         "phase_blend": phase_blend,
         "init_config_path": str(init_config_path),
         "score_cfg": score_cfg,
+        "case_weights": case_weights or {},
         "train_anchor_wavs": [x["wav_path"] for x in train_set],
         "val_anchor_wavs": [x["wav_path"] for x in val_set],
         "config": {
@@ -361,6 +444,13 @@ def main() -> None:
     ap.add_argument("--mae-high", type=float, default=None)
     ap.add_argument("--w-corr-band", type=float, default=0.0)
     ap.add_argument("--w-mae-band", type=float, default=0.0)
+    ap.add_argument("--w-baseline-corr", type=float, default=0.0)
+    ap.add_argument("--w-baseline-mae", type=float, default=0.0)
+    ap.add_argument("--baseline-corr-margin", type=float, default=0.0)
+    ap.add_argument("--baseline-mae-margin", type=float, default=0.0)
+    ap.add_argument("--case-weights-json", default=None, help="JSON object mapping substrings to weights.")
+    ap.add_argument("--extra-train-wavs-json", default=None, help="JSON list of extra train WAV paths.")
+    ap.add_argument("--extra-val-wavs-json", default=None, help="JSON list of extra val WAV paths.")
     args = ap.parse_args()
 
     score_cfg = {
@@ -383,7 +473,14 @@ def main() -> None:
         "mae_high": None if args.mae_high is None else float(args.mae_high),
         "w_corr_band": float(args.w_corr_band),
         "w_mae_band": float(args.w_mae_band),
+        "w_baseline_corr": float(args.w_baseline_corr),
+        "w_baseline_mae": float(args.w_baseline_mae),
+        "baseline_corr_margin": float(args.baseline_corr_margin),
+        "baseline_mae_margin": float(args.baseline_mae_margin),
     }
+    case_weights = json.loads(args.case_weights_json) if args.case_weights_json else {}
+    extra_train_wavs = json.loads(args.extra_train_wavs_json) if args.extra_train_wavs_json else []
+    extra_val_wavs = json.loads(args.extra_val_wavs_json) if args.extra_val_wavs_json else []
 
     summary = train_circleworld_real_anchor(
         out_dir=Path(args.out_dir),
@@ -397,6 +494,9 @@ def main() -> None:
         phase_blend=args.phase_blend,
         init_config_path=Path(args.init_config),
         score_cfg=score_cfg,
+        case_weights=case_weights,
+        extra_train_wavs=extra_train_wavs,
+        extra_val_wavs=extra_val_wavs,
     )
     print(json.dumps(summary, indent=2))
 

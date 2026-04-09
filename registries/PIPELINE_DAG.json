@@ -60,12 +60,12 @@
     {
       "id": "circleworld_real_anchor_benchmark",
       "type": "benchmark",
-      "path": "outputs/circleworld_proto/benchmark_2026-04-09_realanchor_band"
+      "path": "outputs/circleworld_proto/benchmark_2026-04-09_realanchor_constrained_expanded"
     },
     {
       "id": "circleworld_real_anchor_listen_set",
       "type": "artifact",
-      "path": "outputs/circleworld_proto/inference_2026-04-09_realanchor_band_ab"
+      "path": "outputs/circleworld_proto/inference_2026-04-09_realanchor_constrained_ab"
     }
   ],
   "edges": [

@@ -32,8 +32,8 @@
       "training_entrypoint": "runtimes/circleworld_proto/train_circleworld.py",
       "specialized_training_entrypoint": "runtimes/circleworld_proto/train_circleworld_real_anchor.py",
       "benchmark_entrypoint": "runtimes/circleworld_proto/benchmark_circleworld_real_anchor.py",
-      "canonical_output": "outputs/circleworld_proto/inference_2026-04-09_realanchor_band_ab",
-      "canonical_benchmark": "outputs/circleworld_proto/benchmark_2026-04-09_realanchor_band"
+      "canonical_output": "outputs/circleworld_proto/inference_2026-04-09_realanchor_constrained_ab",
+      "canonical_benchmark": "outputs/circleworld_proto/benchmark_2026-04-09_realanchor_constrained_expanded"
     }
   ]
 }
