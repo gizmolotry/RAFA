@@ -1,0 +1,138 @@
+{
+  "version": "2026-04-09",
+  "policy": {
+    "branches_are_workstreams_not_architecture": true,
+    "branch_to_branch_dependencies_forbidden": true,
+    "artifacts_should_be_immutable": true,
+    "canonical_runtime_per_lineage": true
+  },
+  "nodes": [
+    {
+      "id": "platform_shared_modules",
+      "type": "platform",
+      "path": "core"
+    },
+    {
+      "id": "stage4_blackwell_14",
+      "type": "runtime",
+      "path": "runtimes/stage4_blackwell_14"
+    },
+    {
+      "id": "stage4_blackwell_16",
+      "type": "runtime",
+      "path": "runtimes/stage4_blackwell_16"
+    },
+    {
+      "id": "diffusion_parent_v3",
+      "type": "runtime",
+      "path": "runtimes/diffusion_parent_v3"
+    },
+    {
+      "id": "circleworld_proto",
+      "type": "runtime",
+      "path": "runtimes/circleworld_proto"
+    },
+    {
+      "id": "graduation_pack",
+      "type": "lineage",
+      "path": "lineages/01_parent_graduation"
+    },
+    {
+      "id": "local_ablations",
+      "type": "lineage",
+      "path": "lineages/02_local_ablations"
+    },
+    {
+      "id": "subtractive_fork",
+      "type": "lineage",
+      "path": "lineages/03_subtractive_fork"
+    },
+    {
+      "id": "positive_replacement",
+      "type": "lineage",
+      "path": "lineages/04_positive_replacement"
+    },
+    {
+      "id": "graduation_restore_benchmark",
+      "type": "benchmark",
+      "path": "outputs/graduation_pack_restore_candidate"
+    },
+    {
+      "id": "circleworld_real_anchor_benchmark",
+      "type": "benchmark",
+      "path": "outputs/circleworld_proto/benchmark_2026-04-09_realanchor_band"
+    },
+    {
+      "id": "circleworld_real_anchor_listen_set",
+      "type": "artifact",
+      "path": "outputs/circleworld_proto/inference_2026-04-09_realanchor_band_ab"
+    }
+  ],
+  "edges": [
+    {
+      "from": "platform_shared_modules",
+      "to": "stage4_blackwell_14",
+      "kind": "shared_code"
+    },
+    {
+      "from": "platform_shared_modules",
+      "to": "stage4_blackwell_16",
+      "kind": "shared_code"
+    },
+    {
+      "from": "platform_shared_modules",
+      "to": "diffusion_parent_v3",
+      "kind": "shared_code"
+    },
+    {
+      "from": "platform_shared_modules",
+      "to": "circleworld_proto",
+      "kind": "shared_code"
+    },
+    {
+      "from": "stage4_blackwell_14",
+      "to": "graduation_pack",
+      "kind": "canonical_runtime"
+    },
+    {
+      "from": "stage4_blackwell_14",
+      "to": "subtractive_fork",
+      "kind": "canonical_runtime"
+    },
+    {
+      "from": "stage4_blackwell_16",
+      "to": "graduation_pack",
+      "kind": "secondary_runtime"
+    },
+    {
+      "from": "diffusion_parent_v3",
+      "to": "graduation_pack",
+      "kind": "secondary_runtime"
+    },
+    {
+      "from": "diffusion_parent_v3",
+      "to": "local_ablations",
+      "kind": "canonical_runtime"
+    },
+    {
+      "from": "circleworld_proto",
+      "to": "positive_replacement",
+      "kind": "canonical_runtime"
+    },
+    {
+      "from": "graduation_pack",
+      "to": "graduation_restore_benchmark",
+      "kind": "evaluated_by"
+    },
+    {
+      "from": "positive_replacement",
+      "to": "circleworld_real_anchor_benchmark",
+      "kind": "evaluated_by"
+    },
+    {
+      "from": "circleworld_real_anchor_benchmark",
+      "to": "circleworld_real_anchor_listen_set",
+      "kind": "publishes"
+    }
+  ]
+}

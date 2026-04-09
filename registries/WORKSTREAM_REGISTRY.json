@@ -1,0 +1,86 @@
+{
+  "version": "2026-04-09",
+  "policy": {
+    "branch_prefix": "codex/",
+    "purpose": "Branches track active workstreams. Architecture lives in runtimes, lineages, and registries.",
+    "forbidden": [
+      "branch-to-branch dependencies",
+      "mutating another workstream's owned runtime in place",
+      "using a branch name as an architecture identifier"
+    ]
+  },
+  "workstreams": [
+    {
+      "branch": "codex/circleworld",
+      "status": "active",
+      "primary_runtime": "circleworld_proto",
+      "primary_lineage": "positive_replacement",
+      "owned_paths": [
+        "runtimes/circleworld_proto",
+        "lineages/04_positive_replacement",
+        "outputs/circleworld_proto",
+        "checkpoints_circleworld_proto"
+      ],
+      "reference_only_paths": [
+        "runtimes/stage4_blackwell_14",
+        "outputs/graduation_pack",
+        "outputs/graduation_pack_restore_candidate"
+      ]
+    },
+    {
+      "branch": "codex/graduation-runtime",
+      "status": "active",
+      "primary_runtime": "stage4_blackwell_14",
+      "primary_lineage": "graduation_pack",
+      "owned_paths": [
+        "runtimes/stage4_blackwell_14",
+        "outputs/graduation_pack_restore_candidate",
+        "tools/export_audio_compat14.py",
+        "tools/export_graduation_pack_restore.py"
+      ],
+      "reference_only_paths": [
+        "runtimes/circleworld_proto",
+        "lineages/04_positive_replacement",
+        "outputs/circleworld_proto"
+      ]
+    },
+    {
+      "branch": "codex/repo-migration",
+      "status": "active",
+      "primary_runtime": null,
+      "primary_lineage": null,
+      "owned_paths": [
+        "docs",
+        "registries",
+        "tests",
+        "README.md"
+      ]
+    },
+    {
+      "branch": "codex/research-track",
+      "status": "active",
+      "primary_runtime": null,
+      "primary_lineage": null,
+      "owned_paths": [
+        "research_track"
+      ]
+    },
+    {
+      "branch": "codex/runtime-contracts",
+      "status": "active",
+      "primary_runtime": null,
+      "primary_lineage": null,
+      "owned_paths": [
+        "docs/architecture/RUNTIME_CONTRACTS.md",
+        "registries"
+      ]
+    },
+    {
+      "branch": "master",
+      "status": "integration",
+      "primary_runtime": null,
+      "primary_lineage": null,
+      "owned_paths": []
+    }
+  ]
+}

@@ -106,10 +106,53 @@ def _save_wav(wav: torch.Tensor, path: Path, sr: int) -> None:
 
 def _crop_or_pad(wav: torch.Tensor, target_len: int) -> torch.Tensor:
     if wav.size(1) < target_len:
-        wav = F.pad(wav, (0, target_len - wav.size(1)))
+        reps = int(np.ceil(float(target_len) / float(max(1, wav.size(1)))))
+        wav = wav.repeat(1, reps)
+        wav = wav[:, :target_len]
     elif wav.size(1) > target_len:
         wav = wav[:, :target_len]
     return wav
+
+
+def prepare_reference_audio(
+    wav_path: Path,
+    device_name: str,
+    clip_seconds_override: int | None = None,
+) -> tuple[torch.Tensor, int]:
+    cfg = load_config()
+    sr = int(cfg["data"]["sample_rate"])
+    clip_seconds = int(clip_seconds_override if clip_seconds_override is not None else cfg["data"].get("clip_seconds", 2))
+    target_len = sr * clip_seconds
+    device = _safe_device(device_name)
+
+    wav, wav_sr = _load_local_pcm_wav(wav_path)
+    wav = wav.float()
+    if wav.size(0) > 1:
+        wav = wav.mean(dim=0, keepdim=True)
+    wav = _native_resample(wav, wav_sr, sr)
+    wav = _crop_or_pad(wav, target_len)
+    return wav.to(device), sr
+
+
+def render_reference_audio(
+    wav_path: Path,
+    out_path: Path,
+    device_name: str,
+    clip_seconds_override: int | None = None,
+) -> dict[str, Any]:
+    wav, sr = prepare_reference_audio(
+        wav_path=wav_path,
+        device_name=device_name,
+        clip_seconds_override=clip_seconds_override,
+    )
+    _save_wav(wav.squeeze(0), out_path, sr=sr)
+    return {
+        "source_wav": str(wav_path),
+        "out_wav": str(out_path),
+        "device": str(_safe_device(device_name)),
+        "sample_rate": sr,
+        "clip_seconds": int(clip_seconds_override if clip_seconds_override is not None else load_config()["data"].get("clip_seconds", 2)),
+    }
 
 
 def _phasor_to_phase(z: torch.Tensor) -> torch.Tensor:
@@ -129,21 +172,20 @@ def render_circleworld_audio(
     out_path: Path,
     device_name: str,
     phase_blend: float,
+    clip_seconds_override: int | None = None,
 ) -> dict[str, Any]:
     cfg = load_config()
     sr = int(cfg["data"]["sample_rate"])
-    clip_seconds = int(cfg["data"].get("clip_seconds", 2))
-    target_len = sr * clip_seconds
+    clip_seconds = int(clip_seconds_override if clip_seconds_override is not None else cfg["data"].get("clip_seconds", 2))
     stft_cfg = cfg["data"]["stft"]
     circle_cfg = _load_circle_cfg(config_path)
     device = _safe_device(device_name)
 
-    wav, wav_sr = _load_local_pcm_wav(wav_path)
-    wav = wav.float()
-    if wav.size(0) > 1:
-        wav = wav.mean(dim=0, keepdim=True)
-    wav = _native_resample(wav, wav_sr, sr)
-    wav = _crop_or_pad(wav, target_len)
+    wav, sr = prepare_reference_audio(
+        wav_path=wav_path,
+        device_name=device_name,
+        clip_seconds_override=clip_seconds_override,
+    )
     wav = wav.to(device)
 
     mag, phase = compute_stft(wav, stft_cfg)
@@ -174,6 +216,7 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--phase-blend", type=float, default=0.75)
+    ap.add_argument("--clip-seconds", type=int, default=None)
     args = ap.parse_args()
 
     meta = render_circleworld_audio(
@@ -182,6 +225,7 @@ def main() -> None:
         out_path=Path(args.out),
         device_name=args.device,
         phase_blend=args.phase_blend,
+        clip_seconds_override=args.clip_seconds,
     )
     meta_path = Path(args.out).with_suffix(".json")
     meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")

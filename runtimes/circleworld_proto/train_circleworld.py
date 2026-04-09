@@ -5,11 +5,14 @@ import json
 import math
 import random
 import sys
+import wave
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import torch
+import torch.nn.functional as F
 
 ROOT = Path(__file__).resolve().parents[2]
 CORE = ROOT / "core"
@@ -21,6 +24,9 @@ for path in (ROOT, CORE, LINEAGE):
 from ablate_formalization import _generate_seed_phase, _load_cfg
 from circleworld import CircleworldConfig, circleworld_loss, recurse_circleworld, summarize_circleworld_run
 from lib_blackwell import NakedRAFA
+from config import load_config
+from stft_utils import compute_stft
+from rafa_math_tools import phase_to_phasor
 
 
 def _set_seed(seed: int) -> None:
@@ -95,19 +101,124 @@ def _candidate_from_mean_std(mean: dict[str, Any], std: dict[str, Any], rng: ran
     return out
 
 
-def _seed_plan(device: torch.device, train_count: int, val_count: int) -> tuple[list[tuple[str, int]], list[tuple[str, int]]]:
+def _seed_plan(
+    device: torch.device,
+    train_count: int,
+    val_count: int,
+    include_naked_rafa: bool = True,
+) -> tuple[list[tuple[str, int]], list[tuple[str, int]]]:
     train: list[tuple[str, int]] = [("synthetic", 1100 + i) for i in range(train_count)]
     val: list[tuple[str, int]] = [("synthetic", 2100 + i) for i in range(val_count)]
-    if device.type == "cuda":
+    if device.type == "cuda" and include_naked_rafa:
         train.extend([("naked_rafa", 3100 + i) for i in range(max(2, train_count // 2))])
         val.extend([("naked_rafa", 4100 + i) for i in range(max(2, val_count // 2))])
     return train, val
+
+
+def _graduation_anchor_wavs() -> tuple[list[str], list[str]]:
+    train = [
+        "D:\\RAFA\\wav_files\\soundbible_muscle-car_9fce13702c.wav",
+        "D:\\RAFA\\wav_files\\soundbible_steam-engine-running_68e20d27d1.wav",
+        "D:\\RAFA\\wav_files\\soundbible_mystic-chanting-4_a38f2bbe68.wav",
+        "D:\\RAFA\\wav_files\\soundbible_metal-clang_d06ac0429e.wav",
+        "D:\\RAFA\\wav_files\\soundbible_spooky-drone_2efbfd965b.wav",
+        "D:\\RAFA\\wav_files\\soundbible_airplane-takeoff_c752b8ba8b.wav",
+    ]
+    val = [
+        "D:\\RAFA\\wav_files\\soundbible_muscle-car_2f21ca885f.wav",
+        "D:\\RAFA\\wav_files\\soundbible_mystic-chanting-4_7962fb220f.wav",
+        "D:\\RAFA\\wav_files\\soundbible_anvil-impact_c8021375ce.wav",
+        "D:\\RAFA\\wav_files\\soundbible_spooky-drone_7cc45e3229.wav",
+        "D:\\RAFA\\wav_files\\soundbible_airplane-landing-airport_caf74bfdeb.wav",
+    ]
+    return train, val
+
+
+def _load_local_pcm_wav(path: Path) -> tuple[torch.Tensor, int]:
+    with wave.open(str(path), "rb") as wf:
+        sr = int(wf.getframerate())
+        ch = int(wf.getnchannels())
+        sampwidth = int(wf.getsampwidth())
+        nframes = int(wf.getnframes())
+        raw = wf.readframes(nframes)
+
+    if sampwidth == 1:
+        arr = np.frombuffer(raw, dtype=np.uint8).astype(np.float32)
+        arr = (arr - 128.0) / 128.0
+    elif sampwidth == 2:
+        arr = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+    elif sampwidth == 3:
+        b = np.frombuffer(raw, dtype=np.uint8).reshape(-1, 3)
+        v = (
+            b[:, 0].astype(np.int32)
+            | (b[:, 1].astype(np.int32) << 8)
+            | (b[:, 2].astype(np.int32) << 16)
+        )
+        sign = 1 << 23
+        v = (v ^ sign) - sign
+        arr = v.astype(np.float32) / 8388608.0
+    elif sampwidth == 4:
+        arr = np.frombuffer(raw, dtype=np.int32).astype(np.float32) / 2147483648.0
+    else:
+        raise RuntimeError(f"Unsupported WAV sample width: {sampwidth} bytes")
+
+    arr = arr.reshape(-1, ch).T
+    wav = torch.from_numpy(arr)
+    return wav, sr
+
+
+def _native_resample(wav: torch.Tensor, orig_sr: int, target_sr: int) -> torch.Tensor:
+    if orig_sr == target_sr:
+        return wav
+    ratio = float(target_sr) / float(orig_sr)
+    target_len = int(round(wav.size(1) * ratio))
+    return F.interpolate(
+        wav.unsqueeze(0),
+        size=target_len,
+        mode="linear",
+        align_corners=False,
+    ).squeeze(0)
+
+
+def _crop_or_tile(wav: torch.Tensor, target_len: int) -> torch.Tensor:
+    if wav.size(1) < target_len:
+        reps = int(np.ceil(float(target_len) / float(max(1, wav.size(1)))))
+        wav = wav.repeat(1, reps)
+    return wav[:, :target_len]
+
+
+def _phase_state_from_wav(
+    wav_path: Path,
+    target_time_steps: int,
+    device: torch.device,
+) -> torch.Tensor:
+    cfg = load_config()
+    sr = int(cfg["data"]["sample_rate"])
+    stft_cfg = cfg["data"]["stft"]
+    hop = int(stft_cfg["hop"])
+    winl = int(stft_cfg["win_length"])
+    target_len = hop * max(1, target_time_steps - 1) + winl
+
+    wav, wav_sr = _load_local_pcm_wav(wav_path)
+    wav = wav.float()
+    if wav.size(0) > 1:
+        wav = wav.mean(dim=0, keepdim=True)
+    wav = _native_resample(wav, wav_sr, sr)
+    wav = _crop_or_tile(wav, target_len).to(device)
+    mag, phase = compute_stft(wav, stft_cfg)
+    if phase.size(-1) > target_time_steps:
+        phase = phase[..., :target_time_steps]
+    elif phase.size(-1) < target_time_steps:
+        pad = target_time_steps - phase.size(-1)
+        phase = F.pad(phase, (0, pad), mode="replicate")
+    return phase_to_phasor(phase).detach()
 
 
 def _build_dataset(
     plan: list[tuple[str, int]],
     time_steps: int,
     device: torch.device,
+    anchor_wavs: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     dataset: list[dict[str, Any]] = []
     rafa_core: NakedRAFA | None = NakedRAFA(dev=device.type) if any(src == "naked_rafa" for src, _ in plan) else None
@@ -124,6 +235,16 @@ def _build_dataset(
             {
                 "source": source,
                 "seed": seed,
+                "phase_state": phase_state,
+            }
+        )
+    for wav_path in anchor_wavs or []:
+        phase_state = _phase_state_from_wav(Path(wav_path), target_time_steps=time_steps, device=device)
+        dataset.append(
+            {
+                "source": "graduation_anchor",
+                "seed": int(abs(hash(wav_path)) % 10_000_000),
+                "wav_path": str(wav_path),
                 "phase_state": phase_state,
             }
         )
@@ -257,15 +378,23 @@ def train_circleworld(
     seed: int,
     init_config_path: Path | None = None,
     score_cfg: dict[str, float] | None = None,
+    include_graduation_anchors: bool = False,
+    include_naked_rafa: bool = True,
 ) -> dict[str, Any]:
     device = _safe_device(device_name)
     _set_seed(seed)
     base_cfg = _load_circle_cfg(init_config_path) if init_config_path else _default_circle_cfg()
     base_cfg.recursion_depth = recursion_depth
 
-    train_plan, val_plan = _seed_plan(device, train_count=train_count, val_count=val_count)
-    train_set = _build_dataset(train_plan, time_steps=time_steps, device=device)
-    val_set = _build_dataset(val_plan, time_steps=time_steps, device=device)
+    train_plan, val_plan = _seed_plan(
+        device,
+        train_count=train_count,
+        val_count=val_count,
+        include_naked_rafa=include_naked_rafa,
+    )
+    grad_train_wavs, grad_val_wavs = _graduation_anchor_wavs() if include_graduation_anchors else ([], [])
+    train_set = _build_dataset(train_plan, time_steps=time_steps, device=device, anchor_wavs=grad_train_wavs)
+    val_set = _build_dataset(val_plan, time_steps=time_steps, device=device, anchor_wavs=grad_val_wavs)
 
     baseline = _baseline_report(base_cfg, train_set, val_set, score_cfg=score_cfg)
 
@@ -374,9 +503,13 @@ def train_circleworld(
         "device": str(device),
         "time_steps": time_steps,
         "init_config_path": str(init_config_path) if init_config_path else None,
+        "include_graduation_anchors": include_graduation_anchors,
+        "include_naked_rafa": include_naked_rafa,
         "score_cfg": score_cfg or {},
         "train_plan": [{"source": src, "seed": s} for src, s in train_plan],
         "val_plan": [{"source": src, "seed": s} for src, s in val_plan],
+        "graduation_anchor_train_wavs": grad_train_wavs,
+        "graduation_anchor_val_wavs": grad_val_wavs,
         "config": {
             "q_weights": list(best_cfg.q_weights),
             "promotion_threshold": best_cfg.promotion_threshold,
@@ -439,6 +572,8 @@ def main() -> None:
     ap.add_argument("--w-dom-target", type=float, default=0.0)
     ap.add_argument("--w-entropy-target", type=float, default=0.0)
     ap.add_argument("--w-promote-floor", type=float, default=0.0)
+    ap.add_argument("--include-graduation-anchors", action="store_true")
+    ap.add_argument("--no-naked-rafa", action="store_true")
     args = ap.parse_args()
 
     score_cfg = {
@@ -464,6 +599,8 @@ def main() -> None:
         seed=args.seed,
         init_config_path=Path(args.init_config) if args.init_config else None,
         score_cfg=score_cfg,
+        include_graduation_anchors=bool(args.include_graduation_anchors),
+        include_naked_rafa=not bool(args.no_naked_rafa),
     )
     print(json.dumps(summary, indent=2))
 
