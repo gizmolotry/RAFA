@@ -13,7 +13,7 @@ def audit_hierarchy():
     
     for name, module in model.named_modules():
         m_type = str(type(module))
-        if "torch.nn.modules.kernel" in m_type or "solver" in m_type or "LSTM" in m_type:
+        if "torch.nn.modules.rnn" in m_type or "gru" in m_type or "LSTM" in m_type:
             print(f"TARGET FOUND: {name:40} | Type: {m_type}")
         elif "Attention" in m_type or "Multihead" in m_type:
             # MultiheadAttention can sometimes have issues on new archs if using fast path

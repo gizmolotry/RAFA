@@ -1,0 +1,107 @@
+{
+  "version": "2026-04-06",
+  "schema_families": [
+    {
+      "id": "circleworld_v0",
+      "description": "Circleworld prototype parameter/config family for positive-replacement packet-promotion experiments.",
+      "runtime": "circleworld_proto"
+    },
+    {
+      "id": "bw14",
+      "description": "Old 14-key stage-4 Blackwell family before g1 projection heads.",
+      "required_core_keys": [
+        "lexicon_phasors",
+        "mode_seeds",
+        "ps_b_hh",
+        "ps_b_ih",
+        "ps_slow_proj",
+        "ps_w_hh",
+        "ps_w_ih",
+        "ps_z0",
+        "sp_b_out",
+        "sp_b_proj",
+        "sp_filter_w",
+        "sp_w_out",
+        "sp_w_proj"
+      ],
+      "forbidden_core_keys": [
+        "g1_w_ph",
+        "g1_w_mag"
+      ],
+      "runtime": "stage4_blackwell_14"
+    },
+    {
+      "id": "bw16",
+      "description": "Newer 16-key stage-4 Blackwell family with explicit g1 projection heads.",
+      "required_core_keys": [
+        "g1_w_ph",
+        "g1_w_mag",
+        "lexicon_phasors",
+        "mode_seeds",
+        "ps_b_hh",
+        "ps_b_ih",
+        "ps_slow_proj",
+        "ps_w_hh",
+        "ps_w_ih",
+        "ps_z0",
+        "sp_b_out",
+        "sp_b_proj",
+        "sp_filter_w",
+        "sp_w_out",
+        "sp_w_proj",
+        "spectrum_biases"
+      ],
+      "runtime": "stage4_blackwell_16"
+    }
+  ],
+  "tracked_checkpoints": [
+    {
+      "path": "checkpoints_stage4/bound_weights_ep10_step1200.pt",
+      "schema": "bw14",
+      "runtime": "stage4_blackwell_14",
+      "role": "best_known_restore_candidate",
+      "canonical_entrypoint": "runtimes/stage4_blackwell_14/export_graduation.py",
+      "seed": 101,
+      "notes": "Best current deterministic graduation-pack restore candidate."
+    },
+    {
+      "path": "checkpoints_stage4/bound_weights_ep49_step100.pt",
+      "schema": "bw14",
+      "runtime": "stage4_blackwell_14",
+      "role": "lineage_anchor",
+      "canonical_entrypoint": "runtimes/stage4_blackwell_14/export_graduation.py",
+      "notes": "Ledger anchor for the Graduation Pack lineage; not currently the closest behavioral restore match."
+    },
+    {
+      "path": "checkpoints_stage4/bound_weights_ep50_step0.pt",
+      "schema": "bw16",
+      "runtime": "stage4_blackwell_16",
+      "role": "schema_transition",
+      "canonical_entrypoint": "runtimes/stage4_blackwell_16/export_graduation.py",
+      "notes": "First observed checkpoint with g1 projection heads."
+    },
+    {
+      "path": "checkpoints_stage4/bound_weights_ep99_step200.pt",
+      "schema": "bw16",
+      "runtime": "stage4_blackwell_16",
+      "role": "late_runtime_reference",
+      "canonical_entrypoint": "runtimes/stage4_blackwell_16/export_graduation.py"
+    },
+    {
+      "path": "checkpoints_stage4/bound_weights_ep99_step300.pt",
+      "schema": "bw14",
+      "runtime": "stage4_blackwell_14",
+      "role": "late_old_family_reference",
+      "canonical_entrypoint": "runtimes/stage4_blackwell_14/export_graduation.py",
+      "notes": "Late checkpoint still in the old 14-key family."
+    },
+    {
+      "path": "checkpoints_circleworld_proto/proper_attempt_2026-04-06/circleworld_config_cem_v1.json",
+      "schema": "circleworld_v0",
+      "runtime": "circleworld_proto",
+      "role": "prototype_best_config",
+      "canonical_entrypoint": "runtimes/circleworld_proto/train_circleworld.py",
+      "notes": "Best config from the first isolated Circleworld parameter-training attempt on mixed synthetic and NakedRAFA seeds."
+    }
+  ]
+}

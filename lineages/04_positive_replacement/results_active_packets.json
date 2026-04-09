@@ -1,0 +1,30 @@
+{
+  "mode": "active_packets",
+  "depth": 2,
+  "batch_size": 1,
+  "time_steps": 32,
+  "device": "cpu",
+  "seed_source": "synthetic",
+  "initial_major_mass": 0.053343601524829865,
+  "final_major_mass": 0.052103061228990555,
+  "initial_minor_residue": 0.644921600818634,
+  "final_minor_residue": 0.6512361764907837,
+  "initial_promotability": 0.052403535693883896,
+  "final_promotability": 0.05137208104133606,
+  "major_gain": -0.0012405402958393097,
+  "residue_drop": -0.006314575672149658,
+  "promotability_gain": -0.0010314546525478363,
+  "num_promotions": 2.0,
+  "packet_counts_by_depth": [
+    1,
+    1
+  ],
+  "loss": 1.3054826259613037,
+  "loss_terms": {
+    "l_major": 0.6366395950317383,
+    "l_residue": 0.6512361764907837,
+    "l_promo": 0.35835540294647217,
+    "l_attack": 0.002471477724611759,
+    "l_gain": 0.0012405402958393097
+  }
+}

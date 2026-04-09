@@ -1,0 +1,46 @@
+data:
+  sample_rate: 16000
+  stft:
+    n_fft: 256
+    hop: 128
+    win_length: 256
+    window: hann
+  clip_seconds: 1
+  local_wav_root: wav_files
+  force_local_wavs: true
+
+model:
+  learn_grid: true
+  gears:
+    - include_mag: true
+      include_phase: true
+      time_scale: 1
+      d_model: 64 # Shrunk for speed
+      n_heads: 2
+      n_layers: 1
+
+training:
+  batch_size: 2
+  lr: 2.0e-4
+  weights:
+    w_rat: 0.1
+    w_harm: 0.1
+    w_crystal: 0.1
+  rational_ratios:
+    - [1, 1]
+    - [2, 1]
+    - [3, 2]
+  crystal_qs: [2, 3, 4]
+
+performance:
+  use_amp: true
+  num_workers: 0
+
+diffusion:
+  enabled: true
+  model_type: rafa
+  timesteps: 10 # Shrunk for speed
+  train_epochs: 1
+  train_batch_size: 2
+  log_every: 10
+  checkpoint_dir: checkpoints_smoke

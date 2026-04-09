@@ -1,0 +1,61 @@
+{
+  "version": "2026-04-06",
+  "modules": [
+    {
+      "path": "core/dataset.py",
+      "domain": "data_io",
+      "used_by": [
+        "stage4_blackwell_14",
+        "stage4_blackwell_16"
+      ]
+    },
+    {
+      "path": "diffusion_utils.py",
+      "domain": "diffusion_math",
+      "used_by": [
+        "stage4_blackwell_14",
+        "stage4_blackwell_16",
+        "diffusion_parent_v3"
+      ]
+    },
+    {
+      "path": "stft_utils.py",
+      "domain": "audio_transform",
+      "used_by": [
+        "stage4_blackwell_14",
+        "stage4_blackwell_16",
+        "diffusion_parent_v3"
+      ]
+    },
+    {
+      "path": "rafa_math_tools.py",
+      "domain": "phasor_math",
+      "used_by": [
+        "stage4_blackwell_14",
+        "circleworld_proto"
+      ]
+    },
+    {
+      "path": "core/triton_kernels.py",
+      "domain": "accelerators",
+      "used_by": [
+        "stage4_blackwell_14",
+        "stage4_blackwell_16"
+      ]
+    },
+    {
+      "path": "phase_native_ifs.py",
+      "domain": "ifs_runtime",
+      "used_by": [
+        "diffusion_parent_v3"
+      ]
+    },
+    {
+      "path": "rafa_clutch_transformer_upgraded.py",
+      "domain": "routing",
+      "used_by": [
+        "diffusion_parent_v3"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,538 @@
+wav_path,start_seconds,end_seconds,label,youtube_id,source,style
+wav_files/soundbible_poker-chips_b96d0167d3.wav,,1.2761,poker,,soundbible,poker
+wav_files/soundbible_old-car-starting_cec6ac407c.wav,,10.0,old,,soundbible,old
+wav_files/soundbible_ice-skating_8668727b19.wav,,10.0,ice,,soundbible,ice
+wav_files/soundbible_dial-tone-american_af2c202e79.wav,,4.008,dial tone,,soundbible,dial tone
+wav_files/soundbible_small-dog-barking_4c1f809c79.wav,,10.0,warning,,soundbible,warning
+wav_files/soundbible_small-dog-barking_2d4ebf987a.wav,,10.0,warning,,soundbible,warning
+wav_files/soundbible_labrador-barking-dog_75c7915a2b.wav,,10.0,labrador,,soundbible,labrador
+wav_files/soundbible_hyena-laughing_af00056035.wav,,10.0,hyena,,soundbible,hyena
+wav_files/soundbible_fire-truck-horn_833befed7a.wav,,8.4518,fire truck,,soundbible,fire truck
+wav_files/soundbible_tolling-bell_be8de1a16a.wav,,10.0,tolling bell,,soundbible,tolling bell
+wav_files/soundbible_slot-machine_c9b73c0c90.wav,,7.6956,game,,soundbible,game
+wav_files/soundbible_church-bell-chime_a44d76f42d.wav,,10.0,bell,,soundbible,bell
+wav_files/soundbible_meadowlark_05e56d8b9d.wav,,10.0,meadowlark,,soundbible,meadowlark
+wav_files/soundbible_text-message-alert-4_590c5f2afe.wav,,2.6251,sms alert,,soundbible,sms alert
+wav_files/soundbible_formula-1-racing_c7d21b8b3b.wav,,10.0,formula 1,,soundbible,formula 1
+wav_files/soundbible_creepy-background_08e12e86e7.wav,,10.0,creepy,,soundbible,creepy
+wav_files/soundbible_grenade-launcher-2_390c635da8.wav,,3.1732,weapon,,soundbible,weapon
+wav_files/soundbible_gibbon-monkey_d82acca12f.wav,,5.8769,gibbon,,soundbible,gibbon
+wav_files/soundbible_dog-panting-fast_207016226f.wav,,10.0,dog,,soundbible,dog
+wav_files/soundbible_air-conditioner_e5e57db05e.wav,,10.0,hot,,soundbible,hot
+wav_files/soundbible_baby-just-born_9be65ced75.wav,,10.0,newborn,,soundbible,newborn
+wav_files/soundbible_old-movie-projector_0465deb9e9.wav,,10.0,Vintage Movie Projector,,soundbible,Vintage Movie Projector
+wav_files/soundbible_380-gunshot_a2b2e6852d.wav,,2.3521,9mm,,soundbible,9mm
+wav_files/soundbible_40-smith-wesson_ed1eafff1b.wav,,4.6072,gun,,soundbible,gun
+wav_files/soundbible_unscrew-bulb_6131e9cc98.wav,,3.0041,screwing,,soundbible,screwing
+wav_files/soundbible_termites-and-ants_939df0b9df.wav,,7.6289,ant,,soundbible,ant
+wav_files/soundbible_tension-wood-stress_81b3543857.wav,,2.1199,tension,,soundbible,tension
+wav_files/soundbible_trash-bag-2_8c19230b26.wav,,10.0,plastic,,soundbible,plastic
+wav_files/soundbible_sweeping-broom-shorter_2e6d48c562.wav,,7.7538,sweeper,,soundbible,sweeper
+wav_files/soundbible_draw-bow-and-fire_4ca0dc48f4.wav,,4.2358,bow,,soundbible,bow
+wav_files/soundbible_silly-farts_6d7cfb18b2.wav,,4.049,fart,,soundbible,fart
+wav_files/soundbible_fast-drawing_c940af4b75.wav,,10.0,artist,,soundbible,artist
+wav_files/soundbible_piano-breaking_c55c6b2f5a.wav,,4.1836,piano,,soundbible,piano
+wav_files/soundbible_am-radio-tuning_7ca83513ad.wav,,10.0,am,,soundbible,am
+wav_files/soundbible_ufo-landing_3de36e4d98.wav,,3.6338,imaginary,,soundbible,imaginary
+wav_files/soundbible_annoying-speaker-pulsing_4feb26207a.wav,,10.0,loud,,soundbible,loud
+wav_files/soundbible_footsteps-on-cement_176e4ca7fa.wav,,10.0,footsteps,,soundbible,footsteps
+wav_files/soundbible_footsteps-on-cement_55cfd69a3e.wav,,10.0,footsteps,,soundbible,footsteps
+wav_files/soundbible_halloween-vocals_9354ec121e.wav,,10.0,halloween,,soundbible,halloween
+wav_files/soundbible_daydreaming_0c69de0ebf.wav,,10.0,tinkle,,soundbible,tinkle
+wav_files/soundbible_school-fire-alarm_19bf9946dd.wav,,10.0,fire,,soundbible,fire
+wav_files/soundbible_no-mercy_9b2ca883aa.wav,,5.5655,mercy,,soundbible,mercy
+wav_files/soundbible_atchisson-assault-shotgun_187560ba93.wav,,7.4068,gun,,soundbible,gun
+wav_files/soundbible_water_e335b65515.wav,,10.0,creek,,soundbible,creek
+wav_files/soundbible_thunder-strike-3_571f49af4e.wav,,10.0,thunder storm,,soundbible,thunder storm
+wav_files/soundbible_bird-in-rain_94c7bb40e4.wav,,10.0,bird,,soundbible,bird
+wav_files/soundbible_fast-heel-walk_ecf6591736.wav,,5.9962,walk,,soundbible,walk
+wav_files/soundbible_old-record-player_a345f90655.wav,,10.0,gramaphone,,soundbible,gramaphone
+wav_files/soundbible_snow-rock-avalanche_26a284851d.wav,,10.0,rocks falling,,soundbible,rocks falling
+wav_files/soundbible_atomic-bomb_c6ac3955cc.wav,,10.0,atom,,soundbible,atom
+wav_files/soundbible_thunder-strike-3_9de2f0c801.wav,,10.0,thunder storm,,soundbible,thunder storm
+wav_files/soundbible_giant-monster_2fdd851af1.wav,,6.6612,resident evil,,soundbible,resident evil
+wav_files/soundbible_spaceship-takeoff_eccf2d7690.wav,,8.9796,alien,,soundbible,alien
+wav_files/soundbible_thought_435436d4c7.wav,,4.1937,thought,,soundbible,thought
+wav_files/soundbible_shotgun-12ga-fire_7c78a26fd0.wav,,1.9587,shotgun,,soundbible,shotgun
+wav_files/soundbible_dragon-ball-z-scream-9_126c296617.wav,,5.371,dbz,,soundbible,dbz
+wav_files/soundbible_barreta-m9_8df970d055.wav,,1.3342,weapon,,soundbible,weapon
+wav_files/soundbible_dump-truck_3c5abd2ea6.wav,,9.2212,construction,,soundbible,construction
+wav_files/soundbible_thunder-hd_2f7144b05b.wav,,8.8985,thunder,,soundbible,thunder
+wav_files/soundbible_crumbling_39dd4a092e.wav,,1.6592,crumbling,,soundbible,crumbling
+wav_files/soundbible_ump45-heckler-koch_2b83b49c5e.wav,,4.9456,ump45,,soundbible,ump45
+wav_files/soundbible_counting-to-10_43a579668e.wav,,7.5934,count,,soundbible,count
+wav_files/soundbible_sqeaking-door_5223c82e41.wav,,7.8663,door,,soundbible,door
+wav_files/soundbible_canadian-geese-migration_92b5aac2c6.wav,,5.0536,canadian geese,,soundbible,canadian geese
+wav_files/soundbible_raccoon_7aec1a89bc.wav,,5.5549,coon,,soundbible,coon
+wav_files/soundbible_raccoon_f4824d2051.wav,,5.5549,coon,,soundbible,coon
+wav_files/soundbible_bunker-buster-missile_0f14718f9e.wav,,10.0,debris,,soundbible,debris
+wav_files/soundbible_phone-ringing-8x_8cf683681d.wav,,10.0,phone,,soundbible,phone
+wav_files/soundbible_zombie-horde_2147670a64.wav,,10.0,zombie,,soundbible,zombie
+wav_files/soundbible_psychotic-laugh-female_e5c0f574a9.wav,,5.0817,laugh,,soundbible,laugh
+wav_files/soundbible_small-crowd_d6e516a944.wav,,10.0,cheer,,soundbible,cheer
+wav_files/soundbible_end-of-game_448db89590.wav,,10.0,buzzer,,soundbible,buzzer
+wav_files/soundbible_enraged-zombies_c770be1fcc.wav,,10.0,ambiance,,soundbible,ambiance
+wav_files/soundbible_winning-triumphal-fanfare_33e79b957f.wav,,5.3755,trumpet,,soundbible,trumpet
+wav_files/soundbible_party-horn_a062d1f530.wav,,1.4359,horn,,soundbible,horn
+wav_files/soundbible_slowed-breathing_475238e002.wav,,10.0,slow,,soundbible,slow
+wav_files/soundbible_annoying-alien-buzzer_e169672d25.wav,,10.0,siren,,soundbible,siren
+wav_files/soundbible_m4a1-single_8250db9746.wav,,1.8968,assault,,soundbible,assault
+wav_files/soundbible_parrot-talking_c5a415a1ab.wav,,10.0,parrot,,soundbible,parrot
+wav_files/soundbible_ima-firin-my-laser_46b0cb1342.wav,,2.5078,laser,,soundbible,laser
+wav_files/soundbible_parrot-talking_5f70224097.wav,,10.0,parrot,,soundbible,parrot
+wav_files/soundbible_flashbang_6b4dacf0a7.wav,,2.4033,flash,,soundbible,flash
+wav_files/soundbible_tractor-digging_12c66e1acc.wav,,10.0,construction,,soundbible,construction
+wav_files/soundbible_tyrannosaurus-rex_0b9422a74b.wav,,4.587,dinosaur,,soundbible,dinosaur
+wav_files/soundbible_metal-clang_9a23bc37d3.wav,,5.0,impact,,soundbible,impact
+wav_files/soundbible_electronic-noise_a79320dbe2.wav,,8.6035,noise,,soundbible,noise
+wav_files/soundbible_rainforest-ambience_cbc66c1b3f.wav,,10.0,bird,,soundbible,bird
+wav_files/soundbible_glass-break_89b27a487a.wav,,1.045,glass,,soundbible,glass
+wav_files/soundbible_rigid-dark-pulse_73cef1ddbc.wav,,5.9824,dark,,soundbible,dark
+wav_files/soundbible_strange-days_21173415ee.wav,,6.3486,eerie,,soundbible,eerie
+wav_files/soundbible_turkey-gobble_7558335896.wav,,2.0,gobble,,soundbible,gobble
+wav_files/soundbible_creaking-door-spooky_7937b6d12c.wav,,2.5256,scary door openeing,,soundbible,scary door openeing
+wav_files/soundbible_yak-52-propeller-plane_4d26c244a1.wav,,10.0,yak 52,,soundbible,yak 52
+wav_files/soundbible_hearbeat-2_5b894a6ea7.wav,,9.8743,heart,,soundbible,heart
+wav_files/soundbible_train-honk-horn-distance_db8420429c.wav,,5.0,train honk,,soundbible,train honk
+wav_files/soundbible_gavel-bangs-4x_b49e483781.wav,,1.4625,gavel banging,,soundbible,gavel banging
+wav_files/soundbible_strange-mechanical-sound_2ad336ba49.wav,,1.6138,mechanical,,soundbible,mechanical
+wav_files/soundbible_mystic-chanting-2_4d824763c9.wav,,1.4977,voice,,soundbible,voice
+wav_files/soundbible_puking-or-fighting_631a10879a.wav,,3.4503,puke,,soundbible,puke
+wav_files/soundbible_dishwasher_441bff702f.wav,,10.0,dish,,soundbible,dish
+wav_files/soundbible_turkey-gobble_f5da791307.wav,,2.0,turkey gobble,,soundbible,turkey gobble
+wav_files/soundbible_turkey-gobble_153719df30.wav,,1.1643,turkey gobble,,soundbible,turkey gobble
+wav_files/soundbible_toilet-flushing_6e135887e5.wav,,8.8468,toilet,,soundbible,toilet
+wav_files/soundbible_ovation_f8b2f0d83f.wav,,3.9848,crowd,,soundbible,crowd
+wav_files/soundbible_torpedo-impact_99f300f1ff.wav,,2.0,depth charge,,soundbible,depth charge
+wav_files/soundbible_police-scanner-chatter_c480db0518.wav,,10.0,gun,,soundbible,gun
+wav_files/soundbible_breaking-sound-barrier_bd66b23b4d.wav,,4.1894,boom,,soundbible,boom
+wav_files/soundbible_godzilla-walking_120e62d39b.wav,,10.0,boom,,soundbible,boom
+wav_files/soundbible_computer-magic_ff6530b786.wav,,5.0939,magic,,soundbible,magic
+wav_files/soundbible_traffic-jam-3_e3a1f2dd05.wav,,10.0,trafic,,soundbible,trafic
+wav_files/soundbible_scanner-robbery_8345270bce.wav,,3.4221,police,,soundbible,police
+wav_files/soundbible_farm_6fac1ca2ae.wav,,10.0,farm,,soundbible,farm
+wav_files/soundbible_music-box_45547aa13e.wav,,2.1362,music,,soundbible,music
+wav_files/soundbible_sewing-machine-3_392e33ffc1.wav,,4.0079,sewing,,soundbible,sewing
+wav_files/soundbible_scary-demon-haunting_bb87af35c9.wav,,10.0,halloween,,soundbible,halloween
+wav_files/soundbible_microwave_ffd61a3862.wav,,10.0,microwave,,soundbible,microwave
+wav_files/soundbible_gunfire-in-crowd_a546e761a4.wav,,5.0,violent,,soundbible,violent
+wav_files/soundbible_belch_8f5c167200.wav,,2.0,burp,,soundbible,burp
+wav_files/soundbible_airplane-fly-over_20d37aa3d7.wav,,10.0,air plan,,soundbible,air plan
+wav_files/soundbible_single-cow_86d68f77b2.wav,,5.0,cow,,soundbible,cow
+wav_files/soundbible_m1-garand-single_80d58ef7fb.wav,,2.0,gun,,soundbible,gun
+wav_files/soundbible_parots-talking_798bf62976.wav,,2.0577,squawking,,soundbible,squawking
+wav_files/soundbible_microwave_ee98eeadcc.wav,,10.0,microwave,,soundbible,microwave
+wav_files/soundbible_computer-error-alert_db1e5a8a69.wav,,2.0,blunder,,soundbible,blunder
+wav_files/soundbible_sewing-machine-2_1f8d516e4d.wav,,7.2468,sewing,,soundbible,sewing
+wav_files/soundbible_record-static_ae03482904.wav,,10.0,static noise,,soundbible,static noise
+wav_files/soundbible_straw-slurp_e43929f689.wav,,9.5456,slurp,,soundbible,slurp
+wav_files/soundbible_fire-alarm_334e425695.wav,,10.0,fire,,soundbible,fire
+wav_files/soundbible_temple-bell-huge_d2209d67cd.wav,,5.1194,temple,,soundbible,temple
+wav_files/soundbible_neighborhood-dogs-barking_e248ed0c63.wav,,6.3596,woof,,soundbible,woof
+wav_files/soundbible_devil-dog-crazy_ad9172b406.wav,,8.5377,guard dog,,soundbible,guard dog
+wav_files/soundbible_screaming-hawk-3_3dc3dcb14c.wav,,3.7982,eagle,,soundbible,eagle
+wav_files/soundbible_screaming-hawk-2_b4d2eadf3d.wav,,4.0359,eagle,,soundbible,eagle
+wav_files/soundbible_large-angry-dog_d05c6b98de.wav,,1.5405,guard dog,,soundbible,guard dog
+wav_files/soundbible_hawk-call-2x_3402b64eb8.wav,,3.3191,eagle,,soundbible,eagle
+wav_files/soundbible_depth-charge-short_0fb7904254.wav,,2.1454,grenade,,soundbible,grenade
+wav_files/soundbible_fire-truck-siren_b1a7e3bb88.wav,,10.0,fire,,soundbible,fire
+wav_files/soundbible_pain_4e65b7a96e.wav,,2.0,agony,,soundbible,agony
+wav_files/soundbible_shooting-an-mp5_cf70ca0666.wav,,2.0,mp5 shooting,,soundbible,mp5 shooting
+wav_files/soundbible_psycho-scream_97328f916e.wav,,5.6951,blood curdling,,soundbible,blood curdling
+wav_files/soundbible_elevator-ding_269b38b7ad.wav,,2.522,bing,,soundbible,bing
+wav_files/soundbible_funny-slip_25f44606b6.wav,,2.0,slide,,soundbible,slide
+wav_files/soundbible_small-servo-motor_54ecf9819f.wav,,2.0,mechanical,,soundbible,mechanical
+wav_files/soundbible_peacock_3f3a09c895.wav,,2.7686,peacock,,soundbible,peacock
+wav_files/soundbible_lion_2d4ad4dd4e.wav,,2.4424,lion,,soundbible,lion
+wav_files/soundbible_strange-slip_8de63569dd.wav,,1.1888,slide,,soundbible,slide
+wav_files/soundbible_growling-lion_dff8d1212b.wav,,2.0,lion,,soundbible,lion
+wav_files/soundbible_walking-on-gravel_5fdb76b434.wav,,10.0,rock,,soundbible,rock
+wav_files/soundbible_chambering-a-round_101d5d1a62.wav,,1.6951,gun,,soundbible,gun
+wav_files/soundbible_pump_4e786c13eb.wav,,7.8678,force out,,soundbible,force out
+wav_files/soundbible_machine-gun-fire-distance_7c5d51e4fb.wav,,2.0,battlefield,,soundbible,battlefield
+wav_files/soundbible_torpedo-launch_08803cc5d8.wav,,2.1562,torpedo launch,,soundbible,torpedo launch
+wav_files/soundbible_builders-drilling_afc1203378.wav,,10.0,build,,soundbible,build
+wav_files/soundbible_m16-assault-rifle_f229f024dd.wav,,5.2724,uzi,,soundbible,uzi
+wav_files/soundbible_m16-short-burst_9f3b77ef70.wav,,2.0,uzi,,soundbible,uzi
+wav_files/soundbible_rocket_55f85ce07c.wav,,10.0,rocket,,soundbible,rocket
+wav_files/soundbible_dying-robot_762ec515c3.wav,,3.6655,robot,,soundbible,robot
+wav_files/soundbible_small-fireball_6bcc0656ed.wav,,1.4323,fireplace,,soundbible,fireplace
+wav_files/soundbible_old-door-creaking_ad3ce5ebca.wav,,2.3093,rust,,soundbible,rust
+wav_files/soundbible_sliding-door_3bc3e2497c.wav,,3.7497,slide,,soundbible,slide
+wav_files/soundbible_large-fireball_acfed9543a.wav,,2.0,fireplace,,soundbible,fireplace
+wav_files/soundbible_large-bubble_d98b99071e.wav,,1.1435,bubble,,soundbible,bubble
+wav_files/soundbible_barred-owl-call_351c4f83df.wav,,8.4517,barred owl,,soundbible,barred owl
+wav_files/soundbible_croaking-2x_c7566519ff.wav,,1.3227,frog,,soundbible,frog
+wav_files/soundbible_skype-feedback_0091c93fab.wav,,4.8437,feedback,,soundbible,feedback
+wav_files/soundbible_angry-cat_3874d92343.wav,,10.0,angry,,soundbible,angry
+wav_files/soundbible_tank_eed88bdfa0.wav,,6.0427,tank,,soundbible,tank
+wav_files/soundbible_frog-croaking_517d5454d4.wav,,7.935,frog,,soundbible,frog
+wav_files/soundbible_sci-fi-robot_c23c9b9dfe.wav,,4.1657,cpu,,soundbible,cpu
+wav_files/soundbible_strange-alarm_8a0b6867a9.wav,,5.4648,alarm,,soundbible,alarm
+wav_files/soundbible_what-you-eatin-daddy_3c6ac3e9f8.wav,,5.0,what you eatin,,soundbible,what you eatin
+wav_files/soundbible_stomach-growling_7517780e77.wav,,2.4216,stomach growling,,soundbible,stomach growling
+wav_files/soundbible_button-click-off_bde32bd060.wav,,2.0,button,,soundbible,button
+wav_files/soundbible_dog-growl_c151d5930f.wav,,2.5288,chow,,soundbible,chow
+wav_files/soundbible_kitten-meow_04cd286c68.wav,,2.0,cat,,soundbible,cat
+wav_files/soundbible_goofy-laugh_a1ccaede8b.wav,,2.0,goofy laugh,,soundbible,goofy laugh
+wav_files/soundbible_robot-computing_91f4b65f5a.wav,,2.8093,cpu,,soundbible,cpu
+wav_files/soundbible_slide-closed_6314a9ecfc.wav,,5.0,slide,,soundbible,slide
+wav_files/soundbible_roaring-lion_81d74ef1c3.wav,,2.2197,cat,,soundbible,cat
+wav_files/soundbible_cargo-plane-cabin-ambiance_d18bb4f68b.wav,,10.0,airplane,,soundbible,airplane
+wav_files/soundbible_random-son-talk_ebb638f8b0.wav,,10.0,baby,,soundbible,baby
+wav_files/soundbible_space-ship-door-opening_0043bafda8.wav,,10.0,alien,,soundbible,alien
+wav_files/soundbible_cuckoo-clock_c3cbd8816c.wav,,2.0,crazy,,soundbible,crazy
+wav_files/soundbible_cuckoo-clock_5cc69dd1ef.wav,,1.2564,crazy,,soundbible,crazy
+wav_files/soundbible_lion-roar_8f40fddefb.wav,,5.0,cat,,soundbible,cat
+wav_files/soundbible_telephone-ring_cf8c03db19.wav,,10.0,phone,,soundbible,phone
+wav_files/soundbible_ho-ho-ho-st-nick_ad1ccafe27.wav,,2.4813,santa clause,,soundbible,santa clause
+wav_files/soundbible_nature-ambiance_daa888c8a7.wav,,10.0,walla,,soundbible,walla
+wav_files/soundbible_wood-saw_841c3e56ae.wav,,10.0,wood,,soundbible,wood
+wav_files/soundbible_wind_13fbfe130d.wav,,7.9906,air,,soundbible,air
+wav_files/soundbible_pterodactyl_c591a2ba00.wav,,1.8546,dinosaur,,soundbible,dinosaur
+wav_files/soundbible_santa-clause-jolly-laugh_a2ed808add.wav,,5.0,santa clause,,soundbible,santa clause
+wav_files/soundbible_shopping-mall-ambiance_f333fb54c2.wav,,10.0,walla,,soundbible,walla
+wav_files/soundbible_male-common-tern-calls_a0032599a8.wav,,4.4851,male,,soundbible,male
+wav_files/soundbible_time-bomb-short_07865e56ae.wav,,2.6937,time bomb,,soundbible,time bomb
+wav_files/soundbible_male-common-tern-calls_ef3c3eb619.wav,,4.4303,male,,soundbible,male
+wav_files/soundbible_ring-billed-gull-3_52940a20c4.wav,,4.2668,gull,,soundbible,gull
+wav_files/soundbible_geese-flying_a0ed568fd6.wav,,6.0514,canadian geese honk,,soundbible,canadian geese honk
+wav_files/soundbible_time-bomb_456f76b59a.wav,,6.623,time bomb,,soundbible,time bomb
+wav_files/soundbible_automatic-machine-gun-3x_bca763863a.wav,,2.7509,automatic machine gun,,soundbible,automatic machine gun
+wav_files/soundbible_american-woodcock_a0ed17f430.wav,,9.7056,American Woodcock,,soundbible,American Woodcock
+wav_files/soundbible_ring-billed-gull_21b5d87cf1.wav,,5.8626,gull,,soundbible,gull
+wav_files/soundbible_flock-of-common-terns_19ee8e28a7.wav,,4.5217,flock,,soundbible,flock
+wav_files/soundbible_quail-bobwhite_a3cc6d83f0.wav,,1.2293,grouse,,soundbible,grouse
+wav_files/soundbible_grouse_ade1ab6cb7.wav,,2.0,grouse,,soundbible,grouse
+wav_files/soundbible_ak47_81ec8702bf.wav,,2.0,ak47,,soundbible,ak47
+wav_files/soundbible_ak47_ac9626828c.wav,,1.7973,ak47,,soundbible,ak47
+wav_files/soundbible_dove_b54bdb7139.wav,,10.0,dove,,soundbible,dove
+wav_files/soundbible_old-sub-sonar_eed3ba3a75.wav,,10.0,ping,,soundbible,ping
+wav_files/soundbible_bonapartes-gull-2_813f7f72b8.wav,,8.5094,bonapartes gull,,soundbible,bonapartes gull
+wav_files/soundbible_message-from-santa-clause_da1b5619d0.wav,,10.0,santa clause,,soundbible,santa clause
+wav_files/soundbible_river_a971e4e7d9.wav,,7.0222,river,,soundbible,river
+wav_files/soundbible_bubbles_d66f482441.wav,,3.9907,bubble,,soundbible,bubble
+wav_files/soundbible_kid-laughing-short_d6cd7ff426.wav,,2.0,kid,,soundbible,kid
+wav_files/soundbible_short-dial-tone_4812b99811.wav,,1.4604,dial,,soundbible,dial
+wav_files/soundbible_toxic-goo_758059b8f4.wav,,2.0,toxic,,soundbible,toxic
+wav_files/soundbible_drilling_4184536456.wav,,4.3986,drill,,soundbible,drill
+wav_files/soundbible_metal-grinder_a5f0b0aff5.wav,,10.0,chore,,soundbible,chore
+wav_files/soundbible_child-scream_8c0f57c487.wav,,2.0,scream,,soundbible,scream
+wav_files/soundbible_pellet-gun-pump_f829387199.wav,,2.0,click,,soundbible,click
+wav_files/soundbible_large-chains_4584620789.wav,,9.0975,clank,,soundbible,clank
+wav_files/soundbible_truck-idle-and-pull-off_25b312b813.wav,,10.0,truck,,soundbible,truck
+wav_files/soundbible_halloween-monster_f9a0591747.wav,,3.7236,zombie,,soundbible,zombie
+wav_files/soundbible_dentist-drill_40f0d9c928.wav,,1.7884,dentist drill,,soundbible,dentist drill
+wav_files/soundbible_obama-state-of-the-union-2010_0e5ff82521.wav,,10.0,president,,soundbible,president
+wav_files/soundbible_dial-tone_7db5a71dfe.wav,,4.2377,dial,,soundbible,dial
+wav_files/soundbible_frying-circuits_7559004a63.wav,,2.0256,fry,,soundbible,fry
+wav_files/soundbible_mummy-zombie_2b85640c2a.wav,,2.0082,zombie,,soundbible,zombie
+wav_files/soundbible_trash-truck-reverse-beep_2e3c6595f1.wav,,9.7578,truck,,soundbible,truck
+wav_files/soundbible_car-door-close-outside_e08675a32f.wav,,2.0,car,,soundbible,car
+wav_files/soundbible_zombie-kill-you_ff3e6ccb2b.wav,,3.5784,apparition,,soundbible,apparition
+wav_files/soundbible_killdeer-bird-call_d1f2dba90c.wav,,3.4436,killdeer,,soundbible,killdeer
+wav_files/soundbible_car-loosing-control_0d5442dbda.wav,,6.4668,car,,soundbible,car
+wav_files/soundbible_snow-mobile_bb605bc5c1.wav,,5.1473,snowmachine,,soundbible,snowmachine
+wav_files/soundbible_hen-chicken_ce67377c5b.wav,,2.0,hen,,soundbible,hen
+wav_files/soundbible_zombie-on-the-loose_9ef24d5774.wav,,5.4855,apparition,,soundbible,apparition
+wav_files/soundbible_sheep_ec9bf4f713.wav,,2.0,sheep,,soundbible,sheep
+wav_files/soundbible_osprey-bird-call_dadbc78e20.wav,,3.4933,Osprey,,soundbible,Osprey
+wav_files/soundbible_zombies-eat-brains_fcc2961429.wav,,4.7289,apparition,,soundbible,apparition
+wav_files/soundbible_tv-off-air_ce37bb1e14.wav,,10.0,tone,,soundbible,tone
+wav_files/soundbible_humpback-whale-call_8279d3ccd1.wav,,7.4277,humpback,,soundbible,humpback
+wav_files/soundbible_bald-eagle_2c66f73a20.wav,,2.4554,bald eagle,,soundbible,bald eagle
+wav_files/soundbible_bald-eagle_f3fcf00852.wav,,3.7432,bald eagle,,soundbible,bald eagle
+wav_files/soundbible_purring-cat_57fa007da1.wav,,4.4713,pur,,soundbible,pur
+wav_files/soundbible_ripping-head-off_b9fca06f30.wav,,4.0788,peel,,soundbible,peel
+wav_files/soundbible_bull-frog_5ae10d34f6.wav,,5.0,frog,,soundbible,frog
+wav_files/soundbible_elk_5d8977a4c7.wav,,10.0,nature,,soundbible,nature
+wav_files/soundbible_bite_c01ad5c639.wav,,2.0,zombie,,soundbible,zombie
+wav_files/soundbible_metal-bang_5768f601c9.wav,,2.0,metal bang,,soundbible,metal bang
+wav_files/soundbible_applause_474ad3fb09.wav,,10.0,applause,,soundbible,applause
+wav_files/soundbible_peeling-face-off_c0b9866ed0.wav,,2.9233,peel,,soundbible,peel
+wav_files/soundbible_eyeball-burst_37d3d1f1da.wav,,2.0,bone,,soundbible,bone
+wav_files/soundbible_stab-and-tear-flesh_3b00250a8a.wav,,3.5224,stab,,soundbible,stab
+wav_files/soundbible_metronome_a4e5fab0e0.wav,,2.5722,timekeeping device,,soundbible,timekeeping device
+wav_files/soundbible_metal-metronome_33b9516cbf.wav,,3.1314,timekeeping device,,soundbible,timekeeping device
+wav_files/soundbible_background-noise_5b17c067f3.wav,,10.0,noise,,soundbible,noise
+wav_files/soundbible_bison_62487c369c.wav,,6.2956,bison,,soundbible,bison
+wav_files/soundbible_anhinga_400e744ec7.wav,,10.0,anhinga,,soundbible,anhinga
+wav_files/soundbible_door-close_7900161b58.wav,,1.6806,close,,soundbible,close
+wav_files/soundbible_heartbeat_253154f8c1.wav,,10.0,heart,,soundbible,heart
+wav_files/soundbible_small-scrape_54cfbb4b65.wav,,2.0,scrape,,soundbible,scrape
+wav_files/soundbible_slam-fork-down_230bed7240.wav,,2.0,slam,,soundbible,slam
+wav_files/soundbible_rustle_1135f37b63.wav,,2.6603,crackle,,soundbible,crackle
+wav_files/soundbible_i-love-daddy_a39e1130b3.wav,,2.0,kid,,soundbible,kid
+wav_files/soundbible_orca_a9403374b8.wav,,10.0,orca,,soundbible,orca
+wav_files/soundbible_dolphins_09335ef53e.wav,,10.0,dolphin,,soundbible,dolphin
+wav_files/soundbible_cough_bfa6243a58.wav,,2.0,clinic,,soundbible,clinic
+wav_files/soundbible_belch_b6d9bf83f2.wav,,1.0566,burp,,soundbible,burp
+wav_files/soundbible_whimper_ca391d4d20.wav,,4.2624,snivel,,soundbible,snivel
+wav_files/soundbible_hoot-owl_ae48bb32de.wav,,2.2539,animal,,soundbible,animal
+wav_files/soundbible_string-cheese-fart_55ba877c35.wav,,2.6052,fart,,soundbible,fart
+wav_files/soundbible_engine-inside-car_78925f0272.wav,,4.5273,engine,,soundbible,engine
+wav_files/soundbible_gag_63ffe7abd5.wav,,2.0,cough,,soundbible,cough
+wav_files/soundbible_whistling_6caef0c3c9.wav,,3.2596,work,,soundbible,work
+wav_files/soundbible_smack-lips_46f77c4d1b.wav,,3.4017,lips,,soundbible,lips
+wav_files/soundbible_throat-clearing_7abd85dbea.wav,,2.0,clear throat,,soundbible,clear throat
+wav_files/soundbible_hiccuping_2ddb9b88e9.wav,,1.1764,hiccup,,soundbible,hiccup
+wav_files/soundbible_monster-growl_c2310af46a.wav,,3.9782,growl,,soundbible,growl
+wav_files/soundbible_horse-race_d11a421625.wav,,10.0,Bet,,soundbible,Bet
+wav_files/soundbible_glass-pack-muffler_89fcc68b89.wav,,5.9415,damper,,soundbible,damper
+wav_files/soundbible_falling-off_d2fcee4546.wav,,4.0824,scream,,soundbible,scream
+wav_files/soundbible_out-of-control_84cafece8a.wav,,4.2177,crash,,soundbible,crash
+wav_files/soundbible_laugh-evil_9c46fc9ddb.wav,,3.0448,halloween,,soundbible,halloween
+wav_files/soundbible_full-throttle_82874c611f.wav,,5.6726,flat out,,soundbible,flat out
+wav_files/soundbible_leg-breaking_f7e2676e28.wav,,2.0,annihilate,,soundbible,annihilate
+wav_files/soundbible_transfer-truck-driving-off_4a82d6c7d5.wav,,10.0,truck,,soundbible,truck
+wav_files/soundbible_trumpet-fart_5c38f00926.wav,,1.0021,fart,,soundbible,fart
+wav_files/soundbible_rigid-fart_7a37721fd1.wav,,2.0,break wind,,soundbible,break wind
+wav_files/soundbible_wild-child_2cae9c9605.wav,,4.3656,child,,soundbible,child
+wav_files/soundbible_cat-meow_6fd6a34671.wav,,2.0,bobcat,,soundbible,bobcat
+wav_files/soundbible_shuffling-cards_add7883a4d.wav,,4.1375,war,,soundbible,war
+wav_files/soundbible_please-open-the-door_c93b8fe7d5.wav,,1.8228,talk,,soundbible,talk
+wav_files/soundbible_please-open-the-door-loud_667f30e67b.wav,,1.579,talk,,soundbible,talk
+wav_files/soundbible_fizzing_e799a73c67.wav,,7.956,buzz,,soundbible,buzz
+wav_files/soundbible_long-fart_88cb0a3364.wav,,2.6219,fart,,soundbible,fart
+wav_files/soundbible_walking-in-snow_4fb5bbf84c.wav,,8.4637,up,,soundbible,up
+wav_files/soundbible_sharp-fart_5eb8f795f2.wav,,2.0,fart,,soundbible,fart
+wav_files/soundbible_bluethroat-song_3078883428.wav,,4.1224,bird,,soundbible,bird
+wav_files/soundbible_eat-mommy_bc43d34770.wav,,2.0,cute,,soundbible,cute
+wav_files/soundbible_uh-oh-baby_6c355504ed.wav,,1.2384,Uh Oh Baby,,soundbible,Uh Oh Baby
+wav_files/soundbible_truck-drive-by_ed7dcb48ea.wav,,4.3864,truck,,soundbible,truck
+wav_files/soundbible_large-metal-pot-1_38a951aad9.wav,,3.7915,pots,,soundbible,pots
+wav_files/soundbible_police-siren-2_8d1cda4db8.wav,,2.1562,police,,soundbible,police
+wav_files/soundbible_alligator-crocodile-growl_938728a86c.wav,,6.2743,crocodile,,soundbible,crocodile
+wav_files/soundbible_chain-dropped_d54615b629.wav,,2.3646,chain,,soundbible,chain
+wav_files/soundbible_strange-beeping_1cc5f7a6a1.wav,,2.0,bell sound,,soundbible,bell sound
+wav_files/soundbible_fish-splashing_2490de9593.wav,,2.0,aquatic,,soundbible,aquatic
+wav_files/soundbible_pop-cork_11402db6a0.wav,,2.0,champagne bottle,,soundbible,champagne bottle
+wav_files/soundbible_r2d2-again_ba3b4d6356.wav,,2.2319,R2D2,,soundbible,R2D2
+wav_files/soundbible_lamb-bleating_95aed10e33.wav,,2.0,sheep,,soundbible,sheep
+wav_files/soundbible_mouse-double-click_8e1de53861.wav,,2.0,computer,,soundbible,computer
+wav_files/soundbible_play-ball-umpire_511c6acfd6.wav,,2.0,umpire,,soundbible,umpire
+wav_files/soundbible_funny-fart-trail_4e386be3d2.wav,,2.0,fart,,soundbible,fart
+wav_files/soundbible_laserjet-printer_9a156b290f.wav,,5.7053,print,,soundbible,print
+wav_files/soundbible_laugh-and-applause_15c51c48cc.wav,,6.3061,laugh,,soundbible,laugh
+wav_files/soundbible_bomb-5_21cfbc6d5e.wav,,5.906,bomb,,soundbible,bomb
+wav_files/soundbible_baby-says-daddy_62412cb387.wav,,4.3866,dad,,soundbible,dad
+wav_files/soundbible_fan-startup_5e8d1c4c41.wav,,10.0,fan,,soundbible,fan
+wav_files/soundbible_water-down-gutter-3_5932a92c88.wav,,6.5295,house,,soundbible,house
+wav_files/soundbible_machine-gun-firing_266c1fa61f.wav,,4.6511,machine gun,,soundbible,machine gun
+wav_files/soundbible_horse_00acfc1a00.wav,,2.0,horse,,soundbible,horse
+wav_files/soundbible_dialing-phone-number_05f78ea269.wav,,6.877,Dialing a Number,,soundbible,Dialing a Number
+wav_files/soundbible_cargo-plane-ambiance_b7c2de20c3.wav,,10.0,plane,,soundbible,plane
+wav_files/soundbible_extreme-horror-fx_064da96744.wav,,10.0,evil,,soundbible,evil
+wav_files/soundbible_chicks-peeps_2dc4b75276.wav,,1.2118,chicken coup,,soundbible,chicken coup
+wav_files/soundbible_rope-swinging_c14821501e.wav,,2.5283,stretching,,soundbible,stretching
+wav_files/soundbible_backwards-souls_2c3f41d5c1.wav,,10.0,backwards souls,,soundbible,backwards souls
+wav_files/soundbible_water-down-gutter-2_9de98bc795.wav,,10.0,house,,soundbible,house
+wav_files/soundbible_buzz-saw_7b566a769d.wav,,4.932,wood,,soundbible,wood
+wav_files/soundbible_typing-on-computer-keyboard_43b923dd8a.wav,,4.5192,office,,soundbible,office
+wav_files/soundbible_gut-punch-hook_efa1ce7754.wav,,2.0,right hook,,soundbible,right hook
+wav_files/soundbible_osprey-bird-call_854a7260df.wav,,7.614,nature,,soundbible,nature
+wav_files/soundbible_ricochet-of-a-bullet_709c428690.wav,,1.0637,ricochet,,soundbible,ricochet
+wav_files/soundbible_house-finch_f4dc5e2a8e.wav,,9.0906,house finch,,soundbible,house finch
+wav_files/soundbible_kid-talking-about-spongebob_01d350845b.wav,,8.7387,tv,,soundbible,tv
+wav_files/soundbible_toad-at-forest-edge_866f6730ea.wav,,5.8348,Toad,,soundbible,Toad
+wav_files/soundbible_pushing-in-old-cassette_8b70c46bc5.wav,,4.4931,cassette,,soundbible,cassette
+wav_files/soundbible_cellar-door-slam-shut_508fb7e4d1.wav,,2.0,Shut,,soundbible,Shut
+wav_files/soundbible_cellar-door-slam-shut_a9c760ad80.wav,,4.1274,Shut,,soundbible,Shut
+wav_files/soundbible_molotov-cocktail-bomb_65b69938e7.wav,,3.9894,bomb,,soundbible,bomb
+wav_files/soundbible_car-screech-and-crash_04848f3b2d.wav,,5.626,city,,soundbible,city
+wav_files/soundbible_homerun-baseball-game_e020e712ee.wav,,5.0,baseball,,soundbible,baseball
+wav_files/soundbible_pelican-chick_8b2606e6db.wav,,8.437,sea,,soundbible,sea
+wav_files/soundbible_ducks-landing-in-water_fe04a3dc9e.wav,,9.7765,lake,,soundbible,lake
+wav_files/soundbible_bird-song_c332e3fd1d.wav,,10.0,bird,,soundbible,bird
+wav_files/soundbible_pelican-chick_eca071eeb5.wav,,8.425,sea,,soundbible,sea
+wav_files/soundbible_amazon-catfish-underwater_69c8d910cb.wav,,4.0551,hydrophone,,soundbible,hydrophone
+wav_files/soundbible_alligator-hissing_4c4cfb9705.wav,,10.0,alligator,,soundbible,alligator
+wav_files/soundbible_diamond-back-rattle-snake_44949d5d78.wav,,4.7713,snake,,soundbible,snake
+wav_files/soundbible_cow-mooing_e82d83da9d.wav,,2.0,animal,,soundbible,animal
+wav_files/soundbible_pouring-a-glass-full_c4e93929c7.wav,,10.0,thirsty,,soundbible,thirsty
+wav_files/soundbible_person-screaming-no_5a76db9cb2.wav,,2.0,no,,soundbible,no
+wav_files/soundbible_beer-can-opening_a19a47c81e.wav,,2.1054,beer,,soundbible,beer
+wav_files/soundbible_radar-detector-beeps_ea4622783a.wav,,7.3225,beep,,soundbible,beep
+wav_files/soundbible_crowd-laughing_f7829091a6.wav,,7.1409,crowd laughing,,soundbible,crowd laughing
+wav_files/soundbible_hockey-game-ambiance_3346a3313e.wav,,10.0,hockey,,soundbible,hockey
+wav_files/soundbible_redneck-rolls-dice_1da7660062.wav,,2.7006,Snake Eyes,,soundbible,Snake Eyes
+wav_files/soundbible_seagull-call_6fa8ecbb6f.wav,,9.4384,seagulls,,soundbible,seagulls
+wav_files/soundbible_bear-growl-and-roar-2_a13f4d8835.wav,,10.0,baby,,soundbible,baby
+wav_files/soundbible_evil-laugh_6d5110e70b.wav,,5.6937,evil laugh,,soundbible,evil laugh
+wav_files/soundbible_button-click-on_9e218ee3b8.wav,,2.0,click,,soundbible,click
+wav_files/soundbible_evil-ambiance_4c0a4014b1.wav,,9.8743,evil ambiance,,soundbible,evil ambiance
+wav_files/soundbible_shake-dice_260fb505b5.wav,,5.0,dice,,soundbible,dice
+wav_files/soundbible_roll-dice-2_79bfff914d.wav,,5.0,game,,soundbible,game
+wav_files/soundbible_female-counts-to-ten_4fd951b0f3.wav,,10.0,female,,soundbible,female
+wav_files/soundbible_many-wolves-howling_208442ca8c.wav,,10.0,wolf pack,,soundbible,wolf pack
+wav_files/soundbible_car-door_5865cf864c.wav,,4.941,car,,soundbible,car
+wav_files/soundbible_evil-laugh-male-1_f83ff51dd3.wav,,3.7144,Evil Laugh Male,,soundbible,Evil Laugh Male
+wav_files/soundbible_mallard-duck-quacks_b30f67b195.wav,,9.2996,mallard duck quacks,,soundbible,mallard duck quacks
+wav_files/soundbible_dog-licking_5b8d2b6cfb.wav,,5.2901,gross,,soundbible,gross
+wav_files/soundbible_congo-drummer_20ebf8d1d5.wav,,7.0922,tribal,,soundbible,tribal
+wav_files/soundbible_cat-collar-jingle_a5801e63a5.wav,,1.4423,cat,,soundbible,cat
+wav_files/soundbible_car-explosion_dc78920a3d.wav,,2.5537,glass falling,,soundbible,glass falling
+wav_files/soundbible_putter-golf-ball_3f8863bc6b.wav,,2.0,golf ball,,soundbible,golf ball
+wav_files/soundbible_helicopter-flyby_189f833cd8.wav,,10.0,Helicopter Flyby,,soundbible,Helicopter Flyby
+wav_files/soundbible_f15-fighter-jet-flyby_f1d440c724.wav,,2.2629,military,,soundbible,military
+wav_files/soundbible_cartoon-noises-skid_89bf2a1d49.wav,,2.0,cartoon noises,,soundbible,cartoon noises
+wav_files/soundbible_slip-on-banana-peel_a8ed6f05b0.wav,,1.6661,cartoon noises,,soundbible,cartoon noises
+wav_files/soundbible_person-farting_19ad13b4fd.wav,,1.031,farting,,soundbible,farting
+wav_files/soundbible_evil-yelling_e89ebe0d8f.wav,,1.7696,horror scene,,soundbible,horror scene
+wav_files/soundbible_crowd-boo_89c4f7424d.wav,,2.0,audience,,soundbible,audience
+wav_files/soundbible_crowd-boo_3e0b092d57.wav,,1.4996,audience,,soundbible,audience
+wav_files/soundbible_dc9-landing_9d79515b03.wav,,5.921,dc9,,soundbible,dc9
+wav_files/soundbible_boxing-bell-start-round_8e0270eb24.wav,,1.7502,boxing,,soundbible,boxing
+wav_files/soundbible_dog-whine_75a33f948f.wav,,2.0133,afraid,,soundbible,afraid
+wav_files/soundbible_branch-break_aef0d48a8b.wav,,2.0,branch,,soundbible,branch
+wav_files/soundbible_bone-breaking_ca66dea00a.wav,,2.0,branch,,soundbible,branch
+wav_files/soundbible_bone-breaking_c56fbaa407.wav,,1.0449,branch,,soundbible,branch
+wav_files/soundbible_thwack-hit-by-punch_5b27714cd4.wav,,2.0,punch,,soundbible,punch
+wav_files/soundbible_hi-ya-karate-chop_dae3c345d1.wav,,7.5261,hi,,soundbible,hi
+wav_files/soundbible_chain-link-fence-jump_faa47f7cb8.wav,,2.1012,chain,,soundbible,chain
+wav_files/soundbible_baby-sneeze_c1abfacc25.wav,,2.0,Baby,,soundbible,Baby
+wav_files/soundbible_bobwhite-quail_5b244a61c5.wav,,4.041,bobwhite,,soundbible,bobwhite
+wav_files/soundbible_anti-aircraft-gun_e9aed2ffbf.wav,,3.9235,Anti,,soundbible,Anti
+wav_files/soundbible_bomb-dropping_4d4132e18d.wav,,5.6719,bomb,,soundbible,bomb
+wav_files/soundbible_answering-machine-beep_dc2d3d3432.wav,,1.4198,Answering,,soundbible,Answering
+wav_files/soundbible_baby-splashes-and-laughs_a1d7a2b2b4.wav,,10.0,kitchen,,soundbible,kitchen
+wav_files/freewavesamples_kawai-k1-ii-piano-c3_2d507e0876.wav,,2.4402,Electric Piano,,freewavesamples,Electric Piano
+wav_files/freewavesamples_ensoniq-zr-76-glockenspiel-c6_65a0078326.wav,,1.3299,Melodic Percussion,,freewavesamples,Melodic Percussion
+wav_files/freewavesamples_kawai-k1-ii-rhodes-c4_7ecd3538d3.wav,,5.3357,Keyboards,,freewavesamples,Keyboards
+wav_files/freewavesamples_ensoniq-zr-76-syn-vox-gm-c4_5c482891e4.wav,,3.6622,Vocal,,freewavesamples,Vocal
+wav_files/freewavesamples_ensoniq-zr-76-hit-me-hard_61c593e86f.wav,,1.9979,Orchestral,,freewavesamples,Orchestral
+wav_files/freewavesamples_ensoniq-zr-76-legato-str-c4_1d4fb33f26.wav,,3.4493,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_ensoniq-zr-76-bellmen-c4_9a4589c894.wav,,9.8881,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_ensoniq-zr-76-b-psaltery-c4_a2fdc180f9.wav,,3.5945,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_ensoniq-zr-76-shamisen-c5_df706f20f1.wav,,1.5585,Ethnic Instruments,,freewavesamples,Ethnic Instruments
+wav_files/freewavesamples_ensoniq-zr-76-warm-bath-c4_cffa6593a0.wav,,8.3498,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_ensoniq-zr-76-bottle-blow-c3_e211c2814d.wav,,3.3724,Wind Instruments,,freewavesamples,Wind Instruments
+wav_files/freewavesamples_ensoniq-zr-76-flute-stops-c4_846cb1c0da.wav,,2.2972,Organs,,freewavesamples,Organs
+wav_files/freewavesamples_ensoniq-zr-76-vintage-wurlie-c3_4701100fae.wav,,9.9319,Piano,,freewavesamples,Piano
+wav_files/freewavesamples_ensoniq-zr-76-harpsichord-c3_d104abec7d.wav,,4.7988,Keyboards,,freewavesamples,Keyboards
+wav_files/freewavesamples_yamaha-v50-flutevoice-c5_92ca292c84.wav,,3.4806,Wind Instruments,,freewavesamples,Wind Instruments
+wav_files/freewavesamples_roland-jv-2080-brightness-c4_3c756a1ec1.wav,,5.0917,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_roland-jv-2080-prefab-chime-c4_0923604867.wav,,3.4761,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_yamaha-v50-largepipes-c2_41c8635ef9.wav,,5.4874,Organs,,freewavesamples,Organs
+wav_files/freewavesamples_ensoniq-esq-1-sympy-c4_9cbb26fc79.wav,,5.7743,Lead,,freewavesamples,Lead
+wav_files/freewavesamples_alesis-sanctuary-qcard-music-box-c6_0855e71e10.wav,,1.8973,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_alesis-sanctuary-qcard-crotales-c6_76f63f0760.wav,,1.9981,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_alesis-sanctuary-qcard-tines-aahs-c4_c3cfeea072.wav,,3.2508,Electric Piano,,freewavesamples,Electric Piano
+wav_files/freewavesamples_roland-jx-03-harpsichord-c4_7bb3c91651.wav,,1.9028,Keyboards,,freewavesamples,Keyboards
+wav_files/freewavesamples_kurzweil-k2000-dual-bass-c1_66f4871edf.wav,,7.4951,Electric,,freewavesamples,Electric
+wav_files/freewavesamples_kawai-k5000w-addsquare-c4_604a4a6f56.wav,,2.1256,Lead,,freewavesamples,Lead
+wav_files/freewavesamples_yamaha-rm50-reverb-snare_ad374c9d46.wav,,1.2631,Snare,,freewavesamples,Snare
+wav_files/freewavesamples_yamaha-rm50-crash-cymbal-3_4d91f99d62.wav,,1.9936,Crash,,freewavesamples,Crash
+wav_files/freewavesamples_yamaha-rm50-ride-cymbal-4_4072b20b82.wav,,1.9978,Ride,,freewavesamples,Ride
+wav_files/freewavesamples_korg-tr-rack-percussion-kit-sleigh-bells_e24caa2719.wav,,1.0382,Percussion,,freewavesamples,Percussion
+wav_files/freewavesamples_korg-tr-rack-splash-cymbal_0d5b79716e.wav,,1.931,Cymbals,,freewavesamples,Cymbals
+wav_files/freewavesamples_alesis-s4-harpsifunk-c3_b9a3ba14a4.wav,,3.8816,Keyboards,,freewavesamples,Keyboards
+wav_files/freewavesamples_korg-tr-rack-standard-kit-ride-cymbal_5bf5c2973a.wav,,2.9451,Ride,,freewavesamples,Ride
+wav_files/freewavesamples_yamaha-sy22-fr-horn-c5_7f4ce7d933.wav,,2.3468,Brass,,freewavesamples,Brass
+wav_files/freewavesamples_yamaha-sy22-fretless-c2_8d72af9ff2.wav,,3.4621,Electric,,freewavesamples,Electric
+wav_files/freewavesamples_roland-pn-d10-02-wet-synth-bass-1-c2_d6775f9a0b.wav,,1.276,Synth,,freewavesamples,Synth
+wav_files/freewavesamples_korg-01w-pizzicato-c5_8ab33aecc4.wav,,1.8008,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_roland-pn-d10-01-husky-voxes-c3_dcece0bdf5.wav,,2.9829,Vocal,,freewavesamples,Vocal
+wav_files/freewavesamples_yamaha-tg100-hand-clap_9860b9399d.wav,,1.1416,Percussion,,freewavesamples,Percussion
+wav_files/freewavesamples_roland-sc-88-mute-cuica_92971366e9.wav,,1.0171,Latin Percussion,,freewavesamples,Latin Percussion
+wav_files/freewavesamples_roland-sc-88-tenor-sax-c4_00a7465255.wav,,1.9606,Woodwinds,,freewavesamples,Woodwinds
+wav_files/freewavesamples_roland-sc-88-choir-pad-c5_3ac2b68019.wav,,3.9133,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_roland-sc-88-blown-bottle-c5_b714c2c9ad.wav,,1.2793,Wind Instruments,,freewavesamples,Wind Instruments
+wav_files/freewavesamples_roland-sc-88-tubular-bell-c6_36aeff6f94.wav,,3.7131,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_korg-tr-rack-trombone-c5_75d5d70e2f.wav,,1.4328,Brass,,freewavesamples,Brass
+wav_files/freewavesamples_korg-tr-rack-tuba-c2_7303754c8a.wav,,1.1163,Brass,,freewavesamples,Brass
+wav_files/freewavesamples_roland-sc-88-fretless-bass-c3_d021cdfe1e.wav,,6.5369,Electric,,freewavesamples,Electric
+wav_files/freewavesamples_korg-tr-rack-piccolo-c6_2e15d8e9e6.wav,,1.3305,Woodwinds,,freewavesamples,Woodwinds
+wav_files/freewavesamples_korg-tr-rack-radio-piano-c3_b86a690f50.wav,,5.6034,Piano,,freewavesamples,Piano
+wav_files/freewavesamples_roland-sc-88-applause_f710e76c6d.wav,,4.4194,Sound Effects,,freewavesamples,Sound Effects
+wav_files/freewavesamples_korg-tr-rack-solo-cello-c4_2cc6874af3.wav,,2.7086,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_korg-tr-rack-music-box-c6_68fe7e25ba.wav,,2.0001,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_yamaha-ex5-brite-steel-c3_13cf665098.wav,,10.0,Acoustic,,freewavesamples,Acoustic
+wav_files/freewavesamples_roland-sc-88-jazz-guitar-c4_1e79591a41.wav,,4.3356,Electric,,freewavesamples,Electric
+wav_files/freewavesamples_korg-tr-rack-garage-organ-c3_205d82a95c.wav,,2.0225,Organs,,freewavesamples,Organs
+wav_files/freewavesamples_korg-tr-rack-akkordeon-c5_9f151426cd.wav,,1.5215,Keyboards,,freewavesamples,Keyboards
+wav_files/freewavesamples_yamaha-tg77-cosmo-pad-c4_06dde60027.wav,,4.0049,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_yamaha-tg77-string-quartet-c3_a8a7c26e30.wav,,3.0244,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_korg-tr-rack-musette-c5_8f42283d70.wav,,1.6402,Wind Instruments,,freewavesamples,Wind Instruments
+wav_files/freewavesamples_yamaha-mu90r-short-sq-c4_faa4b7f9dd.wav,,1.2905,Lead,,freewavesamples,Lead
+wav_files/freewavesamples_korg-n1r-metronome-bell_25fd60849e.wav,,1.1946,Percussion,,freewavesamples,Percussion
+wav_files/freewavesamples_kawai-k3-modulated-piano-c3_7d156041ee.wav,,7.8703,Piano,,freewavesamples,Piano
+wav_files/freewavesamples_kawai-k3-piano-c3_df6764cd07.wav,,8.4872,Piano,,freewavesamples,Piano
+wav_files/freewavesamples_alesis-fusion-tubular-bells-c6_cab2a1d90c.wav,,2.0005,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_ensoniq-esq-1-synth-voice-c5_94c5050bc2.wav,,3.3624,Vocal,,freewavesamples,Vocal
+wav_files/freewavesamples_yamaha-fs1r-bassline-c2_938918a2cf.wav,,1.0841,Synth,,freewavesamples,Synth
+wav_files/freewavesamples_yamaha-fs1r-ensemble-c4_ef355d1f7a.wav,,4.5193,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_kawai-k5000w-gorgizmo-c2_6f01caa3cd.wav,,7.4989,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_kawai-k5000w-police-siren_92e2e95aff.wav,,5.5263,Sound Effects,,freewavesamples,Sound Effects
+wav_files/freewavesamples_m-audio-venom-raw-square-c4_b03ff61331.wav,,1.5859,Lead,,freewavesamples,Lead
+wav_files/freewavesamples_m-audio-venom-chimetimes-c6_a95df9f1d0.wav,,3.4194,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_yamaha-tx81z-sqncrbass-c1_8ebcefef73.wav,,1.1577,Synth,,freewavesamples,Synth
+wav_files/freewavesamples_korg-n1r-ice-bell-c6_8cb9f92f07.wav,,2.5108,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_yamaha-fs1r-breathy-5th-c4_d9a38fb04b.wav,,6.4737,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_korg-n1r-orchestral-crash-cymbals_2fb5ec9972.wav,,8.0025,Percussion,,freewavesamples,Percussion
+wav_files/freewavesamples_roland-pn-d10-03-electric-tine-c4_a4920c5d67.wav,,2.3899,Electric Piano,,freewavesamples,Electric Piano
+wav_files/freewavesamples_korg-ns5r-steeldrums-c5_788e53d870.wav,,1.1042,Melodic Percussion,,freewavesamples,Melodic Percussion
+wav_files/freewavesamples_galloping-horse_ef1aa3a011.wav,,3.3368,Nature,,freewavesamples,Nature
+wav_files/freewavesamples_korg-ns5r-bass-and-lead-c3_0a4a7ee3a2.wav,,1.6853,Lead,,freewavesamples,Lead
+wav_files/freewavesamples_korg-ns5r-trumpet-1-c4_5e9a15a996.wav,,1.2263,Brass,,freewavesamples,Brass
+wav_files/freewavesamples_yamaha-tx81z-analogsynth-c2_2a33f6dc4a.wav,,10.0,Synth,,freewavesamples,Synth
+wav_files/freewavesamples_korg-dw-8000-whistle-c5_423b98304b.wav,,1.4677,Wind Instruments,,freewavesamples,Wind Instruments
+wav_files/freewavesamples_korg-dw-8000-wide-synth-strings-c2_23587c11c0.wav,,3.1936,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_korg-dw-8000-clav-c3_d009b6e5c5.wav,,4.047,Keyboards,,freewavesamples,Keyboards
+wav_files/freewavesamples_yamaha-tg100-koto-c4_3f6a1ff0d0.wav,,1.5631,Ethnic Instruments,,freewavesamples,Ethnic Instruments
+wav_files/freewavesamples_yamaha-tg100-tweet_3c471e819f.wav,,2.6942,Sound Effects,,freewavesamples,Sound Effects
+wav_files/freewavesamples_yamaha-tg500-ch-pure-c5_7237044efa.wav,,2.2391,Vocal,,freewavesamples,Vocal
+wav_files/freewavesamples_yamaha-tg500-ch-ghost-c4_95d36a998a.wav,,3.4645,Vocal,,freewavesamples,Vocal
+wav_files/freewavesamples_yamaha-tg500-tp-glock-c6_00942cf77f.wav,,1.0766,Percussion,,freewavesamples,Percussion
+wav_files/freewavesamples_korg-01w-freeflight-c5_85a2d41d38.wav,,10.0,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_yamaha-tg500-ap-grand-c3_5fb9e5ded6.wav,,1.0281,Piano,,freewavesamples,Piano
+wav_files/freewavesamples_korg-01w-nuclearsun-c2_a3a4d9434c.wav,,7.7466,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_casio-cz-5000-synth-glockensp-c4_d4fa016b84.wav,,2.8841,Melodic Percussion,,freewavesamples,Melodic Percussion
+wav_files/freewavesamples_ensoniq-sq-1-ride-cymbal_83e5da8248.wav,,2.0919,Ride,,freewavesamples,Ride
+wav_files/freewavesamples_yamaha-tg55-stereo-pulse-c3_94f941c2ba.wav,,3.0884,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_yamaha-dx7-harpsi-stg-c3_062bae259c.wav,,5.6296,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_yamaha-ps-3-flute-c4_464834f0e1.wav,,2.8729,Wind Instruments,,freewavesamples,Wind Instruments
+wav_files/freewavesamples_yamaha-pss-280-toy-piano-c5_f4c3d4bcfa.wav,,2.9276,Piano,,freewavesamples,Piano
+wav_files/freewavesamples_yamaha-ps-300-16-beat_35ac56ddad.wav,,2.6365,Beats,,freewavesamples,Beats
+wav_files/freewavesamples_yamaha-pss-280-music-box-c6_2d92330f7a.wav,,3.0982,Synthesizer,,freewavesamples,Synthesizer
+wav_files/freewavesamples_yamaha-pss-280-ufo_bc31b09d5f.wav,,2.4112,Sound Effects,,freewavesamples,Sound Effects
+wav_files/freewavesamples_kawai-k11-oboe-c3_821ea5e138.wav,,2.4384,Woodwinds,,freewavesamples,Woodwinds
+wav_files/freewavesamples_high-agogo_29e704e448.wav,,1.0432,Percussion,,freewavesamples,Percussion
+wav_files/freewavesamples_kawai-k11-draworgn-c2_c5f1a07d23.wav,,2.3156,Organs,,freewavesamples,Organs
+wav_files/freewavesamples_high-conga-2_90183ac0da.wav,,1.1712,Latin Percussion,,freewavesamples,Latin Percussion
+wav_files/freewavesamples_yamaha-sy22-ooh_c7a8cc4da9.wav,,1.2784,Vocal,,freewavesamples,Vocal
+wav_files/freewavesamples_kawai-k11-synstrg2-c3_110aff6d69.wav,,6.4999,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_triangle-open_e0a116f1fc.wav,,1.1938,Percussion,,freewavesamples,Percussion
+wav_files/freewavesamples_casio-mt-600-plunk-extend-c3_a607d53033.wav,,2.6748,Synthesizer,,freewavesamples,Synthesizer
+wav_files/freewavesamples_korg-m3r-harp-c3_e9b7dcaeba.wav,,2.5324,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_yamaha-sy22-arpegi8-c2_2de7d52886.wav,,10.0,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_korg-m3r-soft-flute-c6_fb2dc229be.wav,,1.8925,Woodwinds,,freewavesamples,Woodwinds
+wav_files/freewavesamples_korg-m3r-rock-mutes-c3_dc60e559a3.wav,,2.166,Electric,,freewavesamples,Electric
+wav_files/freewavesamples_kawai-k11-goblin-c3_aa737c5fec.wav,,9.0839,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_yamaha-sy22-nostromo-c1_f023a77a00.wav,,10.0,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_e-mu-proteus-fx-kalimba-c4_d3bce6b757.wav,,1.1751,Ethnic Instruments,,freewavesamples,Ethnic Instruments
+wav_files/freewavesamples_ensoniq-sq-1-astrovox-c3_b9f65fe039.wav,,4.4942,Pads,,freewavesamples,Pads
+wav_files/freewavesamples_ensoniq-sq-1-music-box-c6_ce7ca641c2.wav,,1.4664,Synthesizer,,freewavesamples,Synthesizer
+wav_files/freewavesamples_kawai-k5000w-tenorsax-c3_08ab3b13f0.wav,,2.2978,Woodwinds,,freewavesamples,Woodwinds
+wav_files/freewavesamples_kawai-k5000w-oboe-c3_16c4e10246.wav,,2.6464,Woodwinds,,freewavesamples,Woodwinds
+wav_files/freewavesamples_e-mu-proteus-fx-cosmobel-c3_5b3f5aaa3e.wav,,2.6593,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_kawai-k5000w-harp-c5_573186377b.wav,,2.4014,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_yamaha-ex5-gronk-c2_3c478761ea.wav,,2.7286,Synth,,freewavesamples,Synth
+wav_files/freewavesamples_kawai-k5000w-shamisen-c4_d5bb4d9caa.wav,,1.3528,Ethnic Instruments,,freewavesamples,Ethnic Instruments
+wav_files/freewavesamples_yamaha-ex5-tine-ep-c6_18acf7b633.wav,,2.4876,Electric Piano,,freewavesamples,Electric Piano
+wav_files/freewavesamples_roland-r-8-room-tom-2_509312aae7.wav,,1.1852,Toms,,freewavesamples,Toms
+wav_files/freewavesamples_roland-r-8-taiko_fa8bcba4c1.wav,,1.1222,Ethnic Instruments,,freewavesamples,Ethnic Instruments
+wav_files/freewavesamples_roland-r-8-ride-cymbal_7b3aa15992.wav,,2.142,Ride,,freewavesamples,Ride
+wav_files/freewavesamples_yamaha-ex5-mouth-keys-c5_dffdaa3e11.wav,,3.4571,Wind Instruments,,freewavesamples,Wind Instruments
+wav_files/freewavesamples_roland-r-8-open-hi-hat_1c6ebf7ef1.wav,,1.1208,Hi-Hat,,freewavesamples,Hi-Hat
+wav_files/freewavesamples_crash-cymbal-6_ceb4f75eae.wav,,2.0036,Crash,,freewavesamples,Crash
+wav_files/freewavesamples_yamaha-ex5-jazz-chorus-c5_23c5e05759.wav,,3.0049,Electric Piano,,freewavesamples,Electric Piano
+wav_files/freewavesamples_yamaha-ex5-jazz-grand-c5_0b00bebc40.wav,,2.6843,Piano,,freewavesamples,Piano
+wav_files/freewavesamples_yamaha-cs2x-bell-c7_659b8f759c.wav,,2.0226,Percussion,,freewavesamples,Percussion
+wav_files/freewavesamples_roland-u-220-harp-c4_b1de8e5735.wav,,3.5029,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_roland-jd-990-wave-bell-c5_50dd0dad48.wav,,3.8464,Bells,,freewavesamples,Bells
+wav_files/freewavesamples_roland-jv-880-wide-strings-c4_b9dc60a23c.wav,,5.9356,Strings,,freewavesamples,Strings
+wav_files/freewavesamples_electro-tom_17d71ec730.wav,,1.0127,Toms,,freewavesamples,Toms
+wav_files/freewavesamples_yamaha-tx81z-flugelhorn-c6_2be8a6389f.wav,,2.1407,Brass,,freewavesamples,Brass
+wav_files/freewavesamples_yamaha-tx81z-lately-bass-c4_152aa14f6f.wav,,2.1391,Synth,,freewavesamples,Synth
+wav_files/freewavesamples_yamaha-tx81z-dynomite-electric-piano-c6_6bdd7c9de0.wav,,2.1949,Electric Piano,,freewavesamples,Electric Piano

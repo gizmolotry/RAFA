@@ -1,0 +1,29 @@
+{
+  "mode": "no_promotion",
+  "depth": 1,
+  "batch_size": 1,
+  "time_steps": 32,
+  "device": "cpu",
+  "seed_source": "synthetic",
+  "initial_major_mass": 0.054665714502334595,
+  "final_major_mass": 0.054665714502334595,
+  "initial_minor_residue": 0.6308309435844421,
+  "final_minor_residue": 0.6308309435844421,
+  "initial_promotability": 0.053135838359594345,
+  "final_promotability": 0.053135838359594345,
+  "major_gain": 0.0,
+  "residue_drop": 0.0,
+  "promotability_gain": 0.0,
+  "num_promotions": 1.0,
+  "packet_counts_by_depth": [
+    1
+  ],
+  "loss": 1.2844198942184448,
+  "loss_terms": {
+    "l_major": 0.6325567364692688,
+    "l_residue": 0.6308309435844421,
+    "l_promo": 0.35624682903289795,
+    "l_attack": 0.0024656362365931273,
+    "l_gain": 0.0
+  }
+}

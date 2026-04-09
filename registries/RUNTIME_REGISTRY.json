@@ -1,0 +1,35 @@
+{
+  "version": "2026-04-06",
+  "runtimes": [
+    {
+      "id": "stage4_blackwell_14",
+      "status": "active-restore",
+      "schema": "bw14",
+      "manifest": "runtimes/stage4_blackwell_14/runtime_manifest.json",
+      "entrypoint": "runtimes/stage4_blackwell_14/export_graduation.py",
+      "canonical_output": "outputs/graduation_pack_restore_candidate"
+    },
+    {
+      "id": "stage4_blackwell_16",
+      "status": "active",
+      "schema": "bw16",
+      "manifest": "runtimes/stage4_blackwell_16/runtime_manifest.json",
+      "entrypoint": "runtimes/stage4_blackwell_16/export_graduation.py"
+    },
+    {
+      "id": "diffusion_parent_v3",
+      "status": "active-historical",
+      "schema": "diff_v3",
+      "manifest": "runtimes/diffusion_parent_v3/runtime_manifest.json",
+      "entrypoint": "runtimes/diffusion_parent_v3/sample_prompt.py"
+    },
+    {
+      "id": "circleworld_proto",
+      "status": "prototype",
+      "schema": "circleworld_v0",
+      "manifest": "runtimes/circleworld_proto/runtime_manifest.json",
+      "entrypoint": "runtimes/circleworld_proto/run_ablation.py",
+      "training_entrypoint": "runtimes/circleworld_proto/train_circleworld.py"
+    }
+  ]
+}

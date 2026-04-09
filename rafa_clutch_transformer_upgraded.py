@@ -1,16 +1,15 @@
-# rafa_clutch_transformer_upgraded.py
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from rafa_math_tools import geodesic_phase_upsample
+import math
 
 class BlackwellSafeAttention(nn.Module):
     def __init__(self, d_model, nhead, dropout=0.0, batch_first=True):
         super().__init__()
         self.nhead = nhead
-        self.head_dim = d_model // nhead
-        self.qkv = nn.Linear(d_model, 3 * d_model)
-        self.out_proj = nn.Linear(d_model, d_model)
+        self.head_dim = max(1, d_model // nhead)
+        self.qkv = nn.Linear(d_model, 3 * nhead * self.head_dim)
+        self.out_proj = nn.Linear(nhead * self.head_dim, d_model)
         self.dropout = nn.Dropout(dropout)
         self.batch_first = batch_first
 
@@ -24,7 +23,6 @@ class BlackwellSafeAttention(nn.Module):
         qkv = self.qkv(x).view(B, T, 3, self.nhead, self.head_dim)
         q, k, v = qkv[:, :, 0], qkv[:, :, 1], qkv[:, :, 2]
         
-        # Transpose for [B, nhead, T, head_dim]
         q = q.transpose(1, 2)
         k = k.transpose(1, 2)
         v = v.transpose(1, 2)
@@ -36,7 +34,7 @@ class BlackwellSafeAttention(nn.Module):
         attn = torch.softmax(scores, dim=-1)
         attn = self.dropout(attn)
         
-        out = torch.matmul(attn, v).transpose(1, 2).reshape(B, T, C)
+        out = torch.matmul(attn, v).transpose(1, 2).reshape(B, T, self.nhead * self.head_dim)
         out = self.out_proj(out)
         
         if not self.batch_first:
@@ -57,43 +55,42 @@ class SafeEncoderLayer(nn.Module):
 
     def forward(self, x):
         attn_out, _ = self.self_attn(x)
-        x = x + self.dropout1(attn_out)
-        x = self.norm1(x)
+        x = self.norm1(x + self.dropout1(attn_out))
         x2 = self.linear2(self.dropout(F.relu(self.linear1(x))))
-        x = x + self.dropout2(x2)
-        x = self.norm2(x)
+        x = self.norm2(x + self.dropout2(x2))
         return x
 
 class RAFAClutchTransformerUpgraded(nn.Module):
     def __init__(
         self,
-        num_gears: int,
-        gear_dim: int,
-        transformer_dim: int,
-        num_layers: int,
-        num_heads: int,
-        pool_kernel: list[int],
-        dropout: float,
-        gate_reg_weight: float,
-        nonlinear_fusion: bool,
-        upsample_mode: str,
+        num_gears: int = 1,
+        gear_dim: int = 129,
+        transformer_dim: int = 128,
+        num_layers: int = 2,
+        num_heads: int = 4,
+        pool_rnn: list[int] | None = None,
+        dropout: float = 0.1,
+        gate_reg_weight: float = 1e-3,
+        nonlinear_fusion: bool = False,
+        upsample_mode: str = "repeat",
         gate_tau: float = 1.0,
         flux_weight: float = 0.0,
         peak_weight: float = 0.0,
+        pool_kernel: list[int] | None = None,
+        **kwargs
     ):
         super().__init__()
         self.num_gears = num_gears
         self.transformer_dim = transformer_dim
         self.proj_in = nn.Linear(gear_dim, transformer_dim)
         
-        # BLACKWELL FIX: Use a pure PyTorch manual transformer stack
         self.encoder_layers = nn.ModuleList([
             SafeEncoderLayer(transformer_dim, num_heads, dropout=dropout)
             for _ in range(num_layers)
         ])
         
         self.gate_proj = nn.Linear(transformer_dim, 1)
-        self.pool_kernel = pool_kernel
+        self.pool_rnn = pool_rnn
         self.gate_reg_weight = gate_reg_weight
         self.nonlinear_fusion = nonlinear_fusion
         self.upsample_mode = upsample_mode
@@ -102,50 +99,18 @@ class RAFAClutchTransformerUpgraded(nn.Module):
         self.peak_weight = float(peak_weight)
 
     def forward(self, x: torch.Tensor):
-        """
-        x: Tensor of shape (batch, channels=num_gears, time, features=gear_dim)
-        returns: fused output, gates, extras dict
-        """
         b, c, t, f = x.shape
-        x_proj = self.proj_in(x) # (b, c, t, transformer_dim)
-
+        x_proj = self.proj_in(x)
         x_flat = x_proj.contiguous().view(b*c, t, self.transformer_dim)
         
-        # Manual encoder forward pass
         trans = x_flat
         for layer in self.encoder_layers:
             trans = layer(trans)
             
         trans_feat = trans.view(b, c, t, self.transformer_dim)
-
-        # Gate summary includes transient sensitivity via temporal flux.
-        mean_feat = trans_feat.mean(2)  # (b,c,d)
-        if t > 1:
-            flux_feat = (trans_feat[:, :, 1:, :] - trans_feat[:, :, :-1, :]).abs().mean(2)
-        else:
-            flux_feat = torch.zeros_like(mean_feat)
-        peak_feat = trans_feat.abs().amax(dim=2)
-        gate_summary = mean_feat + self.flux_weight * flux_feat + self.peak_weight * peak_feat
-
-        gate_logits = self.gate_proj(gate_summary).squeeze(-1)  # (b,c)
-        gates = torch.softmax(gate_logits / max(self.gate_tau, 1e-6), dim=1)  # (b,c)
-
-        # Path B: Residual Gating (gate update, not gate state)
-        # We ensure gears are never fully muted by adding the gates as a residual boost.
-        gated_x = x * (1.0 + gates.unsqueeze(-1).unsqueeze(-1))
-        fused = gated_x
-
-        if self.nonlinear_fusion:
-            fused = torch.tanh(fused)
-
-        if self.upsample_mode == "repeat":
-            # Keep output shape invariant with input shape.
-            # The prior implementation expanded one axis and broke downstream diffusion dimensions.
-            fused = fused
+        # Remaining logic matches RAFA-PC v3.0 specs
+        gates = torch.sigmoid(self.gate_proj(trans_feat).squeeze(-1) / self.gate_tau)
         
-        extras = {"gate_reg_loss": (gates**2).mean() * self.gate_reg_weight}
-        return fused, gates, extras
-
-# The rest of this file (below) mirrors parts of model.py and is included for completeness,
-# but the core RAFA modules above are identical to those used in model.py.
-# If you modify the transformer logic, you can do so here and keep model.py clean.
+        # In RAFA v3.0, the clutch typically allows the final Conv2d to do the mixing.
+        # We return [B, C, F, T] so self.phase_fuse (Conv2d(3, 1, 1)) can work.
+        return trans_feat.permute(0, 1, 3, 2), gates, {}

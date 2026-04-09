@@ -53,19 +53,19 @@ def _parse_qs(text: str) -> list[int]:
     return sorted(set(vals))
 
 
-def _solver_state_from_model_state(model_state: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
+def _gru_state_from_model_state(model_state: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
     out: dict[str, torch.Tensor] = {}
     for k, v in model_state.items():
-        if "phase_solver" not in k:
+        if "phase_gru" not in k:
             continue
-        kk = k.replace("rafa.phase_solver.", "")
+        kk = k.replace("rafa.phase_gru.", "")
         if kk.endswith("qset_t") or kk.endswith("qw_t"):
             continue
         out[kk] = v
     return out
 
 
-def load_solver(
+def load_gru(
     *,
     device: torch.device,
     ckpt_path: str | None,
@@ -77,18 +77,18 @@ def load_solver(
         cfg = ck.get("config", load_config(base_cfg_path) if base_cfg_path else load_config())
         source = ckpt_path
         freq_bins = int(cfg["data"]["stft"]["n_fft"]) // 2 + 1
-        solver = PhaseNativeIFS(freq_bins, cfg.get("phase_native_ifs", {})).to(device)
+        gru = PhaseNativeIFS(freq_bins, cfg.get("phase_native_ifs", {})).to(device)
         if not random_init:
             state = ck.get("model", ck)
-            solver_sd = _solver_state_from_model_state(state)
-            if solver_sd:
-                solver.load_state_dict(solver_sd, strict=False)
-        return solver, cfg, source
+            gru_sd = _gru_state_from_model_state(state)
+            if gru_sd:
+                gru.load_state_dict(gru_sd, strict=False)
+        return gru, cfg, source
 
     cfg = load_config(base_cfg_path) if base_cfg_path else load_config()
     freq_bins = int(cfg["data"]["stft"]["n_fft"]) // 2 + 1
-    solver = PhaseNativeIFS(freq_bins, cfg.get("phase_native_ifs", {})).to(device)
-    return solver, cfg, "config_random_init"
+    gru = PhaseNativeIFS(freq_bins, cfg.get("phase_native_ifs", {})).to(device)
+    return gru, cfg, "config_random_init"
 
 
 def _normalize(z: torch.Tensor) -> torch.Tensor:
@@ -135,10 +135,10 @@ def build_batch(
     return z, q1s, q2s, targets
 
 
-def rollout(solver: PhaseNativeIFS, z: torch.Tensor, steps: int) -> torch.Tensor:
+def rollout(gru: PhaseNativeIFS, z: torch.Tensor, steps: int) -> torch.Tensor:
     x = z
     for _ in range(int(steps)):
-        x, _ = solver(x)
+        x, _ = gru(x)
     return x
 
 
@@ -155,37 +155,37 @@ def q_energies(z: torch.Tensor, q_values: list[int]) -> torch.Tensor:
     return torch.stack(vals, dim=1)
 
 
-def set_train_scope(solver: PhaseNativeIFS, scope: str) -> None:
-    for p in solver.parameters():
+def set_train_scope(gru: PhaseNativeIFS, scope: str) -> None:
+    for p in gru.parameters():
         p.requires_grad = False
 
     if scope == "all":
-        for p in solver.parameters():
+        for p in gru.parameters():
             p.requires_grad = True
         return
     if scope == "router_only":
-        for p in solver.router.parameters():
+        for p in gru.router.parameters():
             p.requires_grad = True
         return
     if scope == "maps_only":
-        for m in solver.maps:
+        for m in gru.maps:
             for p in m.parameters():
                 p.requires_grad = True
         return
     if scope == "router_maps":
-        for p in solver.router.parameters():
+        for p in gru.router.parameters():
             p.requires_grad = True
-        for m in solver.maps:
+        for m in gru.maps:
             for p in m.parameters():
                 p.requires_grad = True
         return
     if scope == "slow_only":
-        for p in solver.slow_solver.parameters():
+        for p in gru.slow_gru.parameters():
             p.requires_grad = True
-        for p in solver.slow_proj.parameters():
+        for p in gru.slow_proj.parameters():
             p.requires_grad = True
-        if hasattr(solver, "memory"):
-            for p in solver.memory.parameters():
+        if hasattr(gru, "memory"):
+            for p in gru.memory.parameters():
                 p.requires_grad = True
         return
     raise ValueError(f"Unknown train scope: {scope}")
@@ -193,7 +193,7 @@ def set_train_scope(solver: PhaseNativeIFS, scope: str) -> None:
 
 def train_probe(
     *,
-    solver: PhaseNativeIFS,
+    gru: PhaseNativeIFS,
     pairs: list[tuple[int, int]],
     q_values: list[int],
     steps: int,
@@ -208,9 +208,9 @@ def train_probe(
     scope: str,
     device: torch.device,
 ) -> dict[str, Any]:
-    solver.train()
-    set_train_scope(solver, scope)
-    params = [p for p in solver.parameters() if p.requires_grad]
+    gru.train()
+    set_train_scope(gru, scope)
+    params = [p for p in gru.parameters() if p.requires_grad]
     if not params:
         raise RuntimeError("No trainable parameters in selected scope.")
     opt = torch.optim.Adam(params, lr=float(lr))
@@ -224,11 +224,11 @@ def train_probe(
         z0, _, _, targets = build_batch(
             pairs=pairs,
             batch_size=batch_size,
-            q_bins=solver.q_bins,
+            q_bins=gru.q_bins,
             inject_strength=inject_strength,
             device=device,
         )
-        zf = rollout(solver, z0, rollout_steps)
+        zf = rollout(gru, z0, rollout_steps)
         energies = q_energies(zf, q_values=q_values)  # [B,M]
 
         t_idx = torch.tensor([q_to_idx[t] for t in targets], device=device, dtype=torch.long)
@@ -268,7 +268,7 @@ def train_probe(
 
 def evaluate_single(
     *,
-    solver: PhaseNativeIFS,
+    gru: PhaseNativeIFS,
     q_values: list[int],
     q1: int,
     q2: int,
@@ -279,8 +279,8 @@ def evaluate_single(
     device: torch.device,
 ) -> dict[str, Any]:
     _set_seed(seed)
-    solver.eval()
-    z = build_injection(q1=q1, q2=q2, q_bins=solver.q_bins, inject_strength=inject_strength, device=device)
+    gru.eval()
+    z = build_injection(q1=q1, q2=q2, q_bins=gru.q_bins, inject_strength=inject_strength, device=device)
 
     history = []
     drift_values: list[float] = []
@@ -288,7 +288,7 @@ def evaluate_single(
     prev_energy_vec: torch.Tensor | None = None
     with torch.no_grad():
         for step in range(int(rollout_steps)):
-            z, debug = solver(z)
+            z, debug = gru(z)
             e = q_energies(z, q_values=q_values)[0]
             if prev_energy_vec is not None:
                 drift_values.append(float((e - prev_energy_vec).abs().mean().item()))
@@ -371,13 +371,13 @@ def run_controls(args: argparse.Namespace) -> dict[str, Any]:
         "rafa_no_slow_clock": args.ckpt_no_slow_clock,
     }
 
-    trained_solvers: dict[str, PhaseNativeIFS] = {}
+    trained_grus: dict[str, PhaseNativeIFS] = {}
 
     # Train per source (manifold-native supervised probe)
     for name, ckpt in ablation_specs.items():
-        solver, _, _ = load_solver(device=device, ckpt_path=ckpt, base_cfg_path=args.base_config, random_init=False)
+        gru, _, _ = load_gru(device=device, ckpt_path=ckpt, base_cfg_path=args.base_config, random_init=False)
         train_probe(
-            solver=solver,
+            gru=gru,
             pairs=train_pairs,
             q_values=q_values,
             steps=args.probe_steps,
@@ -392,16 +392,16 @@ def run_controls(args: argparse.Namespace) -> dict[str, Any]:
             scope=args.train_scope,
             device=device,
         )
-        trained_solvers[name] = solver
+        trained_grus[name] = gru
 
-    random_solver, _, _ = load_solver(
+    random_gru, _, _ = load_gru(
         device=device,
         ckpt_path=args.ckpt_full,
         base_cfg_path=args.base_config,
         random_init=True,
     )
     train_probe(
-        solver=random_solver,
+        gru=random_gru,
         pairs=train_pairs,
         q_values=q_values,
         steps=args.probe_steps,
@@ -416,7 +416,7 @@ def run_controls(args: argparse.Namespace) -> dict[str, Any]:
         scope=args.train_scope,
         device=device,
     )
-    trained_solvers["random_init"] = random_solver
+    trained_grus["random_init"] = random_gru
 
     results: list[dict[str, Any]] = []
 
@@ -424,7 +424,7 @@ def run_controls(args: argparse.Namespace) -> dict[str, Any]:
     for seed in range(args.eval_seeds):
         for name in ["rafa_full", "random_init"]:
             m = evaluate_single(
-                solver=trained_solvers[name],
+                gru=trained_grus[name],
                 q_values=q_values,
                 q1=2,
                 q2=3,
@@ -440,7 +440,7 @@ def run_controls(args: argparse.Namespace) -> dict[str, Any]:
     for seed in range(args.eval_seeds):
         for name in ["rafa_full", "rafa_no_memory", "rafa_no_ramanujan", "rafa_no_slow_clock"]:
             m = evaluate_single(
-                solver=trained_solvers[name],
+                gru=trained_grus[name],
                 q_values=q_values,
                 q1=2,
                 q2=3,
@@ -458,7 +458,7 @@ def run_controls(args: argparse.Namespace) -> dict[str, Any]:
         for q1, q2, target in neg_cases:
             for name in ["rafa_full", "rafa_no_ramanujan", "random_init"]:
                 m = evaluate_single(
-                    solver=trained_solvers[name],
+                    gru=trained_grus[name],
                     q_values=q_values,
                     q1=q1,
                     q2=q2,
@@ -495,7 +495,7 @@ def run_controls(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Manifold-native supervised probe for RAFA solver.")
+    ap = argparse.ArgumentParser(description="Manifold-native supervised probe for RAFA gru.")
     ap.add_argument("--ckpt_full", type=str, default="checkpoints_diffusion_rafa_full/diff_step1000.pt")
     ap.add_argument("--ckpt_no_memory", type=str, default="checkpoints_diffusion_rafa_no_memory/diff_step1000.pt")
     ap.add_argument("--ckpt_no_ramanujan", type=str, default="checkpoints_diffusion_rafa_no_ramanujan/diff_step1000.pt")

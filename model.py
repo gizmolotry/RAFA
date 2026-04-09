@@ -311,7 +311,7 @@ class Gear(nn.Module):
             outs = []
             for t_ in range(t_len):
                 x_t = x[:, t_, :]
-                for solver in self.solvers:
+                for solver in self.temporal_solvers:
                     h, history = solver(x_t, h, history)
                 outs.append(h)
             seq_out = torch.stack(outs, dim=1)
@@ -325,6 +325,13 @@ class Gear(nn.Module):
             seq_out = seq_out[:, :phase.shape[-1], :]
         pd = self.proj_ph(seq_out).transpose(1, 2)
         md = self.proj_mag(seq_out).transpose(1, 2)
+        
+        # Ensure F dimension matches input exactly
+        target_f = mag.size(1)
+        if pd.size(1) != target_f:
+            pd = F.interpolate(pd.unsqueeze(1), size=(target_f, pd.size(2)), mode='bilinear', align_corners=True).squeeze(1)
+            md = F.interpolate(md.unsqueeze(1), size=(target_f, md.size(2)), mode='bilinear', align_corners=True).squeeze(1)
+            
         extras = {"hyena_controls": hyena_controls} if hyena_controls is not None else {}
         return pd, md, extras
 
@@ -486,16 +493,38 @@ class RAFA(nn.Module):
 
         phase_stack = torch.stack(phase_preds, dim=1)
         mag_stack = torch.stack(mag_preds, dim=1)
+        
+        target_f = mag.size(1)
+        target_t = mag.size(2)
 
+        print(f"DEBUG: phase_stack shape: {phase_stack.shape}")
+        # phase_stack: [B, C, F_gear, T]
         fused_phase, phase_gates, phase_extras = self.phase_clutch(
-            phase_stack.permute(0, 1, 3, 2)
+            phase_stack.permute(0, 1, 3, 2) # [B, C, T, F_gear]
         )
+        # fused_phase: [B, C, T, F_clutch]
+        if fused_phase.size(-1) != target_f or fused_phase.size(2) != target_t:
+            # Interpolate [B, C, T, F] -> [B, C, target_t, target_f]
+            fused_phase = F.interpolate(fused_phase, size=(target_t, target_f), mode='bilinear', align_corners=True)
+            
+        print(f"DEBUG: fused_phase shape: {fused_phase.shape}")
         fused_mag, mag_gates, mag_extras = self.mag_clutch(
             mag_stack.permute(0, 1, 3, 2)
         )
-
-        phase_seed = self.phase_fuse(fused_phase).squeeze(1).transpose(1, 2)
-        final_mag = torch.abs(self.mag_fuse(fused_mag).squeeze(1).transpose(1, 2))
+        if fused_mag.size(-1) != target_f or fused_mag.size(2) != target_t:
+            fused_mag = F.interpolate(fused_mag, size=(target_t, target_f), mode='bilinear', align_corners=True)
+            
+        # [B, C, T, F] -> [B, C, target_t, target_f] for Conv2d fuser expectation [B, C, F, T]
+        phase_seed = self.phase_fuse(fused_phase.permute(0, 1, 3, 2)).squeeze(1).transpose(1, 2)
+        # self.phase_fuse( [B, C, target_f, target_t] ) -> [B, 1, target_f, target_t] 
+        # squeeze -> [B, target_f, target_t], transpose(1,2) -> [B, target_t, target_f]
+        # WAIT, sample_diffusion expects [B, F, T]
+        
+        phase_seed = self.phase_fuse(fused_phase.permute(0, 1, 3, 2)).squeeze(1) # [B, F, T]
+        final_mag = torch.abs(self.mag_fuse(fused_mag.permute(0, 1, 3, 2)).squeeze(1)) # [B, F, T]
+        
+        print(f"DEBUG: phase_seed shape: {phase_seed.shape}")
+        print(f"DEBUG: final_mag shape: {final_mag.shape}")
 
         z0 = torch.stack([torch.cos(phase_seed), torch.sin(phase_seed)], dim=-1)  # [B,F,T,2]
         z_in = z0.permute(0, 2, 1, 3)  # [B,T,F,2]

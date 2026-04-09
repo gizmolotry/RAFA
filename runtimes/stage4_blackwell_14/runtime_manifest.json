@@ -1,0 +1,19 @@
+{
+  "id": "stage4_blackwell_14",
+  "status": "active-restore",
+  "checkpoint_schema": "bw14",
+  "canonical_entrypoint": "runtimes/stage4_blackwell_14/export_graduation.py",
+  "implementation_entrypoint": "tools/export_audio_compat14.py",
+  "shared_modules": [
+    "core/dataset.py",
+    "diffusion_utils.py",
+    "stft_utils.py",
+    "rafa_math_tools.py",
+    "core/triton_kernels.py"
+  ],
+  "canonical_outputs": [
+    "outputs/graduation_pack",
+    "outputs/graduation_pack_restore_candidate"
+  ],
+  "notes": "Deterministic compatibility runtime for old 14-key stage-4 Blackwell checkpoints."
+}

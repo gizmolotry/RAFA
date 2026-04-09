@@ -53,15 +53,15 @@ def test_logic(args):
     cfg = load_config()
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    # Setup RAFA solver
+    # Setup RAFA gru
     default_target_q = math.lcm(int(args.q1), int(args.q2))
     target_q = int(args.target_q) if args.target_q is not None else default_target_q
     q_logic_test = sorted(set([2, 3, 4, 5, 6, 8, 9, 10, 12, int(args.q1), int(args.q2), int(target_q)]))
-    solver_ckpt = None
+    gru_ckpt = None
     if args.ckpt:
         print(f"Loading weights from {args.ckpt}")
         ckpt = torch.load(args.ckpt, map_location="cpu")
-        solver_ckpt = ckpt
+        gru_ckpt = ckpt
         if "config" in ckpt:
             cfg = ckpt["config"]
     cfg.setdefault("phase_native_ifs", {})
@@ -88,24 +88,24 @@ def test_logic(args):
 
     if args.ckpt:
         freq_bins = int(cfg["data"]["stft"]["n_fft"]) // 2 + 1
-        solver = PhaseNativeIFS(q_bins=freq_bins, cfg=cfg.get("phase_native_ifs", {})).to(dev)
+        gru = PhaseNativeIFS(q_bins=freq_bins, cfg=cfg.get("phase_native_ifs", {})).to(dev)
         # Handle different checkpoint formats
         state = ckpt["model"] if "model" in ckpt else ckpt
-        # Filter for solver weights
-        solver_state = {
-            k.replace("rafa.phase_solver.", ""): v
+        # Filter for gru weights
+        gru_state = {
+            k.replace("rafa.phase_gru.", ""): v
             for k, v in state.items()
-            if "phase_solver" in k and not k.endswith("qset_t") and not k.endswith("qw_t")
+            if "phase_gru" in k and not k.endswith("qset_t") and not k.endswith("qw_t")
         }
-        solver.load_state_dict(solver_state, strict=False)
+        gru.load_state_dict(gru_state, strict=False)
     else:
         freq_bins = int(cfg["data"]["stft"]["n_fft"]) // 2 + 1
-        solver = PhaseNativeIFS(q_bins=freq_bins, cfg=cfg.get("phase_native_ifs", {})).to(dev)
-    solver.eval()
+        gru = PhaseNativeIFS(q_bins=freq_bins, cfg=cfg.get("phase_native_ifs", {})).to(dev)
+    gru.eval()
 
     # Initialize State: Inject two premises (e.g. q=2 and q=3)
     B = 1
-    Q = solver.q_bins
+    Q = gru.q_bins
     z = torch.randn(B, Q, 2, device=dev)
     # Normalize to unit phasors
     z = z / (torch.norm(z, dim=-1, keepdim=True) + 1e-12)
@@ -130,8 +130,8 @@ def test_logic(args):
     
     for i in range(args.iterations):
         with torch.no_grad():
-            # Step the IFS solver
-            z, debug = solver(z)
+            # Step the IFS gru
+            z, debug = gru(z)
         if isinstance(debug, dict):
             if torch.is_tensor(debug.get("intermediate_consistency_reg", None)):
                 ic_regs.append(float(debug["intermediate_consistency_reg"].item()))
@@ -202,7 +202,7 @@ def test_logic(args):
         "mean_anchor_lambda": float(np.mean(anchor_lambda_means)) if anchor_lambda_means else 0.0,
         "timestamp": datetime.now().isoformat(),
         "q_bins": int(Q),
-        "checkpoint_loaded": bool(solver_ckpt is not None),
+        "checkpoint_loaded": bool(gru_ckpt is not None),
     }
     
     print("\n--- LOGIC RESULT ---")

@@ -14,12 +14,12 @@ def audit_clap():
     found = False
     for name, module in model.named_modules():
         m_type = str(type(module))
-        if "solver" in m_type or "LSTM" in m_type or "kernel" in m_type:
-            print(f"kernel FOUND IN CLAP: {name:40} | Type: {m_type}")
+        if "gru" in m_type or "LSTM" in m_type or "rnn" in m_type:
+            print(f"rnn FOUND IN CLAP: {name:40} | Type: {m_type}")
             found = True
     
     if not found:
-        print("No kernels found in CLAP.")
+        print("No rnns found in CLAP.")
 
 if __name__ == "__main__":
     audit_clap()

@@ -1,0 +1,65 @@
+defaults:
+  eval_name_prefix: conditioned_depth
+  val_steps: 1
+  model_type: rafa
+  logic_diag:
+    enabled: true
+    iterations: 25
+    inject_strength: 0.5
+    seed: 1337
+    tasks:
+      - { q1: 2, q2: 3, target_q: 6 }
+      - { q1: 2, q2: 4, target_q: 4 }
+      - { q1: 2, q2: 5, target_q: 10 }
+      - { q1: 2, q2: 6, target_q: 6 }
+      - { q1: 3, q2: 4, target_q: 12 }
+      - { q1: 3, q2: 5, target_q: 15 }
+      - { q1: 3, q2: 6, target_q: 6 }
+      - { q1: 4, q2: 6, target_q: 12 }
+      - { q1: 4, q2: 8, target_q: 8 }
+      - { q1: 5, q2: 6, target_q: 30 }
+      - { q1: 6, q2: 9, target_q: 18 }
+      - { q1: 8, q2: 12, target_q: 24 }
+
+named_runs:
+  - name: conditioned_depth_prompt_anchor20_ns6_a0_to120
+    checkpoint_name: prompt_anchor20
+    base_config: D:\RAFA\tmp\hypercube_configs\prompt_conditioned_clap_anchor20.yaml
+    resume_ckpt: D:\RAFA\checkpoints_diffusion_prompt_conditioned_clap_anchor20\diff_ep1.pt
+    resume_global_step: 20
+    resume_epoch: 1
+    checkpoint_dir: D:\RAFA\checkpoints_diffusion_conditioned_depth_prompt_anchor20_ns6_a0
+    max_steps: 120
+    num_steps: 6
+    anchor_enabled: false
+    intermediate_consistency_enabled: false
+    notes: conditioned depth promotion from prompt_anchor20; main axis=num_steps, anchor secondary off
+
+  - name: conditioned_depth_prompt_real_quick_ns6_a0_to120
+    checkpoint_name: prompt_real_quick
+    base_config: D:\RAFA\tmp\hypercube_configs\prompt_conditioned_clap_smoke.yaml
+    resume_ckpt: D:\RAFA\checkpoints_diffusion_prompt_conditioned_clap_smoke_real_quick\diff_ep1.pt
+    resume_global_step: 1
+    resume_epoch: 1
+    checkpoint_dir: D:\RAFA\checkpoints_diffusion_conditioned_depth_prompt_real_quick_ns6_a0
+    max_steps: 120
+    num_steps: 6
+    anchor_enabled: false
+    intermediate_consistency_enabled: false
+    notes: conditioned depth promotion from prompt_real_quick; main axis=num_steps, anchor secondary off
+
+  - name: conditioned_depth_prompt_real_quick_ns8_a1light_to120
+    checkpoint_name: prompt_real_quick
+    base_config: D:\RAFA\tmp\hypercube_configs\prompt_conditioned_clap_smoke.yaml
+    resume_ckpt: D:\RAFA\checkpoints_diffusion_prompt_conditioned_clap_smoke_real_quick\diff_ep1.pt
+    resume_global_step: 1
+    resume_epoch: 1
+    checkpoint_dir: D:\RAFA\checkpoints_diffusion_conditioned_depth_prompt_real_quick_ns8_a1light
+    max_steps: 120
+    num_steps: 8
+    anchor_enabled: true
+    anchor_lambda: 0.05
+    anchor_lambda_min: 0.0
+    anchor_decay: 0.95
+    intermediate_consistency_enabled: false
+    notes: conditioned depth promotion from prompt_real_quick; top focused diagnostic row used light anchor at ns8

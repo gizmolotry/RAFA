@@ -1,0 +1,37 @@
+defaults:
+  eval_name_prefix: logic_diag
+  iterations: 25
+  inject_strength: 0.5
+  seed: 1337
+  anchor_lambda: 0.15
+  anchor_lambda_min: 0.05
+  anchor_decay: 0.9
+  intermediate_consistency_detach_target: false
+  tasks:
+    - q1: 2
+      q2: 3
+      target_q: 6
+    - q1: 2
+      q2: 4
+      target_q: 4
+    - q1: 3
+      q2: 6
+      target_q: 6
+    - q1: 4
+      q2: 6
+      target_q: 12
+  checkpoints:
+    - name: bridge_s8000
+      ckpt: D:\RAFA\checkpoints_diffusion_bridge_lc_vram_progress\diff_step8000.pt
+      notes: bridge_lc_vram_s8000
+    - name: prompt_real_quick
+      ckpt: D:\RAFA\checkpoints_diffusion_prompt_conditioned_clap_smoke_real_quick\diff_ep1.pt
+      notes: prompt_conditioned_clap_smoke_real_quick
+    - name: prompt_anchor20
+      ckpt: D:\RAFA\checkpoints_diffusion_prompt_conditioned_clap_anchor20\diff_ep1.pt
+      notes: prompt_conditioned_clap_anchor20
+axes:
+  anchor_enabled: [false, true]
+  intermediate_consistency_enabled: [false, true]
+  num_steps: [2, 4]
+named_runs: []

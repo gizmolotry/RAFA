@@ -1,0 +1,29 @@
+{
+  "v2": {
+    "mean_major_gain": 0.00021761159102121988,
+    "mean_residue_drop": 0.0056745608647664385,
+    "mean_promotability_gain": 0.0003249545892079671,
+    "mean_dominant_q_share": 0.6458783679538302,
+    "mean_q_entropy": 0.5880112846692404,
+    "mean_major_saturation": 0.00205123709100816,
+    "mean_loss": 1.4005464447869196
+  },
+  "full": {
+    "mean_major_gain": 0.3087701466348436,
+    "mean_residue_drop": 0.1495787368880378,
+    "mean_promotability_gain": 0.29744654562738204,
+    "mean_dominant_q_share": 0.9946147865719266,
+    "mean_q_entropy": 0.021509515949421458,
+    "mean_major_saturation": 0.0589708648622036,
+    "mean_loss": 0.9609117772844102
+  },
+  "penalized": {
+    "mean_major_gain": 0.0,
+    "mean_residue_drop": 0.0,
+    "mean_promotability_gain": 0.0,
+    "mean_dominant_q_share": 0.229100301861763,
+    "mean_q_entropy": 0.9005868898497688,
+    "mean_major_saturation": 0.000422579443289174,
+    "mean_loss": 1.4059113793902926
+  }
+}

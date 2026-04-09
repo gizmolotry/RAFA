@@ -1,0 +1,34 @@
+{
+  "version": "2026-04-06",
+  "lineages": [
+    {
+      "id": "graduation_pack",
+      "path": "lineages/01_parent_graduation",
+      "constitution": "docs/architecture/constitutions/01_graduation_pack.md",
+      "primary_runtime": "stage4_blackwell_14",
+      "secondary_runtimes": [
+        "stage4_blackwell_16",
+        "diffusion_parent_v3"
+      ],
+      "canonical_artifact": "outputs/graduation_pack"
+    },
+    {
+      "id": "local_ablations",
+      "path": "lineages/02_local_ablations",
+      "constitution": "docs/architecture/constitutions/02_no_ramanujan.md",
+      "primary_runtime": "diffusion_parent_v3"
+    },
+    {
+      "id": "subtractive_fork",
+      "path": "lineages/03_subtractive_fork",
+      "constitution": "docs/architecture/constitutions/05_subtractive_fork.md",
+      "primary_runtime": "stage4_blackwell_14"
+    },
+    {
+      "id": "positive_replacement",
+      "path": "lineages/04_positive_replacement",
+      "constitution": "docs/architecture/constitutions/06_positive_replacement.md",
+      "primary_runtime": "circleworld_proto"
+    }
+  ]
+}

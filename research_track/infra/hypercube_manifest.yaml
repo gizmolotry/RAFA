@@ -1,0 +1,113 @@
+version: 1
+defaults:
+  max_steps: 1000
+  eval_name_prefix: pathb_hypercube
+  use_existing_checkpoint: true
+  text_encoder: laion/clap-htsat-unfused
+  text_condition_mode: film
+  semantic_condition_mode: none
+  model_text_conditioned: true
+  guidance_scale: 3.0
+  p_uncond: 0.15
+  cond_mag_scale: 0.1
+  text_ifs_control_strength: 0.25
+  semantic_tension_strength: 0.75
+  semantic_tension_alpha_strength: 0.2
+  semantic_tension_temp_strength: 0.35
+  semantic_tension_delta_strength: 0.25
+  phase_qset: []
+  val_steps: 50
+  require_clap_cond: false
+  s3:
+    enabled: false
+    bucket: ""
+    prefix: "rafa/path_b_hypercube"
+
+axes:
+  memory_enabled: [true, false]
+  ramanujan_enabled: [true, false]
+  slow_clock_enabled: [true, false]
+  hyena_conductor_enabled: [true, false]
+  metamer_enabled: [true, false]
+  text_prompt_conditioned: [false]
+
+named_runs:
+  - name: baseline_v3_anchor
+    model_type: baseline
+    memory_enabled: false
+    ramanujan_enabled: false
+    slow_clock_enabled: false
+    hyena_conductor_enabled: false
+    metamer_enabled: false
+    notes: "Path B truth anchor baseline (no RAFA modules)."
+  - name: prompt_conditioned_clap_smoke
+    model_type: rafa
+    memory_enabled: true
+    ramanujan_enabled: true
+    slow_clock_enabled: true
+    hyena_conductor_enabled: true
+    metamer_enabled: true
+    text_prompt_conditioned: true
+    text_encoder: laion/clap-htsat-unfused
+    guidance_scale: 3.0
+    require_clap_cond: true
+    use_existing_checkpoint: false
+    max_steps: 100
+    val_steps: 8
+    notes: "Smoke run for real CLAP-conditioned diffusion; fails loud if encoder assets are unavailable."
+  - name: prompt_conditioned_ifs_control_smoke
+    model_type: rafa
+    memory_enabled: true
+    ramanujan_enabled: true
+    slow_clock_enabled: true
+    hyena_conductor_enabled: true
+    metamer_enabled: true
+    text_prompt_conditioned: true
+    text_condition_mode: ifs_control
+    model_text_conditioned: false
+    text_encoder: laion/clap-htsat-unfused
+    guidance_scale: 3.0
+    require_clap_cond: true
+    use_existing_checkpoint: false
+    max_steps: 20
+    val_steps: 8
+    notes: "Smoke run for bounded IFS-control text conditioning over local multimodal manifest prompts."
+  - name: prompt_conditioned_hybrid_smoke
+    model_type: rafa
+    memory_enabled: true
+    ramanujan_enabled: true
+    slow_clock_enabled: true
+    hyena_conductor_enabled: true
+    metamer_enabled: true
+    text_prompt_conditioned: true
+    text_condition_mode: hybrid
+    model_text_conditioned: true
+    text_encoder: laion/clap-htsat-unfused
+    guidance_scale: 3.0
+    cond_mag_scale: 0.15
+    text_ifs_control_strength: 0.25
+    require_clap_cond: true
+    use_existing_checkpoint: false
+    max_steps: 20
+    val_steps: 8
+    notes: "Hybrid FiLM + IFS smoke run on local multimodal manifest prompts."
+  - name: semantic_tension_steering_smoke
+    model_type: rafa
+    memory_enabled: true
+    ramanujan_enabled: true
+    slow_clock_enabled: true
+    hyena_conductor_enabled: true
+    metamer_enabled: true
+    text_prompt_conditioned: false
+    text_condition_mode: film
+    semantic_condition_mode: tension_envelope
+    model_text_conditioned: false
+    use_existing_checkpoint: false
+    max_steps: 20
+    val_steps: 8
+    phase_qset: [2, 3, 4, 5, 6, 7, 8, 11, 12, 13]
+    semantic_tension_strength: 0.9
+    semantic_tension_alpha_strength: 0.2
+    semantic_tension_temp_strength: 0.4
+    semantic_tension_delta_strength: 0.3
+    notes: "Semantic Hamiltonian smoke run: time-varying tension envelope steers harmonic vs inharmonic q-routing without text embeddings."

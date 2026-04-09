@@ -1,7 +1,7 @@
 
 import torch
 import math
-from triton_kernels import ramanujan_score_triton
+from triton_rnns import ramanujan_score_triton
 
 def _mul(a, b):
     ar, ai = a[..., 0], a[..., 1]
@@ -32,7 +32,7 @@ def ramanujan_score_pytorch(z, qset, q_weights):
         out = out + float(w) * rq[..., 0]
     return out
 
-def test_kernel():
+def test_rnn():
     B, Q = 2, 129
     qset = torch.tensor([2, 3, 4, 5], device="cuda", dtype=torch.int32)
     q_weights = torch.tensor([1.0, 0.9, 0.8, 0.7], device="cuda", dtype=torch.float32)
@@ -65,8 +65,8 @@ def test_kernel():
     torch.cuda.synchronize()
     print(f"Triton time: {(time.time()-t0)/100:.6f}s")
 
-    # Test Summary Kernel
-    from triton_kernels import ramanujan_summary_triton
+    # Test Summary rnn
+    from triton_rnns import ramanujan_summary_triton
     
     def _relative_summary_pytorch(z, a):
         zi = z.unsqueeze(2)
@@ -116,4 +116,4 @@ def test_kernel():
     print(f"Triton Summary time: {(time.time()-t0)/100:.6f}s")
 
 if __name__ == "__main__":
-    test_kernel()
+    test_rnn()

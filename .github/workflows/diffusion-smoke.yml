@@ -1,0 +1,45 @@
+name: Diffusion Smoke
+
+on:
+  pull_request:
+    paths:
+      - "train_diffusion.py"
+      - "dataset.py"
+      - "diffusion_models.py"
+      - "diffusion_utils.py"
+      - "config.yaml"
+      - ".github/workflows/diffusion-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyyaml transformers
+          python -m pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Diffusion Smoke Train
+        run: python train_diffusion.py --epochs 1 --max_steps 20 --ckpt_dir checkpoints_diffusion_ci_smoke
+
+      - name: Check Checkpoint Schema
+        run: |
+          python - <<'PY'
+          import torch
+          ckpt = torch.load("checkpoints_diffusion_ci_smoke/diff_ep1.pt", map_location="cpu")
+          rm = ckpt.get("run_manifest")
+          assert isinstance(rm, dict), "run_manifest missing"
+          for k in ("seed", "git_sha", "config_hash", "dataset", "data_split"):
+              assert k in rm, f"run_manifest missing key: {k}"
+          print("checkpoint schema ok")
+          PY

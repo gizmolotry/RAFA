@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 try:
-    from triton_kernels import ramanujan_summary_triton
+    from triton_rnns import ramanujan_summary_triton
     TRITON_AVAILABLE = True
 except ImportError:
     TRITON_AVAILABLE = False
@@ -57,6 +57,10 @@ class PhaseNativeIFSConfig:
     intermediate_consistency_enabled: bool = False
     intermediate_consistency_detach_target: bool = True
 
+    @property
+    def num_q(self):
+        return len(self.qset)
+
 def _renorm(z: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
     n = torch.sqrt((z * z).sum(dim=-1, keepdim=True).clamp_min(eps))
     return z / n
@@ -95,9 +99,11 @@ class SemanticImpedanceHead(nn.Module):
         super().__init__()
         self.num_q = num_q
         self.net = nn.Sequential(
-            nn.Linear(1, 16),
+            nn.Linear(1, 256),
             nn.SiLU(),
-            nn.Linear(16, num_q + 2),
+            nn.Linear(256, 256),
+            nn.SiLU(),
+            nn.Linear(256, num_q + 2),
         )
     def forward(self, tension: torch.Tensor) -> dict[str, torch.Tensor]:
         out = self.net(tension)
@@ -127,39 +133,59 @@ class RelationalMemory(nn.Module):
         attn_out, _ = self.attn(x)
         return x + attn_out
 
-class PhaseNativeIFS(nn.Module):
+class PhaseNativeIFS: # BLACKWELL sm_120 FIX: Does NOT inherit from nn.Module
     def __init__(self, q_bins: int, cfg: dict[str, Any] | None = None):
-        super().__init__()
         c = cfg or {}
-        print(f"DEBUG: PhaseNativeIFS Stealth Overhaul Active")
+        print(f"DEBUG: PhaseNativeIFS Total Displacement Active (Non-nn.Module)")
         self.cfg = PhaseNativeIFSConfig(**{k: v for k, v in c.items() if k in PhaseNativeIFSConfig.__dataclass_fields__})
         self.q_bins = q_bins
-        feat_dim = 5
+        # We manually register parameters as raw tensors so we can manage their device state
         self.router = nn.Sequential(
-            nn.Linear(feat_dim, self.cfg.hidden_dim),
+            nn.Linear(5, self.cfg.hidden_dim),
             nn.SiLU(),
             nn.Linear(self.cfg.hidden_dim, self.cfg.num_maps),
         )
-        self.maps = nn.ModuleList([_MapHead(feat_dim, self.cfg.hidden_dim) for _ in range(self.cfg.num_maps)])
+        self.maps = nn.ModuleList([_MapHead(5, self.cfg.hidden_dim) for _ in range(self.cfg.num_maps)])
         
-        # Blackwell sm_120 Fix: Raw parameters instead of nn.module subclass
         hdim = self.cfg.slow_hidden_dim
         self.w_ih = nn.Parameter(torch.empty(3 * hdim, 3))
         self.w_hh = nn.Parameter(torch.empty(3 * hdim, hdim))
         self.b_ih = nn.Parameter(torch.zeros(3 * hdim))
         self.b_hh = nn.Parameter(torch.zeros(3 * hdim))
+        self.w_mod = None
+        self.memory = RelationalMemory(3, self.cfg.memory_dim) if self.cfg.memory_enabled else None
+        self.impedance_head = SemanticImpedanceHead(self.cfg.num_q) if self.cfg.impedance_enabled else None
         nn.init.xavier_uniform_(self.w_ih)
         nn.init.orthogonal_(self.w_hh)
 
-        if self.cfg.memory_enabled:
-            self.memory = RelationalMemory(feat_dim=3, mem_dim=self.cfg.memory_dim)
-        else:
-            self.memory = nn.Identity()
-        self.impedance_head = SemanticImpedanceHead(len(self.cfg.qset)) if self.cfg.impedance_enabled else None
         self.slow_proj = nn.Linear(hdim, 3)
-        self.register_buffer("qset_t", torch.tensor(self.cfg.qset, dtype=torch.int32))
-        self.register_buffer("qw_t", torch.tensor(self.cfg.q_weights, dtype=torch.float32))
-        self.w_mod = nn.Parameter(torch.zeros(q_bins, q_bins)) if self.cfg.beta != 0.0 else None
+        self.qset_t = torch.tensor(self.cfg.qset, dtype=torch.int32)
+        self.qw_t = torch.tensor(self.cfg.q_weights, dtype=torch.float32)
+        
+        # We wrap the internal modules in a container so .to() still works at the DENOISER level
+        container = [self.router, self.maps, self.slow_proj]
+        if self.memory is not None: container.append(self.memory)
+        if self.impedance_head is not None: container.append(self.impedance_head)
+        self._parameter_container = nn.ModuleList(container)
+        self._raw_params = [self.w_ih, self.w_hh, self.b_ih, self.b_hh, self.qset_t, self.qw_t]
+
+    def to(self, device):
+        self._parameter_container.to(device)
+        self.w_ih.data = self.w_ih.data.to(device)
+        self.w_hh.data = self.w_hh.data.to(device)
+        self.b_ih.data = self.b_ih.data.to(device)
+        self.b_hh.data = self.b_hh.data.to(device)
+        self.qset_t = self.qset_t.to(device)
+        self.qw_t = self.qw_t.to(device)
+        return self
+
+    def parameters(self):
+        # Allow the optimizer to find the weights
+        for p in self._parameter_container.parameters(): yield p
+        yield self.w_ih
+        yield self.w_hh
+        yield self.b_ih
+        yield self.b_hh
 
     def _ramanujan_score_from_r(self, r, qset_scale=None):
         ry, rx = r[..., 1], r[..., 0]

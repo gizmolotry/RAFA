@@ -1,0 +1,16 @@
+{
+  "id": "diffusion_parent_v3",
+  "status": "active-historical",
+  "checkpoint_schema": "diff_v3",
+  "canonical_entrypoint": "runtimes/diffusion_parent_v3/sample_prompt.py",
+  "implementation_entrypoint": "sample_diffusion.py",
+  "shared_modules": [
+    "model.py",
+    "diffusion_models.py",
+    "phase_native_ifs.py",
+    "diffusion_utils.py",
+    "stft_utils.py",
+    "hf_local.py"
+  ],
+  "notes": "Diffusion sampler family. Not the graduation-pack restore path."
+}

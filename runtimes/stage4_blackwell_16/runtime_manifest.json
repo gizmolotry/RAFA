@@ -1,0 +1,15 @@
+{
+  "id": "stage4_blackwell_16",
+  "status": "active",
+  "checkpoint_schema": "bw16",
+  "canonical_entrypoint": "runtimes/stage4_blackwell_16/export_graduation.py",
+  "implementation_entrypoint": "tools/export_audio.py",
+  "shared_modules": [
+    "core/lib_blackwell.py",
+    "core/dataset.py",
+    "diffusion_utils.py",
+    "stft_utils.py",
+    "core/triton_kernels.py"
+  ],
+  "notes": "Newer stage-4 Blackwell family with explicit g1 projection heads."
+}

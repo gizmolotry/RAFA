@@ -1,0 +1,33 @@
+defaults:
+  eval_name_prefix: logic_diag_focus
+  iterations: 25
+  inject_strength: 0.5
+  seed: 1337
+  anchor_lambda: 0.05
+  anchor_lambda_min: 0.0
+  anchor_decay: 0.95
+  intermediate_consistency_detach_target: false
+  tasks:
+    - { q1: 2, q2: 3, target_q: 6 }
+    - { q1: 2, q2: 4, target_q: 4 }
+    - { q1: 2, q2: 5, target_q: 10 }
+    - { q1: 2, q2: 6, target_q: 6 }
+    - { q1: 3, q2: 4, target_q: 12 }
+    - { q1: 3, q2: 5, target_q: 15 }
+    - { q1: 3, q2: 6, target_q: 6 }
+    - { q1: 4, q2: 6, target_q: 12 }
+    - { q1: 4, q2: 8, target_q: 8 }
+    - { q1: 5, q2: 6, target_q: 30 }
+    - { q1: 6, q2: 9, target_q: 18 }
+    - { q1: 8, q2: 12, target_q: 24 }
+  checkpoints:
+    - name: prompt_real_quick
+      ckpt: D:\RAFA\checkpoints_diffusion_prompt_conditioned_clap_smoke_real_quick\diff_ep1.pt
+      notes: prompt_conditioned_clap_smoke_real_quick_focus
+    - name: prompt_anchor20
+      ckpt: D:\RAFA\checkpoints_diffusion_prompt_conditioned_clap_anchor20\diff_ep1.pt
+      notes: prompt_conditioned_clap_anchor20_focus
+axes:
+  anchor_enabled: [false, true]
+  num_steps: [2, 4, 6, 8]
+named_runs: []

@@ -29,37 +29,37 @@ class TimeEmbedding(nn.Module):
         return self.proj(emb)
 
 
-# class BaselineDenoiser(nn.Module):
-#     def __init__(self, freq_bins: int, tdim: int = 64):
-#         super().__init__()
-#         self.temb = TimeEmbedding(tdim)
-#         in_ch = 3  # logmag + phase re/im
-#         self.net = nn.Sequential(
-#             nn.Conv2d(in_ch + 1, 32, 3, padding=1),
-#             nn.SiLU(),
-#             nn.Conv2d(32, 64, 3, padding=1),
-#             nn.SiLU(),
-#             nn.Conv2d(64, 32, 3, padding=1),
-#             nn.SiLU(),
-#             nn.Conv2d(32, 3, 3, padding=1),
-#         )
-# 
-#     def forward(
-#         self,
-#         xt_mag: torch.Tensor,
-#         xt_z: torch.Tensor,
-#         t: torch.Tensor,
-#         tokens: dict[str, torch.Tensor] | None = None,
-#     ) -> tuple[torch.Tensor, torch.Tensor, dict, dict]:
-#         # inputs [B,F,T], [B,F,T,2]
-#         _ = tokens
-#         bsz = xt_mag.size(0)
-#         x = torch.stack([xt_mag, xt_z[..., 0], xt_z[..., 1]], dim=1)  # [B,3,F,T]
-#         te = self.temb(t).mean(dim=1, keepdim=True).view(bsz, 1, 1, 1).expand(-1, 1, x.size(2), x.size(3))
-#         y = self.net(torch.cat([x, te], dim=1))
-#         pred_mag = y[:, 0]
-#         pred_z = phasor_normalize(torch.stack([y[:, 1], y[:, 2]], dim=-1))
-#         return pred_mag, pred_z, {}, {}
+class BaselineDenoiser(nn.Module):
+    def __init__(self, freq_bins: int, tdim: int = 64):
+        super().__init__()
+        self.temb = TimeEmbedding(tdim)
+        in_ch = 3  # logmag + phase re/im
+        self.net = nn.Sequential(
+            nn.Conv2d(in_ch + 1, 32, 3, padding=1),
+            nn.SiLU(),
+            nn.Conv2d(32, 64, 3, padding=1),
+            nn.SiLU(),
+            nn.Conv2d(64, 32, 3, padding=1),
+            nn.SiLU(),
+            nn.Conv2d(32, 3, 3, padding=1),
+        )
+
+    def forward(
+        self,
+        xt_mag: torch.Tensor,
+        xt_z: torch.Tensor,
+        t: torch.Tensor,
+        tokens: dict[str, torch.Tensor] | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor, dict, dict]:
+        # inputs [B,F,T], [B,F,T,2]
+        _ = tokens
+        bsz = xt_mag.size(0)
+        x = torch.stack([xt_mag, xt_z[..., 0], xt_z[..., 1]], dim=1)  # [B,3,F,T]
+        te = self.temb(t).mean(dim=1, keepdim=True).view(bsz, 1, 1, 1).expand(-1, 1, x.size(2), x.size(3))
+        y = self.net(torch.cat([x, te], dim=1))
+        pred_mag = y[:, 0]
+        pred_z = phasor_normalize(torch.stack([y[:, 1], y[:, 2]], dim=-1))
+        return pred_mag, pred_z, {}, {}
 
 
 class RAFADenoiser(nn.Module):
@@ -142,6 +142,13 @@ class RAFADenoiser(nn.Module):
             nn.SiLU(),
             nn.Linear(64, freq_bins) # Predicting a diagonal or row-sum for now to save params
         )
+
+    def to(self, *args, **kwargs):
+        super().to(*args, **kwargs)
+        device = args[0] if args else kwargs.get("device")
+        if device is not None:
+            self.rafa.phase_solver.to(device)
+        return self
 
     def _tension_envelope(self, t_frames: int, device: torch.device, dtype: torch.dtype) -> torch.Tensor:
         if t_frames <= 1:

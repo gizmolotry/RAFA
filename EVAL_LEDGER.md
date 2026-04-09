@@ -27,3 +27,4 @@
 | 2026-03-12 | `e2d36ec` | prompt_conditioned_ifs_control_smoke_to120 | ep1 | 0.0% | 3.39 | 57325 | 0.1643 | IFS-control smoke continuation to 120 steps after local split/val optimization. |
 | 2026-03-12 | `e2d36ec` | prompt_conditioned_hybrid_smoke | ep1 | 0.0% | 2.11 | 4550 | 0.1614 | Hybrid FiLM + IFS smoke run on local multimodal manifest prompts. |
 | 2026-03-13 | `e2d36ec` | semantic_tension_steering_smoke | ep1 | 0.0% | 3.07 | 16698 | 0.1633 | Semantic Hamiltonian smoke run: time-varying tension envelope steers harmonic vs inharmonic q-routing without text embeddings. |
+| 2026-04-01 | `5866bf4` | stage4_joint_final | 200 | 0.0% | 7.31 | 408993 | 2.5202 | Stage 4 Joint Hardening - Graduation Complete |

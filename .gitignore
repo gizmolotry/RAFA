@@ -1,0 +1,55 @@
+# Ignore high-volume local artifacts and caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local data and generated assets
+wav_files/
+datasets/
+scrapes/
+logs/
+tmp/
+validation_results/
+
+# Model artifacts
+archive_checkpoints/
+checkpoints/
+checkpoints_diffusion*/
+checkpoints_stage*/
+checkpoints_test*/
+
+# Generated outputs and bundles
+eval/
+outputs/
+ROOT_METRICS_*/
+ROOT_RECENT_DENSE_*/
+RAFA_SOUND_PACK_V1/
+extra_results_bundle_*/
+ROOT_300_*/
+ROOT_EXPEDITION_SOURCE_*/
+ROOT_RELEVANT_SCRIPTS_*/
+
+# Detached or archived local miscellany
+archive/root_misc/
+
+# Experiment checkpoints and local scratch
+checkpoints_circleworld_proto/
+input/
+reap/
+test_debug.wav
+test_debug.wav.json
+
+# Generated research summaries and job payloads
+research_track/infra/generated_jobs.json
+research_track/infra/summaries/
+research_track/logic_results/
+
+# Keep only lightweight artifact docs in git
+artifacts/*
+!artifacts/README.md
+
+# Local vendored / nested repos and packaged binaries
+third_party/safari/
+inference_package/checkpoint.pt
+inference_package/samples/

@@ -113,11 +113,11 @@ def test_0_phase_native_acceptance(device):
         "exact_eig_debug": False,
         "noise_enabled": False,
     }
-    solver = PhaseNativeIFS(q_bins=q, cfg=cfg).to(device)
+    gru = PhaseNativeIFS(q_bins=q, cfg=cfg).to(device)
 
     z0 = torch.randn(b, q, 2, device=device)
     z0 = z0 / torch.sqrt((z0 * z0).sum(dim=-1, keepdim=True).clamp_min(1e-8))
-    zf, dbg = solver(z0)
+    zf, dbg = gru(z0)
 
     # 1) Unit-modulus preservation
     max_unit_dev = max(dbg["unit_dev_max"])
@@ -139,13 +139,13 @@ def test_0_phase_native_acceptance(device):
         ],
         dim=-1,
     )
-    a1, _ = solver.build_operator(z0)
-    a2, _ = solver.build_operator(z_shift)
+    a1, _ = gru.build_operator(z0)
+    a2, _ = gru.build_operator(z_shift)
     inv_err = torch.max(torch.abs(a1 - a2)).item()
     ok3 = inv_err < 1e-4
     print(f"  global_shift_A_diff={inv_err:.6f} -> {'PASS' if ok3 else 'FAIL'}")
 
-    zf_shift, _ = solver(z_shift)
+    zf_shift, _ = gru(z_shift)
     zf_rot = torch.stack(
         [
             zf[..., 0] * rot[..., 0] - zf[..., 1] * rot[..., 1],
@@ -155,7 +155,7 @@ def test_0_phase_native_acceptance(device):
     )
     eq_err = torch.max(torch.abs(zf_shift - zf_rot)).item()
     ok3b = eq_err < 1e-4
-    print(f"  solver_equivariance_diff={eq_err:.6f} -> {'PASS' if ok3b else 'FAIL'}")
+    print(f"  gru_equivariance_diff={eq_err:.6f} -> {'PASS' if ok3b else 'FAIL'}")
 
     # 4) Circular mean correctness
     d1 = torch.randn(3, 5, 1, device=device)

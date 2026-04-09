@@ -8,7 +8,7 @@ def find_failing_module(name, module):
     try:
         module.to("cuda")
     except Exception as e:
-        if "no kernel image" in str(e):
+        if "no rnn image" in str(e):
             # If the whole module fails, check its children
             has_failing_child = False
             for child_name, child_module in module.named_children():

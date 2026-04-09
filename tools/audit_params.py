@@ -17,8 +17,8 @@ def audit():
         total = train_p + frozen_p
         if total > 0:
             print(f"{name:20} | Trainable: {train_p/1e6:6.2f}M | Frozen: {frozen_p/1e6:6.2f}M")
-            # Sub-audit for phase_solver
-            if name == "phase_solver":
+            # Sub-audit for phase_gru
+            if name == "phase_gru":
                 for subname, subchild in child.named_children():
                     s_train = sum(p.numel() for p in subchild.parameters() if p.requires_grad)
                     s_frozen = sum(p.numel() for p in subchild.parameters() if not p.requires_grad)
