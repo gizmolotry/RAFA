@@ -44,3 +44,14 @@ Artifacts from this lane live under:
 - per-time trajectory CSV
 
 This is the main inspection path for trained Circleworld configs.
+
+`benchmark_circleworld_real_anchor.py` runs the bit-stable real-audio benchmark used for
+reference-vs-output preservation checks.
+
+`benchmark_audio_continuity.py` runs the macro-time continuity / loop benchmark used for
+repetition, re-entry, and time-world diagnostics.
+
+Current retrospective read:
+- the best real-audio Circleworld runs are still preservation-heavy
+- they do not yet create a new macro-time law
+- the next frontier is reducing loop/re-entry without leaving the real-audio frontier

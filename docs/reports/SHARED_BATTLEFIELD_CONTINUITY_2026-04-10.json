@@ -1,0 +1,75 @@
+{
+  "shared_battlefield": {
+    "graduation": {
+      "original": {
+        "mean_loop_autocorr_peak": 0.345864217991114,
+        "mean_loop_period_seconds": 0.28800000000000003,
+        "mean_adjacent_chunk_similarity": 0.8915793349345525,
+        "mean_nonlocal_chunk_repeat": 0.9099450707435608,
+        "mean_first_chunk_reentry": 0.892442708214124
+      },
+      "restore_candidate": {
+        "mean_loop_autocorr_peak": 0.35762765205664443,
+        "mean_loop_period_seconds": 0.33599999999999997,
+        "mean_adjacent_chunk_similarity": 0.8771374821662903,
+        "mean_nonlocal_chunk_repeat": 0.9075527489185333,
+        "mean_first_chunk_reentry": 0.8782651573419571
+      },
+      "delta_restore_minus_original": {
+        "mean_loop_autocorr_peak": 0.011763434065530431,
+        "mean_loop_period_seconds": 0.04799999999999993,
+        "mean_adjacent_chunk_similarity": -0.014441852768262264,
+        "mean_nonlocal_chunk_repeat": -0.002392321825027466,
+        "mean_first_chunk_reentry": -0.014177550872166877
+      }
+    },
+    "circleworld": {
+      "band": {
+        "reference": {
+          "mean_loop_autocorr_peak": 0.571913316646672,
+          "mean_loop_period_seconds": 1.8304000000000002,
+          "mean_adjacent_chunk_similarity": 0.8826758980751037,
+          "mean_nonlocal_chunk_repeat": 0.9631897687911988,
+          "mean_first_chunk_reentry": 0.8797266215085984
+        },
+        "output": {
+          "mean_loop_autocorr_peak": 0.5714909338832362,
+          "mean_loop_period_seconds": 1.8304000000000002,
+          "mean_adjacent_chunk_similarity": 0.8819554954767227,
+          "mean_nonlocal_chunk_repeat": 0.9623978137969971,
+          "mean_first_chunk_reentry": 0.8788398683071137
+        },
+        "delta_output_minus_reference": {
+          "mean_loop_autocorr_peak": -0.000422382763435758,
+          "mean_loop_period_seconds": 0.0,
+          "mean_adjacent_chunk_similarity": -0.0007204025983810203,
+          "mean_nonlocal_chunk_repeat": -0.0007919549942017046,
+          "mean_first_chunk_reentry": -0.0008867532014846802
+        }
+      },
+      "constrained": {
+        "reference": {
+          "mean_loop_autocorr_peak": 0.6265897201355711,
+          "mean_loop_period_seconds": 1.4586666666666668,
+          "mean_adjacent_chunk_similarity": 0.905510793129603,
+          "mean_nonlocal_chunk_repeat": 0.9614468713601431,
+          "mean_first_chunk_reentry": 0.9041772956649462
+        },
+        "output": {
+          "mean_loop_autocorr_peak": 0.6264546973557824,
+          "mean_loop_period_seconds": 1.4586666666666668,
+          "mean_adjacent_chunk_similarity": 0.904923235376676,
+          "mean_nonlocal_chunk_repeat": 0.9610722064971924,
+          "mean_first_chunk_reentry": 0.9036481517056624
+        },
+        "delta_output_minus_reference": {
+          "mean_loop_autocorr_peak": -0.00013502277978871824,
+          "mean_loop_period_seconds": 0.0,
+          "mean_adjacent_chunk_similarity": -0.0005875577529270704,
+          "mean_nonlocal_chunk_repeat": -0.0003746648629506799,
+          "mean_first_chunk_reentry": -0.0005291439592838287
+        }
+      }
+    }
+  }
+}
