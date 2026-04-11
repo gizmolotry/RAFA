@@ -1,0 +1,141 @@
+{
+  "runs": {
+    "full": {
+      "overall_read": "nested_commitment_not_yet_established",
+      "verdict_counts": {
+        "over_rigid_attractor": 2
+      },
+      "cases": {
+        "airplane_takeoff": {
+          "verdict": "over_rigid_attractor",
+          "counts": {
+            "nested_sibling": 0,
+            "overwrite_or_world_jump": 0,
+            "over_rigid_or_frozen": 6,
+            "ambiguous_middle": 0
+          },
+          "label_histogram": {
+            "over_rigid_or_frozen": 6
+          },
+          "packet_perturbation_effectively_noop": true,
+          "mean_coarse_env_corr": 0.9997120261601254,
+          "mean_meso_chunk_similarity": 0.9997210681438445,
+          "mean_fine_texture_distance": 0.005234115313748024,
+          "max_fine_texture_distance": 0.016713828430917083
+        },
+        "sax_like_clarinet": {
+          "verdict": "over_rigid_attractor",
+          "counts": {
+            "nested_sibling": 0,
+            "overwrite_or_world_jump": 0,
+            "over_rigid_or_frozen": 6,
+            "ambiguous_middle": 0
+          },
+          "label_histogram": {
+            "over_rigid_or_frozen": 6
+          },
+          "packet_perturbation_effectively_noop": true,
+          "mean_coarse_env_corr": 0.9969628113099206,
+          "mean_meso_chunk_similarity": 0.982957778374354,
+          "mean_fine_texture_distance": 0.007269013889384023,
+          "max_fine_texture_distance": 0.0288834398313424
+        }
+      }
+    },
+    "constrained": {
+      "overall_read": "nested_commitment_not_yet_established",
+      "verdict_counts": {
+        "over_rigid_attractor": 2
+      },
+      "cases": {
+        "airplane_takeoff": {
+          "verdict": "over_rigid_attractor",
+          "counts": {
+            "nested_sibling": 0,
+            "overwrite_or_world_jump": 0,
+            "over_rigid_or_frozen": 6,
+            "ambiguous_middle": 0
+          },
+          "label_histogram": {
+            "over_rigid_or_frozen": 6
+          },
+          "packet_perturbation_effectively_noop": true,
+          "mean_coarse_env_corr": 0.9999565638921691,
+          "mean_meso_chunk_similarity": 0.9997793515523274,
+          "mean_fine_texture_distance": 0.0056889800302025485,
+          "max_fine_texture_distance": 0.01708942158673061
+        },
+        "sax_like_clarinet": {
+          "verdict": "over_rigid_attractor",
+          "counts": {
+            "nested_sibling": 0,
+            "overwrite_or_world_jump": 0,
+            "over_rigid_or_frozen": 6,
+            "ambiguous_middle": 0
+          },
+          "label_histogram": {
+            "over_rigid_or_frozen": 6
+          },
+          "packet_perturbation_effectively_noop": true,
+          "mean_coarse_env_corr": 0.9963569846229076,
+          "mean_meso_chunk_similarity": 0.9812707940737407,
+          "mean_fine_texture_distance": 0.008073703962902834,
+          "max_fine_texture_distance": 0.03053413429503758
+        }
+      }
+    },
+    "penalized": {
+      "overall_read": "nested_commitment_not_yet_established",
+      "verdict_counts": {
+        "over_rigid_attractor": 2
+      },
+      "cases": {
+        "airplane_takeoff": {
+          "verdict": "over_rigid_attractor",
+          "counts": {
+            "nested_sibling": 0,
+            "overwrite_or_world_jump": 0,
+            "over_rigid_or_frozen": 6,
+            "ambiguous_middle": 0
+          },
+          "label_histogram": {
+            "over_rigid_or_frozen": 6
+          },
+          "packet_perturbation_effectively_noop": true,
+          "mean_coarse_env_corr": 0.9998566179659449,
+          "mean_meso_chunk_similarity": 0.9995036085446675,
+          "mean_fine_texture_distance": 0.008530007610885263,
+          "max_fine_texture_distance": 0.026662615639740383
+        },
+        "sax_like_clarinet": {
+          "verdict": "over_rigid_attractor",
+          "counts": {
+            "nested_sibling": 0,
+            "overwrite_or_world_jump": 0,
+            "over_rigid_or_frozen": 5,
+            "ambiguous_middle": 1
+          },
+          "label_histogram": {
+            "over_rigid_or_frozen": 5,
+            "ambiguous_middle": 1
+          },
+          "packet_perturbation_effectively_noop": true,
+          "mean_coarse_env_corr": 0.9843294122668808,
+          "mean_meso_chunk_similarity": 0.9712199230988822,
+          "mean_fine_texture_distance": 0.015426921281914918,
+          "max_fine_texture_distance": 0.048196601115990015
+        }
+      }
+    }
+  },
+  "cross_read": {
+    "overall": "All three tested regimes behave as over-rigid attractors under fork/resume. None established nested commitment.",
+    "strongest_signal": [
+      "packet perturbations are effectively no-ops across all three regimes",
+      "fine noise changes texture a little, but does not create sibling continuations with distinct meso development",
+      "promotion perturbations mostly leave the world unchanged rather than creating lawful branch siblings"
+    ],
+    "implication": "The current recursion appears to preserve or freeze an attractor rather than refine a coarse world-law into differentiated child continuations.",
+    "next_move": "Split internal state into coarse world-state, meso development-state, and fine detail-state before training continuity-aware objectives."
+  }
+}

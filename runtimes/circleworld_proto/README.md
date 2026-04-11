@@ -51,7 +51,12 @@ reference-vs-output preservation checks.
 `benchmark_audio_continuity.py` runs the macro-time continuity / loop benchmark used for
 repetition, re-entry, and time-world diagnostics.
 
+`test_nested_commitment.py` runs the fork/resume assay used to test whether recursion
+preserves a coarse world-law while later recursion only refines it.
+
 Current retrospective read:
 - the best real-audio Circleworld runs are still preservation-heavy
 - they do not yet create a new macro-time law
+- the current fork/resume evidence points to over-rigid attractors rather than
+  Matryoshka-like nested commitment
 - the next frontier is reducing loop/re-entry without leaving the real-audio frontier
