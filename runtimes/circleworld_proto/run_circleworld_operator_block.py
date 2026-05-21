@@ -302,6 +302,7 @@ def run_operator_block(
     score = _score_selected_rows(suite_json=suite_json, selected_summary=block_summary, margin=margin)
     block_summary["score"] = score
     block_summary["future_access_clean"] = bool(_future_access_clean([block_summary]))
+    block_summary["strict"] = bool(score.get("aggregate", {}).get("strict_target_replay_pass"))
 
     block_metrics = _metric_block(score.get("aggregate", {}))
     raw_metrics = _raw_suite_metrics(raw_suite_json)
@@ -316,7 +317,7 @@ def run_operator_block(
         "close_to_selected_route_reference": _close_to_selected(block_metrics, selected_metrics),
     }
 
-    strict = bool(score.get("aggregate", {}).get("strict_target_replay_pass"))
+    strict = bool(block_summary["strict"])
     if strict and block_summary["future_access_clean"]:
         block_summary["status"] = "operator_block_target_replay_pass"
         block_summary["interpretation"] = (
