@@ -1,4 +1,4 @@
-﻿# Circleworld Relational Signature Verification (2026-05-04)
+# Circleworld Relational Signature Verification (2026-05-04)
 
 ## Scope
 

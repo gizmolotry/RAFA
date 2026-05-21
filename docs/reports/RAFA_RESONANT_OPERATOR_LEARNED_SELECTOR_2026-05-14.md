@@ -1,4 +1,4 @@
-﻿# RAFA Resonant Operator Learned Selector Assay - 2026-05-14
+# RAFA Resonant Operator Learned Selector Assay - 2026-05-14
 
 ## Scope
 

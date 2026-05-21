@@ -1,4 +1,4 @@
-﻿# Circleworld Parent Phase Projector Validation - 2026-05-13
+# Circleworld Parent Phase Projector Validation - 2026-05-13
 
 ## Executive Claim
 

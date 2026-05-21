@@ -1,4 +1,4 @@
-﻿# RAFA Causal Operator Routing Multihead Depth Push - 2026-05-15
+# RAFA Causal Operator Routing Multihead Depth Push - 2026-05-15
 
 ## Scope
 

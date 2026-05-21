@@ -1,4 +1,4 @@
-﻿# RAFA Directional Child Coalition Allocator - 2026-05-15
+# RAFA Directional Child Coalition Allocator - 2026-05-15
 
 ## Scope
 

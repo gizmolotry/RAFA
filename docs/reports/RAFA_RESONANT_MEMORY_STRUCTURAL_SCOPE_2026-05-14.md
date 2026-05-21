@@ -1,4 +1,4 @@
-﻿# RAFA Resonant Memory Structural Scope Push - 2026-05-14
+# RAFA Resonant Memory Structural Scope Push - 2026-05-14
 
 ## Scope
 

@@ -1,4 +1,4 @@
-﻿# Circleworld V6 Child-Local Readout (2026-04-29)
+# Circleworld V6 Child-Local Readout (2026-04-29)
 
 ## Scope
 Circleworld only. Graduation untouched.

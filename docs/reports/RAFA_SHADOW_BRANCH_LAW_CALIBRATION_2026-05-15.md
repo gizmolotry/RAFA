@@ -1,4 +1,4 @@
-﻿# RAFA Shadow Branch-Law Calibration Pass - 2026-05-15
+# RAFA Shadow Branch-Law Calibration Pass - 2026-05-15
 
 ## Summary
 

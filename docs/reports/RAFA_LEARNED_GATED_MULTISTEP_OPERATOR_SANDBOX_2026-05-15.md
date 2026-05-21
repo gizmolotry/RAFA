@@ -1,4 +1,4 @@
-﻿# RAFA Learned-Gated Multi-Step Operator Sandbox - 2026-05-15
+# RAFA Learned-Gated Multi-Step Operator Sandbox - 2026-05-15
 
 ## Summary
 

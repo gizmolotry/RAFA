@@ -1,4 +1,4 @@
-﻿# RAFA Ecology Writeback Allocator - 2026-05-15
+# RAFA Ecology Writeback Allocator - 2026-05-15
 
 ## Scope
 

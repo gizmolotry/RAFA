@@ -1,4 +1,4 @@
-﻿# RAFA Learned Soft-Gated Writeback Sandbox Pass - 2026-05-15
+# RAFA Learned Soft-Gated Writeback Sandbox Pass - 2026-05-15
 
 ## Summary
 

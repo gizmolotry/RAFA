@@ -1,4 +1,4 @@
-﻿# Circleworld Nested Identity Child-IFS Run - 2026-05-10
+# Circleworld Nested Identity Child-IFS Run - 2026-05-10
 
 ## Decision
 

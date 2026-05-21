@@ -1,4 +1,4 @@
-﻿# Circleworld Learned Parent Bridge Validation - 2026-05-13
+# Circleworld Learned Parent Bridge Validation - 2026-05-13
 
 ## Executive Claim
 

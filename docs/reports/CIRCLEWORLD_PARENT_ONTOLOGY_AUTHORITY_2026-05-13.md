@@ -1,4 +1,4 @@
-﻿# Circleworld Parent Ontology Authority Breakthrough - 2026-05-13
+# Circleworld Parent Ontology Authority Breakthrough - 2026-05-13
 
 ## Executive Claim
 

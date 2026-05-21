@@ -1,4 +1,4 @@
-﻿# Circleworld Geometric Masking Pass (2026-04-17)
+# Circleworld Geometric Masking Pass (2026-04-17)
 
 ## Scope
 

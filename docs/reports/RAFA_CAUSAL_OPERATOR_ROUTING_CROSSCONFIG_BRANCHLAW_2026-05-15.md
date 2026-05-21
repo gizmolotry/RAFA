@@ -1,4 +1,4 @@
-﻿# RAFA Causal Operator Routing Cross-Config Branch-Law Pass - 2026-05-15
+# RAFA Causal Operator Routing Cross-Config Branch-Law Pass - 2026-05-15
 
 ## Summary
 

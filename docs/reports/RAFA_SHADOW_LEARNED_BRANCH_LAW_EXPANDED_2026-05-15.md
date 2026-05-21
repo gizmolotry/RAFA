@@ -1,4 +1,4 @@
-﻿# RAFA Shadow Learned Branch Law Expanded Pass - 2026-05-15
+# RAFA Shadow Learned Branch Law Expanded Pass - 2026-05-15
 
 ## Summary
 

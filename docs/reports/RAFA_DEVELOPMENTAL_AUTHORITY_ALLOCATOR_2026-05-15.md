@@ -1,4 +1,4 @@
-﻿# RAFA Developmental Authority Allocator - 2026-05-15
+# RAFA Developmental Authority Allocator - 2026-05-15
 
 ## Scope
 

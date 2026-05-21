@@ -1,4 +1,4 @@
-﻿# RAFA Learned-Gated Many-Child Runtime Sandbox - 2026-05-15
+# RAFA Learned-Gated Many-Child Runtime Sandbox - 2026-05-15
 
 ## Scope
 

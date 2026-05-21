@@ -1,4 +1,4 @@
-﻿# RAFA Resonant Memory Contrastive Structural Embedding - 2026-05-14
+# RAFA Resonant Memory Contrastive Structural Embedding - 2026-05-14
 
 ## Scope
 

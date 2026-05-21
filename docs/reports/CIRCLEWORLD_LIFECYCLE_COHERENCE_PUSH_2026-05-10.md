@@ -1,4 +1,4 @@
-﻿# Circleworld Lifecycle Coherence Push - 2026-05-10
+# Circleworld Lifecycle Coherence Push - 2026-05-10
 
 ## Decision
 

@@ -1,4 +1,4 @@
-﻿# RAFA Target-Conditioned Child Coalition - 2026-05-15
+# RAFA Target-Conditioned Child Coalition - 2026-05-15
 
 ## Scope
 

@@ -1,4 +1,4 @@
-﻿# Circleworld Qualified Persistence Push - 2026-05-10
+# Circleworld Qualified Persistence Push - 2026-05-10
 
 ## Decision
 

@@ -1,4 +1,4 @@
-﻿# RAFA Resonant Memory Learned Structural Probe - 2026-05-14
+# RAFA Resonant Memory Learned Structural Probe - 2026-05-14
 
 ## Scope
 

@@ -1,4 +1,4 @@
-﻿# Circleworld Fixed Substrate Guard Run - 2026-05-10
+# Circleworld Fixed Substrate Guard Run - 2026-05-10
 
 ## Decision
 

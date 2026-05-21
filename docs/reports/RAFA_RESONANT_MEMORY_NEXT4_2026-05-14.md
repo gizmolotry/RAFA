@@ -1,4 +1,4 @@
-﻿# RAFA Resonant Memory Next-4 Evidence - 2026-05-14
+# RAFA Resonant Memory Next-4 Evidence - 2026-05-14
 
 ## Scope
 

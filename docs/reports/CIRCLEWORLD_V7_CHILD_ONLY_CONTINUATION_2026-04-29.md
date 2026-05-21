@@ -1,4 +1,4 @@
-﻿# Circleworld V7 Child-Only Continuation (2026-04-29)
+# Circleworld V7 Child-Only Continuation (2026-04-29)
 
 ## Scope
 Circleworld only. Graduation untouched.

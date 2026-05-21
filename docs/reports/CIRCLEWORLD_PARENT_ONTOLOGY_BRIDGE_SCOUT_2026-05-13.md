@@ -1,4 +1,4 @@
-﻿# Circleworld Parent Ontology Bridge Scout - 2026-05-13
+# Circleworld Parent Ontology Bridge Scout - 2026-05-13
 
 ## Executive Claim
 

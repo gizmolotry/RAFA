@@ -1,4 +1,4 @@
-﻿# Circleworld Ontology V8 Recalibration (2026-05-04)
+# Circleworld Ontology V8 Recalibration (2026-05-04)
 
 ## Scope
 Circleworld only. Graduation untouched.

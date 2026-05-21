@@ -1,4 +1,4 @@
-﻿# Circleworld Experiment Ledger Addendum - 2026-05-14
+# Circleworld Experiment Ledger Addendum - 2026-05-14
 
 - Schema: `circleworld_experiment_ledger_v1_addendum`
 - JSONL sidecar: `D:\RAFA\docs\reports\CIRCLEWORLD_EXPERIMENT_LEDGER_2026-05-14.jsonl`
