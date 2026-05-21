@@ -21,6 +21,19 @@ for path in (ROOT, CORE, LINEAGE, RUNTIME):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
+
+
+def _exit_if_help_requested_without_runtime() -> None:
+    if any(arg in ("-h", "--help") for arg in sys.argv[1:]):
+        print(f"usage: {Path(__file__).name} [runtime-coupled contract options]")
+        print()
+        print("This contract is coupled to the Circleworld runtime/signature lane.")
+        print("Run it from a Circleworld integration worktree for full argument parsing and execution.")
+        raise SystemExit(0)
+
+
+_exit_if_help_requested_without_runtime()
+
 from ablate_formalization import DEFAULT_SEED_RAFA_INIT, _generate_seed_phase, make_seed_rafa
 from evaluate_circleworld import _heldout_plan, _load_circle_cfg, evaluate_circle_cfg
 

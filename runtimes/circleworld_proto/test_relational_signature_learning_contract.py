@@ -17,6 +17,19 @@ for path in (ROOT, LINEAGE):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
+
+
+def _exit_if_help_requested_without_runtime() -> None:
+    if any(arg in ("-h", "--help") for arg in sys.argv[1:]):
+        print(f"usage: {Path(__file__).name} [runtime-coupled contract options]")
+        print()
+        print("This contract is coupled to the Circleworld runtime/signature lane.")
+        print("Run it from a Circleworld integration worktree for full argument parsing and execution.")
+        raise SystemExit(0)
+
+
+_exit_if_help_requested_without_runtime()
+
 from rafa_relational_signature import (  # noqa: E402
     RafaRelationalSignatureConfig,
     build_relational_factor_pack,
