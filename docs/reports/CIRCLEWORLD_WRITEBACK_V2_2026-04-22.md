@@ -82,7 +82,7 @@ So v2 solved the *causality* bottleneck but weakened the *branch identity* signa
 The trained config drifted to:
 - `child_min_age_for_writeback = 2`
 
-But writeback still happened because the runtime’s early-writeback path is now active.
+But writeback still happened because the runtime's early-writeback path is now active.
 That means the runtime fix was necessary, not cosmetic.
 
 The held-out summary confirms that:

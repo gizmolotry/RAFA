@@ -41,7 +41,7 @@ The recovered candidates looked valid in the search history because the probe re
 
 - `heldout naked_rafa mean_real_branch_fraction = 0.0`
 
-So the issue is no longer just “pick a better candidate.”
+So the issue is no longer just "pick a better candidate."
 The issue is:
 
 **the probe used during search can reward branch-looking candidates that do not survive the real heldout evaluator.**
@@ -145,4 +145,4 @@ The selection layer is now good enough to show that the main bottleneck is evalu
 - Keep `branchfloor_audio_idx04_iter0` as the best retrospective audio candidate.
 - Keep `branchfloor_law_idx44_iter5` as the best retrospective law-diversity candidate.
 
-They answer different questions and should not be collapsed into one “best” model.
+They answer different questions and should not be collapsed into one "best" model.

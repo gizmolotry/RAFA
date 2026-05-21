@@ -126,7 +126,7 @@ Interpretation:
 
 - The continuity sidecar does not show a clear macro-time win.
 - It also does not show catastrophic new looping relative to the reference set.
-- The multimode system is therefore mostly preserving the anchor’s continuity profile rather than creating a new, better time-world.
+- The multimode system is therefore mostly preserving the anchor's continuity profile rather than creating a new, better time-world.
 
 ## Held-Out Evaluator
 
