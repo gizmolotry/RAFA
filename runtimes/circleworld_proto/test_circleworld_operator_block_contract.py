@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import math
 import sys
+import tempfile
 from pathlib import Path
 
+import pytest
 import torch
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,7 +20,15 @@ from phase_native_audio_operators import (  # noqa: E402
     phase_delta_stats,
     phasor_unit_norm_error_from_phase,
 )
+from profile_registry import (  # noqa: E402
+    PHASE_NATIVE_AUDIO_OBJECTIVE_ROUTE_MODELS,
+    route_dict,
+    route_from_id,
+    route_id,
+    validate_route_policy_id,
+)
 from run_circleworld_operator_block import select_route_from_policy_payload  # noqa: E402
+import train_phase_native_audio_objective_route_policy as objective_trainer  # noqa: E402
 
 
 def test_phase_native_operator_bank_preserves_shape_and_finite_phase() -> None:
@@ -71,3 +81,162 @@ def test_operator_block_case_table_route_selection_matches_policy() -> None:
     }
     route = select_route_from_policy_payload(payload, "family__case001", route_policy="case_table")
     assert route == payload["case_routes"]["family__case001"]
+
+
+def test_operator_block_case_table_uses_fallback_for_unknown_case() -> None:
+    payload = {
+        "case_routes": {
+            "known__case001": {
+                "magnitude_mode": "prefix_hold",
+                "mask_mode": "phase_router_bins",
+                "mechanism": "anti_reentry_delta_shear_mix",
+                "gain": 16.0,
+            }
+        },
+        "fallback_route": {
+            "magnitude_mode": "flat",
+            "mask_mode": "all_bins",
+            "mechanism": "raw",
+            "gain": 0.5,
+        },
+    }
+
+    route = select_route_from_policy_payload(payload, "unknown__case999", route_policy="case_table")
+    assert route == payload["fallback_route"]
+
+
+def test_phase_native_route_id_round_trip_is_stable() -> None:
+    key = ("prefix_hold", "phase_router_bins", "anti_reentry_delta_shear_mix", 16.0)
+    encoded = route_id(key)
+
+    assert encoded == "prefix_hold|||phase_router_bins|||anti_reentry_delta_shear_mix|||16"
+    assert route_from_id(encoded) == key
+    assert route_dict(route_from_id(encoded)) == {
+        "magnitude_mode": "prefix_hold",
+        "mask_mode": "phase_router_bins",
+        "mechanism": "anti_reentry_delta_shear_mix",
+        "gain": 16.0,
+    }
+
+
+def test_objective_mlp_v1_is_registered_and_case_table_compatible() -> None:
+    payload = {
+        "schema": "phase_native_audio_objective_route_policy_v1",
+        "model": "objective_mlp_v1",
+        "case_routes": {
+            "family__case001": {
+                "magnitude_mode": "prefix_hold",
+                "mask_mode": "phase_router_bins",
+                "mechanism": "anti_reentry_delta_shear_mix",
+                "gain": 16.0,
+            }
+        },
+        "predictions": [
+            {
+                "case_name": "family__case001",
+                "group": "family",
+                "route_id": "prefix_hold|||phase_router_bins|||anti_reentry_delta_shear_mix|||16",
+                "route": {
+                    "magnitude_mode": "prefix_hold",
+                    "mask_mode": "phase_router_bins",
+                    "mechanism": "anti_reentry_delta_shear_mix",
+                    "gain": 16.0,
+                },
+                "distance": 0.25,
+            }
+        ],
+        "fallback_route": {
+            "magnitude_mode": "flat",
+            "mask_mode": "all_bins",
+            "mechanism": "raw",
+            "gain": 0.5,
+        },
+        "predicted_route_counts": {
+            "prefix_hold|||phase_router_bins|||anti_reentry_delta_shear_mix|||16": 1,
+        },
+    }
+
+    assert "objective_mlp_v1" in objective_trainer.OBJECTIVE_ROUTE_MODELS
+    assert "objective_mlp_v1" in PHASE_NATIVE_AUDIO_OBJECTIVE_ROUTE_MODELS
+    assert validate_route_policy_id("objective_mlp_v1") == "objective_mlp_v1"
+    route = select_route_from_policy_payload(payload, "family__case001", route_policy="case_table")
+    assert route == payload["predictions"][0]["route"]
+
+
+def test_objective_mlp_v1_training_emits_case_table_policy(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    route_a = ("prefix_hold", "phase_router_bins", "anti_reentry_delta_shear_mix", 16.0)
+    route_b = ("flat", "all_bins", "raw", 0.5)
+
+    def fake_case_features(paths: list[Path]) -> dict[str, dict[str, float]]:
+        if paths == [Path("target_delta.json")]:
+            return {
+                "family__target001": {"x": 0.05, "y": 0.10},
+                "family__target002": {"x": 0.95, "y": 0.90},
+            }
+        return {
+            "family__source001": {"x": 0.00, "y": 0.00},
+            "family__source002": {"x": 0.10, "y": 0.05},
+            "family__source003": {"x": 1.00, "y": 1.00},
+            "family__source004": {"x": 0.90, "y": 0.95},
+        }
+
+    def fake_training_rows(
+        train_sets: list[tuple[Path, list[Path]]],
+        keys: list[str],
+        *,
+        margin: float,
+    ) -> list[dict[str, object]]:
+        del train_sets, margin
+        source = fake_case_features([Path("source_delta.json")])
+        labels = {
+            "family__source001": route_a,
+            "family__source002": route_a,
+            "family__source003": route_b,
+            "family__source004": route_b,
+        }
+        return [
+            {
+                "case_name": case_name,
+                "group": "family",
+                "route_id": objective_trainer._route_id(labels[case_name]),
+                "route": objective_trainer._route_dict(labels[case_name]),
+                "row_objective": 1.0,
+                "vector": objective_trainer._vector(features, keys),
+            }
+            for case_name, features in sorted(source.items())
+        ]
+
+    monkeypatch.setattr(objective_trainer, "_case_features", fake_case_features)
+    monkeypatch.setattr(objective_trainer, "_training_rows", fake_training_rows)
+
+    with tempfile.TemporaryDirectory(prefix="objective_mlp_v1_", dir=Path.cwd()) as out_dir:
+        summary = objective_trainer.train_objective_route_policy(
+            train_sets=[(Path("suite.json"), [Path("source_delta.json")])],
+            target_delta_json=Path("target_delta.json"),
+            out_dir=Path(out_dir),
+            model="objective_mlp_v1",
+            margin=0.01,
+        )
+
+    assert summary["schema"] == "phase_native_audio_objective_route_policy_v1"
+    assert summary["model"] == "objective_mlp_v1"
+    assert summary["feature_keys"] == ["x", "y"]
+    assert summary["source_future_metrics_used_for_route_training_labels"] is True
+    assert summary["target_future_audio_used_for_route_selection"] is False
+    assert summary["target_future_metrics_used_for_route_selection"] is False
+    assert not any(
+        token in key
+        for key in summary["feature_keys"]
+        for token in ("target_", "copy_last", "row_objective", "selected_route")
+    )
+    assert set(summary["case_routes"]) == {"family__target001", "family__target002"}
+    assert len(summary["predictions"]) == 2
+    assert sum(summary["predicted_route_counts"].values()) == 2
+    assert summary["fallback_route"] in [objective_trainer._route_dict(route_a), objective_trainer._route_dict(route_b)]
+    assert summary["training_diagnostics"]["class_count"] == 2
+    assert summary["training_diagnostics"]["epochs"] > 0
+    assert summary["training_diagnostics"]["final_loss"] is not None
+    route = select_route_from_policy_payload(summary, "family__target001", route_policy="case_table")
+    assert route == summary["case_routes"]["family__target001"]

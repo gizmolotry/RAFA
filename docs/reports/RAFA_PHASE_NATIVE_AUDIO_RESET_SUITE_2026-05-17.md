@@ -1002,3 +1002,72 @@ Interpretation:
 - This strengthens the next learned-router target: a learned router should beat
   the `knn5` safety/balance profile without sacrificing the `knn1` correlation
   edge or violating no-future route selection.
+
+## Tiny Learned Router Reverify - 2026-05-21
+
+`objective_mlp_v1` was added as the first tiny learned objective router inside
+the same route-policy family. It is deliberately still a JSON `case_table`
+producer: the trainer may use a deterministic PyTorch MLP over source labels,
+but selected-route rendering and `circleworld_operator_block_v1` consume only
+the emitted no-future route table.
+
+Artifacts:
+
+- Policy:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_mlp_v1_original_fresh_third_to_fourth\phase_native_audio_objective_route_policy.json`
+- Policy audit:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_mlp_v1_original_fresh_third_to_fourth\phase_native_audio_objective_mlp_v1_policy_audit.json`
+- Selected-route render:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_selected_route_2026-05-21_objective_mlp_v1_fourth_full\phase_native_audio_selected_route.json`
+- Operator-block render:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-21_objective_mlp_v1_fourth_full\circleworld_operator_block_v1.json`
+- Four-way router comparison:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_route_policy_comparison_2026-05-21_objective_mlp_v1_vs_objective_family_fourth\phase_native_audio_route_policy_comparison.json`
+
+Policy audit:
+
+| Check | Result |
+| --- | --- |
+| Training cases | `186` |
+| Target cases | `62` |
+| Feature count | `118` |
+| Training route classes | `67` |
+| Predicted route classes on fourth | `46` |
+| Final training loss | `0.144271597` |
+| Route-label training accuracy | `0.994623661` |
+| Fallback predictions | `0` |
+| Target audio used for route selection | `false` |
+| Target metrics used for route selection | `false` |
+| Forbidden future/target feature keys | `0` |
+
+Fourth-lockbox selected-route comparison:
+
+| Router | Status | Corr-copy | MSE-copy | Loop-copy | Harm-delta | Corr-gain0 | Strict |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `objective_mlp_v1` | `selected_route_target_replay_pass` | `+0.092800381` | `-0.030052639` | `-0.078464776` | `-0.010494122` | `+0.092788538` | `true` |
+| `objective_centroid_v1` | `selected_route_target_replay_pass` | `+0.064420015` | `-0.028320732` | `-0.060812492` | `-0.006380592` | `+0.056921764` | `true` |
+| `objective_knn1_v1` | `selected_route_target_replay_pass` | `+0.094914122` | `-0.029753753` | `-0.078038929` | `-0.009961096` | `+0.093070993` | `true` |
+| `objective_knn5_v1` | `selected_route_target_replay_pass` | `+0.094890524` | `-0.030189536` | `-0.080123397` | `-0.010335098` | `+0.093313192` | `true` |
+
+Operator-block result for `objective_mlp_v1`:
+
+- Status: `operator_block_target_replay_pass`
+- Cases: `62`
+- Future access clean: `true`
+- Strict target replay pass: `true`
+- Router head: `objective_mlp_v1`
+- Selected-route equivalence: pass
+
+Interpretation:
+
+- `objective_mlp_v1` is a valid learned, no-future router head for the current
+  operator block.
+- It does not supersede `objective_knn5_v1` as the balanced incumbent. The MLP
+  slightly improves harmful replay excess versus `knn5`, but loses correlation,
+  MSE, loop reduction, and corr-vs-gain0.
+- The learned-router thesis therefore advances only one notch: learned routing
+  can be inserted without breaking contracts, but this tiny MLP is not yet the
+  better phase-native operator selector.
+- Next learned-router work should test margin-aware or pairwise ranking losses
+  directly against the balanced score instead of trying to imitate the source
+  route labels as a multiclass classification problem.

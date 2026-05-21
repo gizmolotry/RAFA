@@ -56,6 +56,7 @@ PHASE_NATIVE_AUDIO_OBJECTIVE_ROUTE_MODELS: tuple[str, ...] = (
     "objective_centroid_v1",
     "objective_knn1_v1",
     "objective_knn5_v1",
+    "objective_mlp_v1",
 )
 
 PHASE_NATIVE_AUDIO_ROUTE_SELECTOR_COMPONENTS: tuple[str, ...] = (

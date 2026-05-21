@@ -25,6 +25,12 @@ from profile_registry import route_id as _route_id  # noqa: E402
 
 OUTPUT_JSON = "phase_native_audio_objective_route_policy.json"
 OUTPUT_MD = "PHASE_NATIVE_AUDIO_OBJECTIVE_ROUTE_POLICY.md"
+OBJECTIVE_ROUTE_MODELS = (
+    "objective_centroid_v1",
+    "objective_knn1_v1",
+    "objective_knn5_v1",
+    "objective_mlp_v1",
+)
 
 
 def _parse_train_set(raw: str) -> tuple[Path, list[Path]]:
@@ -176,6 +182,152 @@ def _predict_knn(
     return route_id, sum(distance for distance, _, _ in nearest) / float(len(nearest))
 
 
+def _fit_mlp_route_classifier(
+    training_rows: Sequence[dict[str, Any]],
+    *,
+    means: Sequence[float],
+    stds: Sequence[float],
+    fallback_route_id: str,
+) -> dict[str, Any]:
+    route_ids = sorted({str(row["route_id"]) for row in training_rows})
+    diagnostics: dict[str, Any] = {
+        "model_family": "mlp",
+        "class_count": len(route_ids),
+        "epochs": 0,
+        "final_loss": None,
+        "training_accuracy": 0.0,
+        "route_label_accuracy": 0.0,
+        "fallback_to_most_common_source_route": False,
+        "fallback_reason": None,
+        "hidden_dim": 0,
+        "seed": 1701,
+    }
+    if len(route_ids) <= 1:
+        diagnostics.update(
+            {
+                "fallback_to_most_common_source_route": True,
+                "fallback_reason": "single_class_training_set",
+                "training_accuracy": 1.0 if training_rows else 0.0,
+                "route_label_accuracy": 1.0 if training_rows else 0.0,
+            }
+        )
+        return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
+    input_dim = len(means)
+    if input_dim <= 0:
+        diagnostics.update(
+            {
+                "fallback_to_most_common_source_route": True,
+                "fallback_reason": "empty_feature_vector",
+            }
+        )
+        return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
+
+    try:
+        import torch
+    except ImportError as exc:
+        diagnostics.update(
+            {
+                "fallback_to_most_common_source_route": True,
+                "fallback_reason": f"torch_import_failed:{exc.__class__.__name__}",
+            }
+        )
+        return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
+
+    torch.manual_seed(int(diagnostics["seed"]))
+    try:
+        torch.use_deterministic_algorithms(True)
+    except Exception:
+        diagnostics["deterministic_algorithms_unavailable"] = True
+
+    class_index = {route_id: idx for idx, route_id in enumerate(route_ids)}
+    x = torch.tensor(
+        [_scale(row["vector"], means, stds) for row in training_rows],
+        dtype=torch.float32,
+    )
+    y = torch.tensor([class_index[str(row["route_id"])] for row in training_rows], dtype=torch.long)
+    if not bool(torch.isfinite(x).all()):
+        diagnostics.update(
+            {
+                "fallback_to_most_common_source_route": True,
+                "fallback_reason": "nonfinite_training_features",
+            }
+        )
+        return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
+
+    hidden_dim = min(16, max(4, len(route_ids) * 2, input_dim // 2))
+    epochs = 96
+    mlp = torch.nn.Sequential(
+        torch.nn.Linear(input_dim, hidden_dim),
+        torch.nn.Tanh(),
+        torch.nn.Linear(hidden_dim, len(route_ids)),
+    )
+    optimizer = torch.optim.AdamW(mlp.parameters(), lr=0.03, weight_decay=1.0e-4)
+    final_loss = float("nan")
+    for _ in range(epochs):
+        optimizer.zero_grad(set_to_none=True)
+        logits = mlp(x)
+        loss = torch.nn.functional.cross_entropy(logits, y)
+        if not bool(torch.isfinite(loss)):
+            diagnostics.update(
+                {
+                    "fallback_to_most_common_source_route": True,
+                    "fallback_reason": "nonfinite_training_loss",
+                    "epochs": _,
+                }
+            )
+            return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
+        loss.backward()
+        optimizer.step()
+        final_loss = float(loss.detach().cpu())
+
+    with torch.no_grad():
+        logits = mlp(x)
+        predicted = torch.argmax(logits, dim=1)
+        accuracy = float((predicted == y).to(torch.float32).mean().cpu())
+
+    diagnostics.update(
+        {
+            "epochs": epochs,
+            "final_loss": final_loss,
+            "training_accuracy": accuracy,
+            "route_label_accuracy": accuracy,
+            "hidden_dim": hidden_dim,
+            "route_ids": route_ids,
+        }
+    )
+    return {
+        "mode": "mlp",
+        "model": mlp,
+        "route_ids": route_ids,
+        "diagnostics": diagnostics,
+        "torch": torch,
+    }
+
+
+def _predict_mlp(
+    vector: Sequence[float],
+    *,
+    means: Sequence[float],
+    stds: Sequence[float],
+    mlp_state: dict[str, Any],
+) -> tuple[str, float]:
+    if mlp_state.get("mode") != "mlp":
+        return str(mlp_state["fallback_route_id"]), 1.0
+    torch = mlp_state["torch"]
+    model = mlp_state["model"]
+    model.eval()
+    with torch.no_grad():
+        x = torch.tensor([_scale(vector, means, stds)], dtype=torch.float32)
+        logits = model(x)
+        probs = torch.softmax(logits, dim=1)[0]
+        class_idx = int(torch.argmax(probs).cpu())
+        confidence = float(probs[class_idx].cpu())
+    route_ids = mlp_state["route_ids"]
+    if class_idx < 0 or class_idx >= len(route_ids):
+        return str(mlp_state["fallback_route_id"]), 1.0
+    return str(route_ids[class_idx]), 1.0 - confidence
+
+
 def _predict(
     vector: Sequence[float],
     *,
@@ -184,6 +336,7 @@ def _predict(
     stds: Sequence[float],
     training_rows: Sequence[dict[str, Any]],
     centroids: dict[str, list[float]],
+    mlp_state: dict[str, Any] | None = None,
 ) -> tuple[str, float]:
     if model == "objective_centroid_v1":
         return _predict_centroid(vector, means=means, stds=stds, centroids=centroids)
@@ -191,6 +344,10 @@ def _predict(
         return _predict_knn(vector, means=means, stds=stds, training_rows=training_rows, k=1)
     if model == "objective_knn5_v1":
         return _predict_knn(vector, means=means, stds=stds, training_rows=training_rows, k=5)
+    if model == "objective_mlp_v1":
+        if mlp_state is None:
+            raise ValueError("objective_mlp_v1 requires a trained mlp_state")
+        return _predict_mlp(vector, means=means, stds=stds, mlp_state=mlp_state)
     raise ValueError(f"Unknown objective route model: {model}")
 
 
@@ -265,9 +422,20 @@ def train_objective_route_policy(
     means, stds = _fit_scaler([row["vector"] for row in training_rows])
     centroids = _fit_route_centroids(training_rows, means, stds)
     fallback_route_id = Counter(str(row["route_id"]) for row in training_rows).most_common(1)[0][0]
+    mlp_state = (
+        _fit_mlp_route_classifier(
+            training_rows,
+            means=means,
+            stds=stds,
+            fallback_route_id=fallback_route_id,
+        )
+        if model == "objective_mlp_v1"
+        else None
+    )
 
     case_routes: dict[str, dict[str, Any]] = {}
     predictions: list[dict[str, Any]] = []
+    fallback_prediction_count = 0
     for case_name, features in sorted(target_features.items()):
         route_id, distance = _predict(
             _vector(features, keys),
@@ -276,9 +444,11 @@ def train_objective_route_policy(
             stds=stds,
             training_rows=training_rows,
             centroids=centroids,
+            mlp_state=mlp_state,
         )
         if route_id not in centroids:
             route_id = fallback_route_id
+            fallback_prediction_count += 1
         route = _route_from_id(route_id)
         case_routes[case_name] = _route_dict(route)
         predictions.append(
@@ -291,7 +461,13 @@ def train_objective_route_policy(
             }
         )
 
-    diagnostics = _leave_one_accuracy(training_rows, model=model)
+    if mlp_state is not None and mlp_state.get("mode") != "mlp":
+        fallback_prediction_count = len(predictions)
+    diagnostics = (
+        {**mlp_state["diagnostics"], "total": len(training_rows), "fallback_prediction_count": fallback_prediction_count}
+        if mlp_state is not None
+        else _leave_one_accuracy(training_rows, model=model)
+    )
     summary = {
         "schema": "phase_native_audio_objective_route_policy_v1",
         "status": "objective_route_policy_ready",
@@ -347,7 +523,7 @@ def main() -> None:
     parser.add_argument("--out-dir", required=True, type=Path)
     parser.add_argument(
         "--model",
-        choices=("objective_centroid_v1", "objective_knn1_v1", "objective_knn5_v1"),
+        choices=OBJECTIVE_ROUTE_MODELS,
         default="objective_knn5_v1",
     )
     parser.add_argument("--target-margin", type=float, default=0.01)
