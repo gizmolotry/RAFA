@@ -142,3 +142,30 @@ The temporary branch remains the safety shelf until lane commits or explicit pat
 3. Leave `runtime-contracts` as a future extraction branch only after contract tests can run against an external artifact root or a small fixture set.
 4. Commit research-track reports separately from runtime code.
 5. Only after those commits exist, re-evaluate whether the temporary triage branch can be deleted.
+
+## Completion Pass
+
+Additional cleanup completed after the initial execution report:
+
+| Branch | Commit | Status |
+| --- | --- | --- |
+| `codex/repo-migration` | `2e4c6b8 docs: add RAFA project cartography branch split` | clean, ahead of origin by 1 |
+| `codex/research-track` | `9d5b4e5 docs: preserve RAFA research track reports` | clean, ahead of origin by 1 |
+| `codex/runtime-contracts` | `010c63c test: add Circleworld runtime contract audits` | clean, ahead of origin by 1 |
+| `codex/circleworld-signature-spike-2026-05-21` | `7bf8f3e feat: add RAFA relational signature spike` | clean, local branch |
+| `codex/circleworld` | `e54f21d feat: consolidate Circleworld phase-native integration lane` | clean, ahead of origin by 1 |
+
+Circleworld cleanup actions during completion:
+
+- Added the manifest-referenced `RAFA_PHASE_NATIVE_AUDIO_RESET_SUITE_2026-05-17.md` report to the Circleworld lane.
+- Synchronized the `circleworld_proto` row in `registries/RUNTIME_REGISTRY.json` with the expanded runtime manifest entrypoint surface.
+- Verified tracked manifest entrypoint/report paths exist, excluding large `outputs/` artifact roots.
+- Verified Circleworld imports for the shared cleanup helpers, phase-native audio operators, relational signature files, and operator block runner.
+- Verified cached Python compile for 132 staged Python files.
+- Verified focused Circleworld contract subset: `26 passed`.
+
+Remaining safety shelf:
+
+- `codex/circleworld-cleanup-cartography-2026-05-21` is still dirty in `D:\RAFA` by design.
+- Its contents are now preserved in durable lane commits, but it was not deleted/reset because that would be destructive.
+- The next operator can retire it after reviewing the commits and explicitly approving destructive cleanup of the aggregate checkout.
