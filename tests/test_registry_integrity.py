@@ -100,7 +100,7 @@ class RegistryIntegrityTests(unittest.TestCase):
             cwd=ROOT,
             text=True,
         )
-        branches = {line.strip().lstrip("* ").strip() for line in branch_output.splitlines() if line.strip()}
+        branches = {line.strip().lstrip("*+ ").strip() for line in branch_output.splitlines() if line.strip()}
 
         for row in data["workstreams"]:
             self.assertIn(row["branch"], branches)
