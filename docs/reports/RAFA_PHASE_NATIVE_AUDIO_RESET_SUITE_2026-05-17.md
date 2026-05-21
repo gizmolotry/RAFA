@@ -943,3 +943,62 @@ Current-code equivalence:
 Interpretation: the reusable operator block remains valid as an internal
 Circleworld phase-native audio component. This reverify does not promote raw
 Circleworld and does not compare against protected Graduation RAFA.
+
+## Objective Router Swap Reverify - 2026-05-21
+
+The objective-router family was retrained under current code on the same
+original+fresh+third source lockboxes and rendered on the fourth lockbox. This
+tests whether `circleworld_operator_block_v1` is only a wrapper around
+`objective_knn5_v1`, or whether it can carry different no-future router heads
+through the same phase-native operator-bank interface.
+
+Selected-route comparison artifact:
+
+- `D:\RAFA\outputs\circleworld_proto\phase_native_audio_route_policy_comparison_2026-05-21_reverify_objective_family_fourth\phase_native_audio_route_policy_comparison.json`
+
+Selected-route fourth-lockbox results:
+
+| Router | Status | Corr-copy | MSE-copy | Loop-copy | Harm-delta | Corr-gain0 | Strict |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `objective_centroid_v1` | `selected_route_target_replay_pass` | `+0.064420015` | `-0.028320732` | `-0.060812492` | `-0.006380592` | `+0.056921764` | `true` |
+| `objective_knn1_v1` | `selected_route_target_replay_pass` | `+0.094914122` | `-0.029753753` | `-0.078038929` | `-0.009961096` | `+0.093070993` | `true` |
+| `objective_knn5_v1` | `selected_route_target_replay_pass` | `+0.094890524` | `-0.030189536` | `-0.080123397` | `-0.010335098` | `+0.093313192` | `true` |
+
+No-future policy checks:
+
+| Router | Training cases | Target cases | Feature count | Leave-one route accuracy |
+| --- | ---: | ---: | ---: | ---: |
+| `objective_centroid_v1` | `186` | `62` | `118` | `0.451612903` |
+| `objective_knn1_v1` | `186` | `62` | `118` | `0.768817204` |
+| `objective_knn5_v1` | `186` | `62` | `118` | `0.747311828` |
+
+All three policies preserve the target no-future route-selection contract.
+
+Operator-block router-swap results:
+
+- Centroid block artifact:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-21_reverify_centroid_fourth_full\circleworld_operator_block_v1.json`
+- KNN1 block artifact:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-21_reverify_knn1_fourth_full\circleworld_operator_block_v1.json`
+- KNN5 block artifact:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-21_reverify_knn5_retrained_fourth_full\circleworld_operator_block_v1.json`
+
+All three operator-block runs returned:
+
+- `operator_block_target_replay_pass`
+- case count `62`
+- future access clean `true`
+- strict target replay pass `true`
+- close to selected-route reference `true`
+- beats raw Circleworld `true`
+
+Interpretation:
+
+- `circleworld_operator_block_v1` is router-swappable, not hardwired to one
+  frozen policy.
+- `objective_knn1_v1` is the sharpest correlation variant on this fourth
+  lockbox, but `objective_knn5_v1` remains the best balanced router because it
+  wins MSE, loop reduction, harmful replay reduction, and corr-vs-gain0.
+- This strengthens the next learned-router target: a learned router should beat
+  the `knn5` safety/balance profile without sacrificing the `knn1` correlation
+  edge or violating no-future route selection.
