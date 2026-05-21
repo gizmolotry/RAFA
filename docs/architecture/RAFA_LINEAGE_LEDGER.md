@@ -60,6 +60,7 @@ This ledger formalizes the RAFA model evolution, categorizing every run into its
 | Name | Family | Philosophical Purpose | Engineering Purpose | Question it tests | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Circleworld / Hardy-Littlewood** | Positive Replacement | Auto-formalize attractors via geometric laws. | Replace statistical snapshots with recursive structural mass laws. | Can a pure Hardy-Littlewood mass distribution replace the hybrid entirely? | **Untested** |
+| **Resonant Attention / Post-Token Memory Lane** | Positive Replacement research lane | Test whether law objects can become addressable by resonance rather than token position. | Build retrieval/composition/operator assays over packets, childworlds, grandchildren, and dense signatures. | Can partial phase/q/arc/support queries select reusable law objects whose values causally update state? | **Scaffolded / Not Validated** |
 
 ### Checkpoint Analysis: Formalization Suite
 - **Lineage Tag:** `h2_formal_v1`
@@ -68,3 +69,18 @@ This ledger formalizes the RAFA model evolution, categorizing every run into its
 - **Key Metrics:** Major-Arc Mass vs. Minor-Arc Residue.
 - **Perceptual Verdict:** TBD.
 - **Notes:** Initial implementation in `tools/ablate_formalization.py`. Incorporates principles from `SemanticInferometer` (Circle-Method / Fractal IFS). Treats concepts (e.g., "Piano") as repeatable recursive geometries in phase space.
+
+### Branch-Hierarchy Note: Resonant Attention / Post-Token Memory
+
+- This is an active research lane under the Positive Replacement / Circleworld
+  family, not a rename of the parent Graduation Pack and not a new proven
+  lineage.
+- Its current implementation evidence is limited to Circleworld's local
+  branch-QKV mechanism: `branch_law_version = "relational_qkv_v2"` and
+  `_relational_branch_attention(...)`.
+- `relational_qkv_v2` remains only a local branch-QKV precursor. It must not be
+  promoted to full RAFA attention unless retrieval and composition assays over
+  reusable packet/child/grandchild/signature law objects pass.
+- Dense relational signatures and childworld records are candidate law-object
+  sources for this lane, but neither is sufficient by existence alone to claim a
+  RAFA post-token.

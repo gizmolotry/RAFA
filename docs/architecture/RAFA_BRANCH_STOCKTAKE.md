@@ -66,6 +66,14 @@ These are not legacy lineages exactly. They are the active operating programs si
 - Role: diagnostic reasoning lane, not a production model line
 - Constitution: [09_conditioned_logic_lane.md](constitutions/09_conditioned_logic_lane.md)
 
+### D. Resonant Attention / Post-Token Memory Lane
+- Current precursor: `relational_qkv_v2` in Circleworld
+- Status: local branch-QKV coupling exists, but full RAFA attention is not proven
+- Role: tests whether packet/child/grandchild law objects can be retrieved,
+  composed, and causally applied by relational resonance
+- Constitution: [10_resonant_attention_memory_lane.md](constitutions/10_resonant_attention_memory_lane.md)
+- Formal terminology: [RAFA_ATTENTION_QKV_TOKEN_CONSTITUTION.md](RAFA_ATTENTION_QKV_TOKEN_CONSTITUTION.md)
+
 ## Repo-Level Summary
 
 ### What is actually proven
@@ -84,6 +92,7 @@ These are not legacy lineages exactly. They are the active operating programs si
 - a working low-rank impedance head
 - a validated multiscale memory claim
 - a positive replacement model that beats the hybrid on its own terms
+- a validated RAFA attention or post-token memory substrate
 
 ## Governance Rule
 

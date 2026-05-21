@@ -119,6 +119,35 @@ Interpretation:
 - This is the physical implementation of hierarchical routing across scales.
 - It is the candidate substrate for compressed multiscale memory, not yet a proven world model.
 
+#### L4a. Resonant Attention / Post-Token Memory Lane
+
+Definition:
+- A research lane inside the L4 memory question, not a replacement name for the
+  whole stack.
+- Tests whether packet, childworld, grandchild, or dense-signature law objects
+  can be retrieved, composed, and causally applied by relational resonance.
+
+Current precursor:
+- Circleworld contains `branch_law_version = "relational_qkv_v2"` and
+  `_relational_branch_attention(...)`.
+- This is only a local branch-QKV precursor: it couples a local mode pair and
+  emits a branch handoff message.
+- It must not be renamed into full RAFA attention unless reusable law-object
+  retrieval and composition assays pass.
+
+Promotion requirement:
+- Partial relational queries retrieve compatible law objects above decoys.
+- Selected values act as phase, support, q-trace, branch, or writeback operators.
+- Parent-child-grandchild composition improves relational fit without world jump.
+- Geometry-disabled and residual-disabled controls separate q/arc/support/phase
+  resonance from dense shortcut routing.
+
+Interpretation:
+- This lane is where "post-token memory" would be earned.
+- Until those assays pass, the correct labels are `local branch-QKV precursor`,
+  `dense relational signature`, `law object`, or `post-token candidate`, not
+  "RAFA token" or "full RAFA attention."
+
 ### L5. Render & Output
 
 Definition:
@@ -242,6 +271,24 @@ What does not exist yet:
 - demonstrated compact constraint retrieval
 - demonstrated hierarchical semantic nesting
 - demonstrated precision-preserving multiscale memory retention
+
+#### L4a. Resonant Attention / Post-Token Memory Lane
+
+Status:
+- Scaffolded as a docs/evaluator lane.
+- Current Circleworld evidence is a local branch-QKV precursor only.
+
+What exists:
+- `relational_qkv_v2` local branch coupling in Circleworld.
+- Dense relational-signature interfaces and split-suite diagnostics.
+- Childworld/static child-carrier artifacts that may supply future law-object
+  banks.
+
+What does not exist yet:
+- resonant child retrieval above decoys
+- cross-depth packet/child/grandchild composition
+- interference selectivity under larger law-object banks
+- operator-value causality sufficient for RAFA attention or post-token promotion
 
 ## Cross-Comparison Snapshot (Current Repo State)
 
@@ -377,6 +424,8 @@ As of now:
 - L2 is instrumented and failing
 - L3 is specified but unbuilt
 - L4 is conceptual and partially scaffolded
+- L4a Resonant Attention / Post-Token Memory is a research lane with only a
+  local branch-QKV precursor so far
 
 ## 8. RAFA Training Doctrine (Constitutional Update)
 

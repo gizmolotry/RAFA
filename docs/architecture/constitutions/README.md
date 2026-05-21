@@ -14,3 +14,4 @@ These files define the constitutions of the major RAFA branches and active lanes
 - [07_prompt_conditioned_audio_lane.md](07_prompt_conditioned_audio_lane.md)
 - [08_semantic_steering_lane.md](08_semantic_steering_lane.md)
 - [09_conditioned_logic_lane.md](09_conditioned_logic_lane.md)
+- [10_resonant_attention_memory_lane.md](10_resonant_attention_memory_lane.md)
