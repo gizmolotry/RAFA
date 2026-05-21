@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RAFA — Manifest Generator (works)
+RAFA - Manifest Generator (works)
 
 Zero-pandas, fast, and robust for VGGSound-style datasets.
 - Recursively indexes your audio_dir ONCE (extensions configurable)
