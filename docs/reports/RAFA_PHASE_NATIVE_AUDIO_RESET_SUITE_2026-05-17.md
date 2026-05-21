@@ -873,3 +873,73 @@ Status: `operator_block_target_replay_pass`.
 The block beats raw Circleworld on corr, MSE, loop, and reentry deltas for the fourth lockbox. It exactly matches the regenerated canonical selected-route renderer after both paths use the extracted operator bank. The older 2026-05-17 selected-route artifact remains valid historical evidence, but the post-extraction canonical selected-route rerender is the correct equivalence reference for `circleworld_operator_block_v1`.
 
 Interpretation update: `objective_knn5_v1` is now best understood as the first routing head inside a reusable Circleworld operator block. This is architectural consolidation of a supported component claim, not a new full audio model claim and not a Graduation-vs-Circleworld result.
+
+## Circleworld Operator Block V1 Reverify - 2026-05-21
+
+The operator-block lane was reverified from the clean `codex/circleworld`
+worktree after the branch split and cleanup pass.
+
+Contract/audit repair:
+
+- Audit entrypoint:
+  `D:\RAFA\runtimes\circleworld_proto\audit_phase_native_audio_route_selector_contract.py`
+- Fresh audit artifact:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_knn5_contract_audit_2026-05-21_reverify_after_patch\phase_native_audio_route_selector_contract_audit.json`
+- Result: `route_selector_contract_pass`
+- Checks: `37 / 37`
+
+The audit script now resolves artifact-root-relative paths from absolute
+profile locations. This is a portability fix only; the no-future contract and
+output schema were not changed.
+
+Smoke reverify:
+
+- Artifact:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-21_reverify_smoke3\circleworld_operator_block_v1.json`
+- Cases: `3`
+- Status: `operator_block_target_replay_pass`
+- Future access clean: `true`
+
+Smoke metrics:
+
+| Metric | Delta |
+| --- | ---: |
+| corr vs copy-last | `+0.118428752` |
+| MSE vs copy-last | `-0.129610684` |
+| loop vs copy-last | `-0.170671604` |
+| harmful replay excess vs copy-last | `+0.000000000` |
+| corr vs gain-0 | `+0.203759590` |
+
+Full fourth-lockbox reverify:
+
+- Operator-block artifact:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-21_reverify_fourth_full\circleworld_operator_block_v1.json`
+- Current selected-route rerender:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_selected_route_2026-05-21_reverify_objective_knn5_operator_bank_fourth_full\phase_native_audio_selected_route.json`
+- Cases: `62`
+- Status: `operator_block_target_replay_pass`
+- Future access clean: `true`
+- Strict target replay pass: `true`
+
+Full fourth-lockbox metrics:
+
+| Metric | Delta |
+| --- | ---: |
+| corr vs copy-last | `+0.094890524` |
+| MSE vs copy-last | `-0.030189536` |
+| loop vs copy-last | `-0.080123397` |
+| reentry vs copy-last | `+0.027003167` |
+| harmful replay excess vs copy-last | `-0.010335098` |
+| corr vs gain-0 | `+0.093313192` |
+
+Current-code equivalence:
+
+- The 2026-05-21 operator-block full run and the 2026-05-21 selected-route
+  rerender have identical aggregate metrics.
+- The 2026-05-21 rerender differs slightly from the older 2026-05-19 frozen
+  selected-route artifact while preserving the same pass verdict and future
+  access contract.
+
+Interpretation: the reusable operator block remains valid as an internal
+Circleworld phase-native audio component. This reverify does not promote raw
+Circleworld and does not compare against protected Graduation RAFA.
