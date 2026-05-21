@@ -15,9 +15,15 @@
 - `inference_package/`: compact inference bundle with sample assets.
 
 ## Key Docs
+- `project_cartography/README.md`: root-level dashboard mirror for project inventory, usage, artifact, and redundancy maps.
 - `docs/architecture/RAFA_COGNITIVE_STACK.md`
 - `docs/architecture/RUNTIME_CONTRACTS.md`
 - `docs/architecture/RAFA_LINEAGE_LEDGER.md`
+- `docs/architecture/PROJECT_SCRIPT_INVENTORY.md`
+- `docs/architecture/PROJECT_REDUNDANCY_HOTSPOTS.md`
+- `docs/architecture/PROJECT_SCAFFOLDING_GUIDE.md`
+- `docs/architecture/PROJECT_USAGE_MAP.md`
+- `docs/architecture/PROJECT_ARTIFACT_INVENTORY.md`
 - `docs/reports/ROOT_FAILURE_ANALYSIS_2026-03-12.md`
 - `EVAL_LEDGER.md`
 
@@ -40,5 +46,7 @@
 3. Read the subsystem README in the area you need
 4. Use lineage folders for historical architectural branches
 5. Use artifact directories only after you know which run or lineage you want
+6. Before refactoring or deleting scripts, regenerate `PROJECT_SCRIPT_INVENTORY.md` with `python tools/audit_project_scripts.py`
+7. Before moving/deleting outputs, checkpoints, logs, or bundles, regenerate `PROJECT_USAGE_MAP.md` with `python tools/audit_project_usage.py`
 
 

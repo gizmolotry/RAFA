@@ -1,0 +1,106 @@
+{
+    "generated_utc":  "2026-05-21T16:39:37Z",
+    "purpose":  "Root-level dashboard mirror for RAFA project cartography, usage maps, cleanup pass reports, and retirement triage.",
+    "canonical_policy":  "Canonical generators remain in tools/ and canonical architecture/report outputs remain in docs/. This folder is a convenience mirror.",
+    "regenerate_commands":  [
+                                "python tools/audit_project_scripts.py",
+                                "python tools/audit_project_usage.py",
+                                "Copy-Item docs\\architecture\\PROJECT_* project_cartography\\ -Force",
+                                "Copy-Item docs\\reports\\RAFA_PROJECT_CARTOGRAPHY_2026-05-19.md project_cartography\\ -Force",
+                                "Copy-Item docs\\reports\\RAFA_PROJECT_USAGE_AUDIT_2026-05-19.md project_cartography\\ -Force",
+                                "Copy-Item docs\\reports\\RAFA_CODEBASE_CLEANUP_PASS_2026-05-20.md project_cartography\\ -Force",
+                                "Copy-Item docs\\reports\\RAFA_CODEBASE_CLEANUP_ORCHESTRATION_2026-05-20.md project_cartography\\ -Force"
+                            ],
+    "files":  [
+                  {
+                      "mirror":  "project_cartography/PROJECT_SCRIPT_INVENTORY.md",
+                      "canonical":  "docs/architecture/PROJECT_SCRIPT_INVENTORY.md",
+                      "bytes":  61350,
+                      "source_last_write_utc":  "2026-05-20T17:29:07Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/PROJECT_SCRIPT_INVENTORY.json",
+                      "canonical":  "docs/architecture/PROJECT_SCRIPT_INVENTORY.json",
+                      "bytes":  973905,
+                      "source_last_write_utc":  "2026-05-20T17:29:07Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/PROJECT_USAGE_MAP.md",
+                      "canonical":  "docs/architecture/PROJECT_USAGE_MAP.md",
+                      "bytes":  37064,
+                      "source_last_write_utc":  "2026-05-20T17:36:24Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/PROJECT_USAGE_MAP.json",
+                      "canonical":  "docs/architecture/PROJECT_USAGE_MAP.json",
+                      "bytes":  29667955,
+                      "source_last_write_utc":  "2026-05-20T17:36:24Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/PROJECT_ARTIFACT_INVENTORY.md",
+                      "canonical":  "docs/architecture/PROJECT_ARTIFACT_INVENTORY.md",
+                      "bytes":  269712,
+                      "source_last_write_utc":  "2026-05-20T17:36:24Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/PROJECT_REDUNDANCY_HOTSPOTS.md",
+                      "canonical":  "docs/architecture/PROJECT_REDUNDANCY_HOTSPOTS.md",
+                      "bytes":  15024,
+                      "source_last_write_utc":  "2026-05-20T17:29:07Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/PROJECT_SCAFFOLDING_GUIDE.md",
+                      "canonical":  "docs/architecture/PROJECT_SCAFFOLDING_GUIDE.md",
+                      "bytes":  5690,
+                      "source_last_write_utc":  "2026-05-20T17:37:09Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/PROJECT_RETIREMENT_CANDIDATES.md",
+                      "canonical":  "docs/architecture/PROJECT_RETIREMENT_CANDIDATES.md",
+                      "bytes":  66365,
+                      "source_last_write_utc":  "2026-05-20T17:37:23Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/RAFA_PROJECT_CARTOGRAPHY_2026-05-19.md",
+                      "canonical":  "docs/reports/RAFA_PROJECT_CARTOGRAPHY_2026-05-19.md",
+                      "bytes":  5941,
+                      "source_last_write_utc":  "2026-05-19T11:20:43Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/RAFA_PROJECT_USAGE_AUDIT_2026-05-19.md",
+                      "canonical":  "docs/reports/RAFA_PROJECT_USAGE_AUDIT_2026-05-19.md",
+                      "bytes":  1816,
+                      "source_last_write_utc":  "2026-05-20T17:36:24Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/RAFA_CODEBASE_CLEANUP_PASS_2026-05-20.md",
+                      "canonical":  "docs/reports/RAFA_CODEBASE_CLEANUP_PASS_2026-05-20.md",
+                      "bytes":  6828,
+                      "source_last_write_utc":  "2026-05-20T16:21:18Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/RAFA_CODEBASE_CLEANUP_ORCHESTRATION_2026-05-20.md",
+                      "canonical":  "docs/reports/RAFA_CODEBASE_CLEANUP_ORCHESTRATION_2026-05-20.md",
+                      "bytes":  7009,
+                      "source_last_write_utc":  "2026-05-20T17:37:56Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/BRANCH_DELEGATION_MAP.md",
+                      "canonical":  "docs/architecture/BRANCH_DELEGATION_MAP.md",
+                      "bytes":  8498,
+                      "source_last_write_utc":  "2026-05-21T15:57:30Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/BRANCH_MIGRATION_PREVIEW_2026-05-21.md",
+                      "canonical":  "docs/architecture/BRANCH_MIGRATION_PREVIEW_2026-05-21.md",
+                      "bytes":  20257,
+                      "source_last_write_utc":  "2026-05-21T15:59:54Z"
+                  },
+                  {
+                      "mirror":  "project_cartography/BRANCH_MIGRATION_EXECUTION_2026-05-21.md",
+                      "canonical":  "docs/architecture/BRANCH_MIGRATION_EXECUTION_2026-05-21.md",
+                      "bytes":  6652,
+                      "source_last_write_utc":  "2026-05-21T16:39:23Z"
+                  }
+              ]
+}
