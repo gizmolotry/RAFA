@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import sys
 import os
 
 # AGGRESSIVE LATTICE QUARANTINE: Purge legacy envs from path
 sys.path = [p for p in sys.path if not (("envs" in p.lower() and "rafa" in p.lower()) and "sm120" not in p.lower())]
 print(f"DEBUG: Aggressively Quarantined sys.path: {sys.path}")
-
-from __future__ import annotations
 
 import os
 import time
