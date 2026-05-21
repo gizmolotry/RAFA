@@ -9,6 +9,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_JSON = "phase_native_audio_route_selector_contract_audit.json"
 OUTPUT_MD = "PHASE_NATIVE_AUDIO_ROUTE_SELECTOR_CONTRACT_AUDIT.md"
+_EXTRA_RESOLUTION_ROOTS: list[Path] = []
 
 FORBIDDEN_FEATURE_SUBSTRINGS = (
     "target_corr",
@@ -30,9 +31,33 @@ FORBIDDEN_FEATURE_SUBSTRINGS = (
 ALLOWED_FUTURE_FEATURE_KEYS = {"case.future_samples", "case.future_stft_frames"}
 
 
+def _add_resolution_root(candidate: Path) -> None:
+    resolved = candidate.resolve()
+    if resolved != ROOT and resolved not in _EXTRA_RESOLUTION_ROOTS:
+        _EXTRA_RESOLUTION_ROOTS.append(resolved)
+
+
+def _configure_resolution_roots(profile_json: Path) -> None:
+    _EXTRA_RESOLUTION_ROOTS.clear()
+    if profile_json.is_absolute():
+        parts_lower = [part.lower() for part in profile_json.parts]
+        for index, part in enumerate(parts_lower):
+            if part == "outputs" and index > 0:
+                _add_resolution_root(Path(*profile_json.parts[:index]))
+                break
+    _add_resolution_root(Path.cwd())
+
+
 def _resolve(path: str | Path) -> Path:
     path = Path(path)
-    return path if path.is_absolute() else ROOT / path
+    if path.is_absolute():
+        return path
+    candidates = [ROOT, *_EXTRA_RESOLUTION_ROOTS]
+    for root in candidates:
+        resolved = root / path
+        if resolved.exists():
+            return resolved
+    return ROOT / path
 
 
 def _json_load(path: str | Path) -> dict[str, Any]:
@@ -305,6 +330,7 @@ def _markdown(summary: dict[str, Any]) -> str:
 
 
 def audit_profile(*, profile_json: Path, out_dir: Path) -> dict[str, Any]:
+    _configure_resolution_roots(profile_json)
     profile = _json_load(profile_json)
     checks: list[dict[str, Any]] = []
     selected_audits = [
