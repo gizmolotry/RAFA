@@ -1,10 +1,24 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+
+def _exit_if_help_requested_without_runtime() -> None:
+    if any(arg in ("-h", "--help") for arg in sys.argv[1:]):
+        print(f"usage: {Path(__file__).name} [runtime-coupled contract options]")
+        print()
+        print("This contract is coupled to the Circleworld runtime/signature lane.")
+        print("Run it from a Circleworld integration worktree for full argument parsing and execution.")
+        raise SystemExit(0)
+
+
+_exit_if_help_requested_without_runtime()
+
 import ast
 import json
 import py_compile
 import re
-from pathlib import Path
 from typing import Any
 
 
