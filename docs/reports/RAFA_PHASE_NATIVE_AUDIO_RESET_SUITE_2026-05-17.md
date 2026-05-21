@@ -1143,3 +1143,99 @@ Interpretation:
 - The next low-risk experiment should be abstention-to-`objective_knn5_v1`:
   use learned confidence only where it is source-validated, otherwise defer to
   the current balanced nonparametric router.
+
+## Resonant Memory Router Reverify - 2026-05-21
+
+`objective_resonant_memory_v1` was added to move beyond generic Euclidean kNN
+toward the intended RAFA retrieval form:
+
+```text
+target prefix/Circleworld query
+-> source phase-law memory keys
+-> explicit phase/q/arc/support/branch resonance components
+-> source objective weighting
+-> operator-route value
+```
+
+It still emits the same pure `case_table` route-policy JSON, so selected-route
+rendering and `circleworld_operator_block_v1` consume it without a new runtime
+dependency.
+
+Artifacts:
+
+- Policy:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_resonant_memory_v1_original_fresh_third_to_fourth\phase_native_audio_objective_route_policy.json`
+- Policy audit:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_resonant_memory_v1_original_fresh_third_to_fourth\phase_native_audio_objective_resonant_memory_v1_policy_audit.json`
+- Selected-route render:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_selected_route_2026-05-21_objective_resonant_memory_v1_fourth_full\phase_native_audio_selected_route.json`
+- Operator-block render:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-21_objective_resonant_memory_v1_fourth_full\circleworld_operator_block_v1.json`
+- Six-way router comparison:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_route_policy_comparison_2026-05-21_objective_resonant_memory_v1_vs_objective_family_fourth\phase_native_audio_route_policy_comparison.json`
+
+Policy audit:
+
+| Check | Result |
+| --- | --- |
+| Memory source | `best_source_rows` |
+| Memory count | `186` |
+| Memory route classes | `67` |
+| Target cases | `62` |
+| Feature count | `118` |
+| Predicted route classes on fourth | `7` |
+| Leave-one route-label accuracy | `0.102150538` |
+| Forbidden future/target feature keys | `0` |
+| Target audio used for route selection | `false` |
+| Target metrics used for route selection | `false` |
+
+Feature-group sizes:
+
+| Component | Feature count |
+| --- | ---: |
+| `phase` | `21` |
+| `q` | `6` |
+| `arc_residue` | `3` |
+| `support` | `21` |
+| `branch` | `30` |
+| `reentry` | `0` |
+| `case` | `4` |
+| `other` | `33` |
+
+Fourth-lockbox selected-route comparison:
+
+| Router | Status | Corr-copy | MSE-copy | Loop-copy | Harm-delta | Corr-gain0 | Strict |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `objective_resonant_memory_v1` | `selected_route_not_yet` | `+0.036257724` | `-0.022778305` | `-0.043177264` | `+0.000573753` | `+0.034580908` | `false` |
+| `objective_score_mlp_v1` | `selected_route_not_yet` | `+0.053442600` | `-0.023873799` | `-0.070617068` | `+0.006819712` | `+0.054797230` | `false` |
+| `objective_mlp_v1` | `selected_route_target_replay_pass` | `+0.092800381` | `-0.030052639` | `-0.078464776` | `-0.010494122` | `+0.092788538` | `true` |
+| `objective_centroid_v1` | `selected_route_target_replay_pass` | `+0.064420015` | `-0.028320732` | `-0.060812492` | `-0.006380592` | `+0.056921764` | `true` |
+| `objective_knn1_v1` | `selected_route_target_replay_pass` | `+0.094914122` | `-0.029753753` | `-0.078038929` | `-0.009961096` | `+0.093070993` | `true` |
+| `objective_knn5_v1` | `selected_route_target_replay_pass` | `+0.094890524` | `-0.030189536` | `-0.080123397` | `-0.010335098` | `+0.093313192` | `true` |
+
+Operator-block result for `objective_resonant_memory_v1`:
+
+- Status: `operator_block_not_yet`
+- Cases: `62`
+- Future access clean: `true`
+- Strict target replay pass: `false`
+- Router head: `objective_resonant_memory_v1`
+
+Interpretation:
+
+- The RAFA-shaped retrieval interface is now implemented: explicit component
+  groups, geometric resonance scores, source objective weighting, operator
+  values, and per-case activation diagnostics.
+- The v1 mechanism is not yet viable as an audio router. It fails strict fourth
+  lockbox replay and collapses the fourth-lockbox route set to `7` classes.
+- The most revealing diagnostic is that `reentry` has `0` features in the
+  current no-future metadata surface. This router is trying to solve a replay
+  objective without a dedicated reentry query component.
+- This result does not falsify resonant memory as the target architecture. It
+  falsifies the current shallow scalar-feature v1: best-source-row memories,
+  fixed string-group weights, no explicit reentry feature group, and no
+  source-validated abstention.
+- Next step should not be another generic learned classifier. It should either
+  add explicit no-future reentry/query features to `_case_features`, or build
+  an abstaining resonant-memory head that defers to `objective_knn5_v1` unless
+  route activation margin and component coverage are source-validated.

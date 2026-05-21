@@ -169,6 +169,12 @@ def test_objective_score_mlp_v1_is_registered() -> None:
     assert validate_route_policy_id("objective_score_mlp_v1") == "objective_score_mlp_v1"
 
 
+def test_objective_resonant_memory_v1_is_registered() -> None:
+    assert "objective_resonant_memory_v1" in objective_trainer.OBJECTIVE_ROUTE_MODELS
+    assert "objective_resonant_memory_v1" in PHASE_NATIVE_AUDIO_OBJECTIVE_ROUTE_MODELS
+    assert validate_route_policy_id("objective_resonant_memory_v1") == "objective_resonant_memory_v1"
+
+
 def test_objective_mlp_v1_training_emits_case_table_policy(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -355,3 +361,133 @@ def test_objective_score_mlp_v1_training_uses_candidate_objectives(
     assert candidate_diagnostics["source_future_access_clean"] is True
     route = select_route_from_policy_payload(summary, "family__target001", route_policy="case_table")
     assert route == summary["case_routes"]["family__target001"]
+
+
+def test_objective_resonant_memory_v1_training_emits_component_diagnostics(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    route_a = ("prefix_hold", "phase_router_bins", "anti_reentry_delta_shear_mix", 16.0)
+    route_b = ("flat", "all_bins", "raw", 0.5)
+    safe_feature_names = [
+        "phase_alignment",
+        "ramanujan_q_score",
+        "arc_residue_balance",
+        "mask_support_locality",
+        "child_branch_mode",
+        "loop_reentry_temporal",
+        "case_horizon",
+        "residual_energy",
+    ]
+
+    def feature_row(base: float) -> dict[str, float]:
+        return {key: base for key in safe_feature_names}
+
+    def fake_case_features(paths: list[Path]) -> dict[str, dict[str, float]]:
+        if paths == [Path("target_delta.json")]:
+            return {
+                "family__target001": feature_row(0.05),
+                "family__target002": feature_row(0.95),
+            }
+        return {
+            "family__source001": feature_row(0.00),
+            "family__source002": feature_row(0.10),
+            "family__source003": feature_row(1.00),
+            "family__source004": feature_row(0.90),
+        }
+
+    def fake_training_rows(
+        train_sets: list[tuple[Path, list[Path]]],
+        keys: list[str],
+        *,
+        margin: float,
+    ) -> list[dict[str, object]]:
+        del train_sets, margin
+        source = fake_case_features([Path("source_delta.json")])
+        labels = {
+            "family__source001": (route_a, 1.5),
+            "family__source002": (route_a, 1.2),
+            "family__source003": (route_b, 1.4),
+            "family__source004": (route_b, 1.1),
+        }
+        return [
+            {
+                "case_name": case_name,
+                "group": "family",
+                "route_id": objective_trainer._route_id(labels[case_name][0]),
+                "route": objective_trainer._route_dict(labels[case_name][0]),
+                "row_objective": labels[case_name][1],
+                "vector": objective_trainer._vector(features, keys),
+            }
+            for case_name, features in sorted(source.items())
+        ]
+
+    monkeypatch.setattr(objective_trainer, "_case_features", fake_case_features)
+    monkeypatch.setattr(objective_trainer, "_training_rows", fake_training_rows)
+
+    with tempfile.TemporaryDirectory(prefix="objective_resonant_memory_v1_", dir=Path.cwd()) as out_dir:
+        summary = objective_trainer.train_objective_route_policy(
+            train_sets=[(Path("suite.json"), [Path("source_delta.json")])],
+            target_delta_json=Path("target_delta.json"),
+            out_dir=Path(out_dir),
+            model="objective_resonant_memory_v1",
+            margin=0.01,
+        )
+
+    assert summary["schema"] == "phase_native_audio_objective_route_policy_v1"
+    assert summary["model"] == "objective_resonant_memory_v1"
+    assert summary["feature_keys"] == sorted(safe_feature_names)
+    assert summary["source_future_metrics_used_for_route_training_labels"] is True
+    assert summary["target_future_audio_used_for_route_selection"] is False
+    assert summary["target_future_metrics_used_for_route_selection"] is False
+    assert not any(
+        token in key
+        for key in summary["feature_keys"]
+        for token in (
+            "target_",
+            "copy_last",
+            "row_objective",
+            "selected_route",
+            "corr_delta",
+            "mse_delta",
+            "loop_delta",
+        )
+    )
+    assert set(summary["case_routes"]) == {"family__target001", "family__target002"}
+    assert len(summary["predictions"]) == 2
+    assert sum(summary["predicted_route_counts"].values()) == 2
+    route = select_route_from_policy_payload(summary, "family__target001", route_policy="case_table")
+    assert route == summary["case_routes"]["family__target001"]
+
+    diagnostics = summary["training_diagnostics"]
+    assert diagnostics["model_family"] == "resonant_memory"
+    assert diagnostics["memory_source"] == "best_source_rows"
+    assert diagnostics["memory_count"] == 4
+    assert diagnostics["memory_route_count"] == 2
+    assert diagnostics["fallback_prediction_count"] == 0
+    assert set(diagnostics["component_weights"]) == {
+        "phase",
+        "q",
+        "arc_residue",
+        "support",
+        "branch",
+        "reentry",
+        "case",
+        "other",
+    }
+    for group in diagnostics["component_weights"]:
+        assert group in diagnostics["feature_groups"]
+    assert diagnostics["feature_groups"]["phase"] == ["phase_alignment"]
+    assert diagnostics["feature_groups"]["q"] == ["ramanujan_q_score"]
+    assert diagnostics["feature_groups"]["arc_residue"] == ["arc_residue_balance"]
+    assert diagnostics["feature_groups"]["support"] == ["mask_support_locality"]
+    assert diagnostics["feature_groups"]["branch"] == ["child_branch_mode"]
+    assert diagnostics["feature_groups"]["reentry"] == ["loop_reentry_temporal"]
+    assert diagnostics["feature_groups"]["case"] == ["case_horizon"]
+    assert diagnostics["feature_groups"]["other"] == ["residual_energy"]
+    assert diagnostics["target_route_activation_summaries"]
+
+    first_prediction = summary["predictions"][0]
+    assert "activation" in first_prediction
+    assert set(first_prediction["resonance_components"]) == set(diagnostics["component_weights"])
+    assert first_prediction["route_activation_summaries"]
+    assert first_prediction["top_memory_preview"]

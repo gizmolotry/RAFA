@@ -31,7 +31,31 @@ OBJECTIVE_ROUTE_MODELS = (
     "objective_knn5_v1",
     "objective_mlp_v1",
     "objective_score_mlp_v1",
+    "objective_resonant_memory_v1",
 )
+
+RESONANT_FEATURE_GROUPS = (
+    "phase",
+    "q",
+    "arc_residue",
+    "support",
+    "branch",
+    "reentry",
+    "case",
+    "other",
+)
+
+RESONANT_COMPONENT_WEIGHTS: dict[str, float] = {
+    "phase": 1.25,
+    "q": 1.15,
+    "arc_residue": 1.0,
+    "support": 1.0,
+    "branch": 0.9,
+    "reentry": 1.1,
+    "case": 0.7,
+    "other": 0.35,
+}
+RESONANT_ROUTE_TOP_M = 5
 
 
 def _parse_train_set(raw: str) -> tuple[Path, list[Path]]:
@@ -88,6 +112,278 @@ def _centroid(vectors: Sequence[Sequence[float]]) -> list[float]:
 
 def _distance(a: Sequence[float], b: Sequence[float]) -> float:
     return math.sqrt(sum((float(av) - float(bv)) ** 2 for av, bv in zip(a, b)))
+
+
+def _feature_group(key: str) -> str:
+    lower = str(key).lower()
+    if "phase" in lower or "phasor" in lower:
+        return "phase"
+    if "ramanujan" in lower or lower.startswith("q_") or "_q_" in lower or lower.endswith("_q"):
+        return "q"
+    if "arc" in lower or "residue" in lower or "residual_mod" in lower:
+        return "arc_residue"
+    if "support" in lower or "mask" in lower or "locality" in lower or "local_" in lower:
+        return "support"
+    if "branch" in lower or "child" in lower or "mode" in lower:
+        return "branch"
+    if "reentry" in lower or "loop" in lower or "temporal" in lower or "time" in lower:
+        return "reentry"
+    if "case" in lower or "horizon" in lower:
+        return "case"
+    return "other"
+
+
+def _partition_feature_keys(keys: Sequence[str]) -> dict[str, list[str]]:
+    groups = {group: [] for group in RESONANT_FEATURE_GROUPS}
+    for key in keys:
+        groups[_feature_group(str(key))].append(str(key))
+    return groups
+
+
+def _feature_group_indexes(keys: Sequence[str]) -> dict[str, list[int]]:
+    groups = {group: [] for group in RESONANT_FEATURE_GROUPS}
+    for idx, key in enumerate(keys):
+        groups[_feature_group(str(key))].append(idx)
+    return groups
+
+
+def _source_objective_weight(objective: float) -> float:
+    return min(3.0, max(0.05, 1.0 + max(float(objective), 0.0)))
+
+
+def _group_rbf_similarity(
+    target: Sequence[float],
+    source: Sequence[float],
+    indexes: Sequence[int],
+) -> float | None:
+    if not indexes:
+        return None
+    mean_sq = sum((float(target[idx]) - float(source[idx])) ** 2 for idx in indexes) / float(len(indexes))
+    return math.exp(-0.5 * mean_sq)
+
+
+def _resonance_components(
+    target_scaled: Sequence[float],
+    source_scaled: Sequence[float],
+    group_indexes: dict[str, list[int]],
+) -> dict[str, float | None]:
+    return {
+        group: _group_rbf_similarity(target_scaled, source_scaled, group_indexes[group])
+        for group in RESONANT_FEATURE_GROUPS
+    }
+
+
+def _geometric_resonance(
+    components: dict[str, float | None],
+    weights: dict[str, float],
+) -> float:
+    numerator = 0.0
+    denominator = 0.0
+    for group, value in components.items():
+        if value is None:
+            continue
+        weight = float(weights.get(group, 0.0))
+        numerator += weight * float(value)
+        denominator += weight
+    return numerator / denominator if denominator > 0.0 else 0.0
+
+
+def _fit_resonant_memory(
+    training_rows: Sequence[dict[str, Any]],
+    keys: Sequence[str],
+    *,
+    means: Sequence[float],
+    stds: Sequence[float],
+) -> dict[str, Any]:
+    memory: list[dict[str, Any]] = []
+    for row in training_rows:
+        route_id = str(row["route_id"])
+        route = row.get("route") or _route_dict(_route_from_id(route_id))
+        objective = _as_float(row.get("row_objective"))
+        memory.append(
+            {
+                "case_name": str(row["case_name"]),
+                "group": str(row.get("group", _case_group(str(row["case_name"])))),
+                "source_key": {
+                    "case_name": str(row["case_name"]),
+                    "group": str(row.get("group", _case_group(str(row["case_name"])))),
+                    "route_id": route_id,
+                    "law_identity": route,
+                },
+                "route_id": route_id,
+                "route": route,
+                "row_objective": objective,
+                "objective_weight": _source_objective_weight(objective),
+                "scaled_vector": _scale(row["vector"], means, stds),
+            }
+        )
+    route_counts = Counter(str(packet["route_id"]) for packet in memory)
+    objectives_by_route: dict[str, list[float]] = defaultdict(list)
+    for packet in memory:
+        objectives_by_route[str(packet["route_id"])].append(float(packet["row_objective"]))
+    return {
+        "mode": "resonant_memory",
+        "memory": memory,
+        "group_indexes": _feature_group_indexes(keys),
+        "feature_groups": _partition_feature_keys(keys),
+        "component_weights": dict(RESONANT_COMPONENT_WEIGHTS),
+        "route_ids": sorted(route_counts),
+        "diagnostics": {
+            "model_family": "resonant_memory",
+            "memory_source": "best_source_rows",
+            "memory_count": len(memory),
+            "memory_route_count": len(route_counts),
+            "component_weights": dict(RESONANT_COMPONENT_WEIGHTS),
+            "feature_groups": _partition_feature_keys(keys),
+            "route_memory_counts": dict(sorted(route_counts.items())),
+            "route_objective_weight_summaries": {
+                route_id: {
+                    "count": len(values),
+                    "mean_row_objective": sum(values) / float(len(values)),
+                    "mean_objective_weight": sum(_source_objective_weight(value) for value in values)
+                    / float(len(values)),
+                }
+                for route_id, values in sorted(objectives_by_route.items())
+            },
+            "fallback_prediction_count": 0,
+            "route_label_accuracy": 0.0,
+        },
+    }
+
+
+def _activation_preview(scored_packets: Sequence[dict[str, Any]], *, limit: int = 3) -> list[dict[str, Any]]:
+    return [
+        {
+            "case_name": str(packet["case_name"]),
+            "group": str(packet["group"]),
+            "route_id": str(packet["route_id"]),
+            "activation": float(packet["activation"]),
+            "geometric_resonance": float(packet["geometric_resonance"]),
+            "objective_weight": float(packet["objective_weight"]),
+            "resonance_components": packet["resonance_components"],
+        }
+        for packet in scored_packets[:limit]
+    ]
+
+
+def _predict_resonant_memory(
+    vector: Sequence[float],
+    *,
+    means: Sequence[float],
+    stds: Sequence[float],
+    resonant_state: dict[str, Any],
+) -> dict[str, Any]:
+    target_scaled = _scale(vector, means, stds)
+    scored_packets: list[dict[str, Any]] = []
+    route_activation: dict[str, dict[str, Any]] = {}
+    for packet in resonant_state["memory"]:
+        components = _resonance_components(
+            target_scaled,
+            packet["scaled_vector"],
+            resonant_state["group_indexes"],
+        )
+        geometric = _geometric_resonance(components, resonant_state["component_weights"])
+        activation = geometric * float(packet["objective_weight"])
+        scored = {
+            "case_name": packet["case_name"],
+            "group": packet["group"],
+            "route_id": packet["route_id"],
+            "activation": activation,
+            "geometric_resonance": geometric,
+            "objective_weight": packet["objective_weight"],
+            "resonance_components": components,
+        }
+        scored_packets.append(scored)
+        route_id = str(packet["route_id"])
+        summary = route_activation.setdefault(
+            route_id,
+            {
+                "route_id": route_id,
+                "route": packet["route"],
+                "memory_count": 0,
+                "activation_sum": 0.0,
+                "top_activation_sum": 0.0,
+                "best_activation": 0.0,
+                "packet_activations": [],
+                "component_sums": {group: 0.0 for group in RESONANT_FEATURE_GROUPS},
+                "component_counts": {group: 0 for group in RESONANT_FEATURE_GROUPS},
+            },
+        )
+        summary["memory_count"] += 1
+        summary["activation_sum"] += activation
+        summary["best_activation"] = max(float(summary["best_activation"]), activation)
+        summary["packet_activations"].append(float(activation))
+        for group, value in components.items():
+            if value is None:
+                continue
+            summary["component_sums"][group] += float(value) * activation
+            summary["component_counts"][group] += 1
+    scored_packets.sort(key=lambda item: (-float(item["activation"]), str(item["route_id"]), str(item["case_name"])))
+    if not route_activation:
+        raise RuntimeError("Resonant memory is empty")
+    route_summaries: list[dict[str, Any]] = []
+    for route_id, summary in route_activation.items():
+        top_activations = sorted((float(value) for value in summary["packet_activations"]), reverse=True)[
+            :RESONANT_ROUTE_TOP_M
+        ]
+        summary["top_activation_sum"] = sum(top_activations)
+        components = {}
+        for group in RESONANT_FEATURE_GROUPS:
+            if int(summary["component_counts"][group]) <= 0 or float(summary["activation_sum"]) <= 0.0:
+                components[group] = None
+            else:
+                components[group] = float(summary["component_sums"][group]) / float(summary["activation_sum"])
+        route_summaries.append(
+            {
+                "route_id": route_id,
+                "route": summary["route"],
+                "memory_count": int(summary["memory_count"]),
+                "activation_sum": float(summary["activation_sum"]),
+                "top_activation_sum": float(summary["top_activation_sum"]),
+                "aggregation_top_m": RESONANT_ROUTE_TOP_M,
+                "best_activation": float(summary["best_activation"]),
+                "mean_resonance_components": components,
+            }
+        )
+    route_summaries.sort(
+        key=lambda item: (
+            -float(item["top_activation_sum"]),
+            -float(item["best_activation"]),
+            str(item["route_id"]),
+        )
+    )
+    selected = route_summaries[0]
+    return {
+        "route_id": str(selected["route_id"]),
+        "distance": -float(selected["top_activation_sum"]),
+        "activation": float(selected["top_activation_sum"]),
+        "resonance_components": selected["mean_resonance_components"],
+        "route_activation_summaries": route_summaries[:8],
+        "top_memory_preview": _activation_preview(scored_packets, limit=3),
+    }
+
+
+def _leave_one_resonant_accuracy(training_rows: Sequence[dict[str, Any]], *, keys: Sequence[str]) -> dict[str, Any]:
+    correct = 0
+    total = 0
+    for idx, held in enumerate(training_rows):
+        train = [row for j, row in enumerate(training_rows) if j != idx]
+        if not train:
+            continue
+        means, stds = _fit_scaler([row["vector"] for row in train])
+        resonant_state = _fit_resonant_memory(train, keys, means=means, stds=stds)
+        pred = _predict_resonant_memory(
+            held["vector"],
+            means=means,
+            stds=stds,
+            resonant_state=resonant_state,
+        )
+        correct += int(str(pred["route_id"]) == str(held["route_id"]))
+        total += 1
+    return {
+        "total": total,
+        "route_label_accuracy": correct / float(total) if total else 0.0,
+    }
 
 
 def _best_rows_from_train_set(suite_json: Path, delta_jsons: Sequence[Path], *, margin: float) -> dict[str, dict[str, Any]]:
@@ -680,7 +976,7 @@ def train_objective_route_policy(
     centroids = _fit_route_centroids(training_rows, means, stds)
     fallback_route_id = (
         _best_mean_objective_route_id(training_rows)
-        if model == "objective_score_mlp_v1"
+        if model in {"objective_score_mlp_v1", "objective_resonant_memory_v1"}
         else Counter(str(row["route_id"]) for row in training_rows).most_common(1)[0][0]
     )
     mlp_state = (
@@ -703,57 +999,104 @@ def train_objective_route_policy(
         if model == "objective_score_mlp_v1"
         else None
     )
+    resonant_state = (
+        _fit_resonant_memory(
+            training_rows,
+            keys,
+            means=means,
+            stds=stds,
+        )
+        if model == "objective_resonant_memory_v1"
+        else None
+    )
     valid_route_ids = set(centroids)
     if score_mlp_state is not None:
         valid_route_ids.update(str(route_id) for route_id in score_mlp_state.get("route_ids", ()))
+    if resonant_state is not None:
+        valid_route_ids.update(str(route_id) for route_id in resonant_state.get("route_ids", ()))
 
     case_routes: dict[str, dict[str, Any]] = {}
     predictions: list[dict[str, Any]] = []
     fallback_prediction_count = 0
     for case_name, features in sorted(target_features.items()):
-        route_id, distance = _predict(
-            _vector(features, keys),
-            model=model,
-            means=means,
-            stds=stds,
-            training_rows=training_rows,
-            centroids=centroids,
-            mlp_state=mlp_state,
-            score_mlp_state=score_mlp_state,
-        )
+        prediction_extra: dict[str, Any] = {}
+        target_vector = _vector(features, keys)
+        if resonant_state is not None:
+            resonant_prediction = _predict_resonant_memory(
+                target_vector,
+                means=means,
+                stds=stds,
+                resonant_state=resonant_state,
+            )
+            route_id = str(resonant_prediction["route_id"])
+            distance = float(resonant_prediction["distance"])
+            prediction_extra = {
+                "activation": float(resonant_prediction["activation"]),
+                "resonance_components": resonant_prediction["resonance_components"],
+                "route_activation_summaries": resonant_prediction["route_activation_summaries"],
+                "top_memory_preview": resonant_prediction["top_memory_preview"],
+            }
+        else:
+            route_id, distance = _predict(
+                target_vector,
+                model=model,
+                means=means,
+                stds=stds,
+                training_rows=training_rows,
+                centroids=centroids,
+                mlp_state=mlp_state,
+                score_mlp_state=score_mlp_state,
+            )
         if route_id not in valid_route_ids:
             route_id = fallback_route_id
             fallback_prediction_count += 1
         route = _route_from_id(route_id)
         case_routes[case_name] = _route_dict(route)
-        predictions.append(
-            {
-                "case_name": case_name,
-                "group": _case_group(case_name),
-                "route_id": route_id,
-                "route": _route_dict(route),
-                "distance": distance,
-            }
-        )
+        prediction = {
+            "case_name": case_name,
+            "group": _case_group(case_name),
+            "route_id": route_id,
+            "route": _route_dict(route),
+            "distance": distance,
+        }
+        prediction.update(prediction_extra)
+        predictions.append(prediction)
 
     if mlp_state is not None and mlp_state.get("mode") != "mlp":
         fallback_prediction_count = len(predictions)
     if score_mlp_state is not None and score_mlp_state.get("mode") != "mlp":
         fallback_prediction_count = len(predictions)
-    diagnostics = (
-        {**mlp_state["diagnostics"], "total": len(training_rows), "fallback_prediction_count": fallback_prediction_count}
-        if mlp_state is not None
-        else (
-            {
-                **score_mlp_state["diagnostics"],
-                "total": len(training_rows),
-                "fallback_prediction_count": fallback_prediction_count,
-                "candidate_diagnostics": candidate_diagnostics or {},
-            }
-            if score_mlp_state is not None
-            else _leave_one_accuracy(training_rows, model=model)
-        )
-    )
+    if mlp_state is not None:
+        diagnostics = {
+            **mlp_state["diagnostics"],
+            "total": len(training_rows),
+            "fallback_prediction_count": fallback_prediction_count,
+        }
+    elif score_mlp_state is not None:
+        diagnostics = {
+            **score_mlp_state["diagnostics"],
+            "total": len(training_rows),
+            "fallback_prediction_count": fallback_prediction_count,
+            "candidate_diagnostics": candidate_diagnostics or {},
+        }
+    elif resonant_state is not None:
+        resonant_accuracy = _leave_one_resonant_accuracy(training_rows, keys=keys)
+        diagnostics = {
+            **resonant_state["diagnostics"],
+            **resonant_accuracy,
+            "fallback_prediction_count": fallback_prediction_count,
+            "target_route_activation_summaries": [
+                {
+                    "case_name": str(prediction["case_name"]),
+                    "selected_route_id": str(prediction["route_id"]),
+                    "activation": float(prediction.get("activation", 0.0)),
+                    "route_activation_summaries": prediction.get("route_activation_summaries", []),
+                }
+                for prediction in predictions[:16]
+            ],
+        }
+    else:
+        diagnostics = _leave_one_accuracy(training_rows, model=model)
     summary = {
         "schema": "phase_native_audio_objective_route_policy_v1",
         "status": "objective_route_policy_ready",
