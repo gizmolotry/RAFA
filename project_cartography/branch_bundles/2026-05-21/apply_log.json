@@ -1,32 +1,38 @@
 [
-    {
-        "Manifest":  "lane_research_track.txt",
-        "Target":  "D:\\RAFA_worktrees\\research-track",
-        "Copied":  113,
-        "Missing":  ""
-    },
-    {
-        "Manifest":  "lane_repo_migration_project_cartography.txt",
-        "Target":  "D:\\RAFA_worktrees\\repo-migration",
-        "Copied":  18,
-        "Missing":  ""
-    },
-    {
-        "Manifest":  "lane_circleworld_runtime_or_spike.txt",
-        "Target":  "D:\\RAFA_worktrees\\circleworld",
-        "Copied":  116,
-        "Missing":  ""
-    },
-    {
-        "Manifest":  "lane_circleworld_signature_spike.txt",
-        "Target":  "D:\\RAFA_worktrees\\circleworld-signature-spike-2026-05-21",
-        "Copied":  3,
-        "Missing":  ""
-    },
-    {
-        "Manifest":  "lane_runtime_contracts.txt",
-        "Target":  "D:\\RAFA_worktrees\\runtime-contracts",
-        "Copied":  16,
-        "Missing":  ""
-    }
+  {
+    "Manifest": "lane_research_track.txt",
+    "Target": "D:\\RAFA_worktrees\\research-track",
+    "Copied": 113,
+    "Missing": "",
+    "copied_count_source": "path_manifest_line_count_after_completion_refresh"
+  },
+  {
+    "Manifest": "lane_repo_migration_project_cartography.txt",
+    "Target": "D:\\RAFA_worktrees\\repo-migration",
+    "Copied": 19,
+    "Missing": "",
+    "copied_count_source": "path_manifest_line_count_after_completion_refresh",
+    "note": "Original copy pass counted project_cartography before recursive tree sync; refreshed count matches path manifest."
+  },
+  {
+    "Manifest": "lane_circleworld_runtime_or_spike.txt",
+    "Target": "D:\\RAFA_worktrees\\circleworld",
+    "Copied": 116,
+    "Missing": "",
+    "copied_count_source": "path_manifest_line_count_after_completion_refresh"
+  },
+  {
+    "Manifest": "lane_circleworld_signature_spike.txt",
+    "Target": "D:\\RAFA_worktrees\\circleworld-signature-spike-2026-05-21",
+    "Copied": 3,
+    "Missing": "",
+    "copied_count_source": "path_manifest_line_count_after_completion_refresh"
+  },
+  {
+    "Manifest": "lane_runtime_contracts.txt",
+    "Target": "D:\\RAFA_worktrees\\runtime-contracts",
+    "Copied": 16,
+    "Missing": "",
+    "copied_count_source": "path_manifest_line_count_after_completion_refresh"
+  }
 ]
