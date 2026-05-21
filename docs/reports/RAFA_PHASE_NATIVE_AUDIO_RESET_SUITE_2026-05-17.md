@@ -1071,3 +1071,75 @@ Interpretation:
 - Next learned-router work should test margin-aware or pairwise ranking losses
   directly against the balanced score instead of trying to imitate the source
   route labels as a multiclass classification problem.
+
+## Candidate-Score Learned Router Reverify - 2026-05-21
+
+`objective_score_mlp_v1` was added to test the cleaner learned-router thesis:
+learn the balanced source `row_objective` over all candidate route rows instead
+of imitating only the single best route label per case.
+
+Artifacts:
+
+- Policy:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_score_mlp_v1_original_fresh_third_to_fourth\phase_native_audio_objective_route_policy.json`
+- Policy audit:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_score_mlp_v1_original_fresh_third_to_fourth\phase_native_audio_objective_score_mlp_v1_policy_audit.json`
+- Selected-route render:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_selected_route_2026-05-21_objective_score_mlp_v1_fourth_full\phase_native_audio_selected_route.json`
+- Operator-block render:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-21_objective_score_mlp_v1_fourth_full\circleworld_operator_block_v1.json`
+- Five-way router comparison:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_route_policy_comparison_2026-05-21_objective_score_mlp_v1_vs_objective_family_fourth\phase_native_audio_route_policy_comparison.json`
+
+Policy audit:
+
+| Check | Result |
+| --- | --- |
+| Source candidate rows after zero-gain/dedup filtering | `89232` |
+| Raw source candidate rows | `127596` |
+| Zero-gain source candidate rows filtered | `18228` |
+| Duplicate case-route candidate rows collapsed | `20136` |
+| Candidate route classes | `572` |
+| Target cases | `62` |
+| Feature count | `118` |
+| Predicted route classes on fourth | `28` |
+| Final training loss | `0.230289966` |
+| Training MSE | `0.004577588` |
+| Fallback predictions | `0` |
+| Target audio used for route selection | `false` |
+| Target metrics used for route selection | `false` |
+| Forbidden future/target feature keys | `0` |
+
+Fourth-lockbox selected-route comparison:
+
+| Router | Status | Corr-copy | MSE-copy | Loop-copy | Harm-delta | Corr-gain0 | Strict |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `objective_score_mlp_v1` | `selected_route_not_yet` | `+0.053442600` | `-0.023873799` | `-0.070617068` | `+0.006819712` | `+0.054797230` | `false` |
+| `objective_mlp_v1` | `selected_route_target_replay_pass` | `+0.092800381` | `-0.030052639` | `-0.078464776` | `-0.010494122` | `+0.092788538` | `true` |
+| `objective_centroid_v1` | `selected_route_target_replay_pass` | `+0.064420015` | `-0.028320732` | `-0.060812492` | `-0.006380592` | `+0.056921764` | `true` |
+| `objective_knn1_v1` | `selected_route_target_replay_pass` | `+0.094914122` | `-0.029753753` | `-0.078038929` | `-0.009961096` | `+0.093070993` | `true` |
+| `objective_knn5_v1` | `selected_route_target_replay_pass` | `+0.094890524` | `-0.030189536` | `-0.080123397` | `-0.010335098` | `+0.093313192` | `true` |
+
+Operator-block result for `objective_score_mlp_v1`:
+
+- Status: `operator_block_not_yet`
+- Cases: `62`
+- Future access clean: `true`
+- Strict target replay pass: `false`
+- Router head: `objective_score_mlp_v1`
+
+Interpretation:
+
+- The score-regression formulation is no-future clean, but it is not a viable
+  fourth-lockbox router in this form.
+- The failure is not route collapse: it predicts `28` route classes on the
+  fourth lockbox. The failure is objective transfer. Harmful replay excess
+  flips positive, so the model learned a source candidate-score surface that
+  does not preserve the target-normalized replay guard.
+- This separates two learned-router claims:
+  `objective_mlp_v1` proves a tiny learned head can be inserted safely, while
+  `objective_score_mlp_v1` falsifies naive candidate-score regression as the
+  next balanced selector.
+- The next low-risk experiment should be abstention-to-`objective_knn5_v1`:
+  use learned confidence only where it is source-validated, otherwise defer to
+  the current balanced nonparametric router.

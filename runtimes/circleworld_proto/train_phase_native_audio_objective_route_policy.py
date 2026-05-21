@@ -30,6 +30,7 @@ OBJECTIVE_ROUTE_MODELS = (
     "objective_knn1_v1",
     "objective_knn5_v1",
     "objective_mlp_v1",
+    "objective_score_mlp_v1",
 )
 
 
@@ -135,6 +136,69 @@ def _training_rows(
                 }
             )
     return rows
+
+
+def _candidate_training_rows(
+    train_sets: Sequence[tuple[Path, list[Path]]],
+    keys: Sequence[str],
+    *,
+    margin: float,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    best_by_case_route: dict[tuple[str, str], dict[str, Any]] = {}
+    diagnostics: dict[str, Any] = {
+        "raw_candidate_row_count": 0,
+        "zero_gain_candidate_row_count": 0,
+        "missing_feature_candidate_row_count": 0,
+        "duplicate_case_route_candidate_row_count": 0,
+        "source_future_access_clean": True,
+    }
+    for suite_json, delta_jsons in train_sets:
+        collect_diagnostics, collected_rows = _collect_rows(suite_json, delta_jsons, margin)
+        diagnostics["source_future_access_clean"] = bool(diagnostics["source_future_access_clean"]) and bool(
+            collect_diagnostics.get("future_access_clean")
+        )
+        features = _case_features([delta_jsons[0]])
+        for row in collected_rows:
+            diagnostics["raw_candidate_row_count"] += 1
+            if abs(_as_float(row.get("gain"))) <= 1.0e-12:
+                diagnostics["zero_gain_candidate_row_count"] += 1
+                continue
+            case_name = str(row.get("case_name", ""))
+            if case_name not in features:
+                diagnostics["missing_feature_candidate_row_count"] += 1
+                continue
+            route = _key(row)
+            route_id = _route_id(route)
+            objective = _row_objective(row)
+            candidate = {
+                "case_name": case_name,
+                "group": _case_group(case_name),
+                "suite_json": str(suite_json),
+                "feature_delta_json": str(delta_jsons[0]),
+                "route_id": route_id,
+                "route": _route_dict(route),
+                "row_objective": objective,
+                "label_metrics": {
+                    "corr_delta_vs_copy_last": row.get("corr_delta_vs_copy_last"),
+                    "mse_delta_vs_copy_last": row.get("mse_delta_vs_copy_last"),
+                    "loop_delta_vs_copy_last": row.get("loop_delta_vs_copy_last"),
+                    "harmful_replay_excess_delta_vs_copy_last": row.get(
+                        "harmful_replay_excess_delta_vs_copy_last"
+                    ),
+                    "corr_delta_vs_gain0": row.get("corr_delta_vs_gain0"),
+                },
+                "vector": _vector(features[case_name], keys),
+            }
+            key = (case_name, route_id)
+            previous = best_by_case_route.get(key)
+            if previous is not None:
+                diagnostics["duplicate_case_route_candidate_row_count"] += 1
+            if previous is None or objective > _as_float(previous.get("row_objective")):
+                best_by_case_route[key] = candidate
+    rows = [best_by_case_route[key] for key in sorted(best_by_case_route)]
+    diagnostics["candidate_row_count"] = len(rows)
+    diagnostics["candidate_route_count"] = len({str(row["route_id"]) for row in rows})
+    return rows, diagnostics
 
 
 def _fit_route_centroids(training_rows: Sequence[dict[str, Any]], means: Sequence[float], stds: Sequence[float]) -> dict[str, list[float]]:
@@ -328,6 +392,190 @@ def _predict_mlp(
     return str(route_ids[class_idx]), 1.0 - confidence
 
 
+def _best_mean_objective_route_id(training_rows: Sequence[dict[str, Any]]) -> str:
+    by_route: dict[str, list[float]] = defaultdict(list)
+    for row in training_rows:
+        by_route[str(row["route_id"])].append(_as_float(row.get("row_objective")))
+    if not by_route:
+        raise RuntimeError("No route rows available for fallback route selection")
+    return max(
+        sorted(by_route),
+        key=lambda route_id: sum(by_route[route_id]) / float(len(by_route[route_id])),
+    )
+
+
+def _score_input(
+    vector: Sequence[float],
+    route_id: str,
+    *,
+    route_ids: Sequence[str],
+    means: Sequence[float],
+    stds: Sequence[float],
+) -> list[float]:
+    route_one_hot = [1.0 if route_id == candidate else 0.0 for candidate in route_ids]
+    return [*_scale(vector, means, stds), *route_one_hot]
+
+
+def _fit_mlp_score_regressor(
+    training_rows: Sequence[dict[str, Any]],
+    *,
+    means: Sequence[float],
+    stds: Sequence[float],
+    fallback_route_id: str,
+) -> dict[str, Any]:
+    route_ids = sorted({str(row["route_id"]) for row in training_rows})
+    targets = [_as_float(row.get("row_objective")) for row in training_rows]
+    target_mean = sum(targets) / float(len(targets)) if targets else 0.0
+    target_var = sum((target - target_mean) ** 2 for target in targets) / float(len(targets)) if targets else 0.0
+    target_std = math.sqrt(target_var) if target_var > 1.0e-18 else 1.0
+    diagnostics: dict[str, Any] = {
+        "model_family": "score_mlp",
+        "candidate_row_count": len(training_rows),
+        "candidate_route_count": len(route_ids),
+        "epochs": 0,
+        "final_loss": None,
+        "training_mse": None,
+        "route_label_accuracy": 0.0,
+        "fallback_to_best_mean_source_route": False,
+        "fallback_reason": None,
+        "hidden_dim": 0,
+        "seed": 2701,
+        "route_ids": route_ids,
+        "target_mean": target_mean,
+        "target_std": target_std,
+    }
+    if len(route_ids) <= 1:
+        diagnostics.update(
+            {
+                "fallback_to_best_mean_source_route": True,
+                "fallback_reason": "single_candidate_route",
+            }
+        )
+        return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
+    if len(training_rows) < 2 or target_var <= 1.0e-18:
+        diagnostics.update(
+            {
+                "fallback_to_best_mean_source_route": True,
+                "fallback_reason": "degenerate_objective_targets",
+            }
+        )
+        return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
+
+    try:
+        import torch
+    except ImportError as exc:
+        diagnostics.update(
+            {
+                "fallback_to_best_mean_source_route": True,
+                "fallback_reason": f"torch_import_failed:{exc.__class__.__name__}",
+            }
+        )
+        return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
+
+    torch.manual_seed(int(diagnostics["seed"]))
+    try:
+        torch.set_num_threads(1)
+    except Exception:
+        diagnostics["set_num_threads_unavailable"] = True
+    try:
+        torch.use_deterministic_algorithms(True)
+    except Exception:
+        diagnostics["deterministic_algorithms_unavailable"] = True
+
+    x = torch.tensor(
+        [
+            _score_input(row["vector"], str(row["route_id"]), route_ids=route_ids, means=means, stds=stds)
+            for row in training_rows
+        ],
+        dtype=torch.float32,
+    )
+    y = torch.tensor([[(target - target_mean) / target_std] for target in targets], dtype=torch.float32)
+    if not bool(torch.isfinite(x).all()) or not bool(torch.isfinite(y).all()):
+        diagnostics.update(
+            {
+                "fallback_to_best_mean_source_route": True,
+                "fallback_reason": "nonfinite_score_training_data",
+            }
+        )
+        return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
+
+    input_dim = int(x.shape[1])
+    hidden_dim = min(24, max(4, len(route_ids) * 2, input_dim))
+    epochs = 128
+    mlp = torch.nn.Sequential(
+        torch.nn.Linear(input_dim, hidden_dim),
+        torch.nn.Tanh(),
+        torch.nn.Linear(hidden_dim, 1),
+    )
+    optimizer = torch.optim.AdamW(mlp.parameters(), lr=0.02, weight_decay=1.0e-4)
+    final_loss = float("nan")
+    for epoch in range(epochs):
+        optimizer.zero_grad(set_to_none=True)
+        predicted = mlp(x)
+        loss = torch.nn.functional.mse_loss(predicted, y)
+        if not bool(torch.isfinite(loss)):
+            diagnostics.update(
+                {
+                    "fallback_to_best_mean_source_route": True,
+                    "fallback_reason": "nonfinite_training_loss",
+                    "epochs": epoch,
+                }
+            )
+            return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
+        loss.backward()
+        optimizer.step()
+        final_loss = float(loss.detach().cpu())
+
+    with torch.no_grad():
+        predicted = (mlp(x)[:, 0] * target_std) + target_mean
+        target_tensor = torch.tensor(targets, dtype=torch.float32)
+        training_mse = float(torch.mean((predicted - target_tensor) ** 2).cpu())
+
+    diagnostics.update(
+        {
+            "epochs": epochs,
+            "final_loss": final_loss,
+            "training_mse": training_mse,
+            "hidden_dim": hidden_dim,
+        }
+    )
+    return {
+        "mode": "mlp",
+        "model": mlp,
+        "route_ids": route_ids,
+        "target_mean": target_mean,
+        "target_std": target_std,
+        "diagnostics": diagnostics,
+        "torch": torch,
+    }
+
+
+def _predict_score_mlp(
+    vector: Sequence[float],
+    *,
+    means: Sequence[float],
+    stds: Sequence[float],
+    score_mlp_state: dict[str, Any],
+) -> tuple[str, float]:
+    if score_mlp_state.get("mode") != "mlp":
+        return str(score_mlp_state["fallback_route_id"]), 1.0
+    torch = score_mlp_state["torch"]
+    model = score_mlp_state["model"]
+    route_ids = [str(route_id) for route_id in score_mlp_state["route_ids"]]
+    model.eval()
+    with torch.no_grad():
+        x = torch.tensor(
+            [_score_input(vector, route_id, route_ids=route_ids, means=means, stds=stds) for route_id in route_ids],
+            dtype=torch.float32,
+        )
+        scores = (model(x)[:, 0] * float(score_mlp_state["target_std"])) + float(score_mlp_state["target_mean"])
+        best_idx = int(torch.argmax(scores).cpu())
+        best_score = float(scores[best_idx].cpu())
+    if best_idx < 0 or best_idx >= len(route_ids):
+        return str(score_mlp_state["fallback_route_id"]), 1.0
+    return route_ids[best_idx], -best_score
+
+
 def _predict(
     vector: Sequence[float],
     *,
@@ -337,6 +585,7 @@ def _predict(
     training_rows: Sequence[dict[str, Any]],
     centroids: dict[str, list[float]],
     mlp_state: dict[str, Any] | None = None,
+    score_mlp_state: dict[str, Any] | None = None,
 ) -> tuple[str, float]:
     if model == "objective_centroid_v1":
         return _predict_centroid(vector, means=means, stds=stds, centroids=centroids)
@@ -348,6 +597,10 @@ def _predict(
         if mlp_state is None:
             raise ValueError("objective_mlp_v1 requires a trained mlp_state")
         return _predict_mlp(vector, means=means, stds=stds, mlp_state=mlp_state)
+    if model == "objective_score_mlp_v1":
+        if score_mlp_state is None:
+            raise ValueError("objective_score_mlp_v1 requires a trained score_mlp_state")
+        return _predict_score_mlp(vector, means=means, stds=stds, score_mlp_state=score_mlp_state)
     raise ValueError(f"Unknown objective route model: {model}")
 
 
@@ -416,12 +669,20 @@ def train_objective_route_policy(
     train_feature_sets = [_case_features([delta_jsons[0]]) for _, delta_jsons in train_sets]
     target_features = _case_features([target_delta_json])
     keys = _feature_keys([*train_feature_sets, target_features])
-    training_rows = _training_rows(train_sets, keys, margin=margin)
+    candidate_diagnostics: dict[str, Any] | None = None
+    if model == "objective_score_mlp_v1":
+        training_rows, candidate_diagnostics = _candidate_training_rows(train_sets, keys, margin=margin)
+    else:
+        training_rows = _training_rows(train_sets, keys, margin=margin)
     if not training_rows:
         raise RuntimeError("No objective-labeled training rows produced")
     means, stds = _fit_scaler([row["vector"] for row in training_rows])
     centroids = _fit_route_centroids(training_rows, means, stds)
-    fallback_route_id = Counter(str(row["route_id"]) for row in training_rows).most_common(1)[0][0]
+    fallback_route_id = (
+        _best_mean_objective_route_id(training_rows)
+        if model == "objective_score_mlp_v1"
+        else Counter(str(row["route_id"]) for row in training_rows).most_common(1)[0][0]
+    )
     mlp_state = (
         _fit_mlp_route_classifier(
             training_rows,
@@ -432,6 +693,19 @@ def train_objective_route_policy(
         if model == "objective_mlp_v1"
         else None
     )
+    score_mlp_state = (
+        _fit_mlp_score_regressor(
+            training_rows,
+            means=means,
+            stds=stds,
+            fallback_route_id=fallback_route_id,
+        )
+        if model == "objective_score_mlp_v1"
+        else None
+    )
+    valid_route_ids = set(centroids)
+    if score_mlp_state is not None:
+        valid_route_ids.update(str(route_id) for route_id in score_mlp_state.get("route_ids", ()))
 
     case_routes: dict[str, dict[str, Any]] = {}
     predictions: list[dict[str, Any]] = []
@@ -445,8 +719,9 @@ def train_objective_route_policy(
             training_rows=training_rows,
             centroids=centroids,
             mlp_state=mlp_state,
+            score_mlp_state=score_mlp_state,
         )
-        if route_id not in centroids:
+        if route_id not in valid_route_ids:
             route_id = fallback_route_id
             fallback_prediction_count += 1
         route = _route_from_id(route_id)
@@ -463,10 +738,21 @@ def train_objective_route_policy(
 
     if mlp_state is not None and mlp_state.get("mode") != "mlp":
         fallback_prediction_count = len(predictions)
+    if score_mlp_state is not None and score_mlp_state.get("mode") != "mlp":
+        fallback_prediction_count = len(predictions)
     diagnostics = (
         {**mlp_state["diagnostics"], "total": len(training_rows), "fallback_prediction_count": fallback_prediction_count}
         if mlp_state is not None
-        else _leave_one_accuracy(training_rows, model=model)
+        else (
+            {
+                **score_mlp_state["diagnostics"],
+                "total": len(training_rows),
+                "fallback_prediction_count": fallback_prediction_count,
+                "candidate_diagnostics": candidate_diagnostics or {},
+            }
+            if score_mlp_state is not None
+            else _leave_one_accuracy(training_rows, model=model)
+        )
     )
     summary = {
         "schema": "phase_native_audio_objective_route_policy_v1",
