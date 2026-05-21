@@ -75,12 +75,34 @@ Runtimes answer:
 
 Both must be tracked.
 
+### 5. Research lanes are not runtime families
+
+An operating lane can define a claim, constitution, or evaluator without creating
+a new runtime family.
+
+The Resonant Attention / Post-Token Memory lane is currently such a lane:
+
+- It may evaluate Circleworld packets, childworld records, dense relational
+  signatures, and branch-law diagnostics.
+- It does not currently define a new checkpoint schema or entrypoint.
+- It does not rename `circleworld_proto` or `positive_replacement`.
+- `relational_qkv_v2` remains a local Circleworld branch-QKV precursor, not the
+  runtime contract for full RAFA attention.
+
+If this lane later owns a distinct loader, checkpoint schema, or inference
+entrypoint, it must be added as a runtime family or adapter in the registries.
+
 ## Current Runtime Families
 
 - `stage4_blackwell_14`
 - `stage4_blackwell_16`
 - `diffusion_parent_v3`
 - `circleworld_proto`
+
+Current docs-only research lanes using existing runtime artifacts:
+
+- `resonant_attention_post_token_memory_lane` over `circleworld_proto` and
+  dense-signature artifacts; no separate runtime contract yet.
 
 ## Current Shared Foundation Modules
 
@@ -103,3 +125,47 @@ Before a new artifact is treated as canonical, we should be able to answer:
 4. Which seed/config pair was used?
 
 If those answers are missing, the artifact is not canonical.
+
+## Script Cartography Standard
+
+RAFA now has a repo-wide script inventory and redundancy audit layer:
+
+- [D:\RAFA\project_cartography\README.md](D:\RAFA\project_cartography\README.md)
+- [D:\RAFA\tools\audit_project_scripts.py](D:\RAFA\tools\audit_project_scripts.py)
+- [D:\RAFA\docs\architecture\PROJECT_SCRIPT_INVENTORY.md](D:\RAFA\docs\architecture\PROJECT_SCRIPT_INVENTORY.md)
+- [D:\RAFA\docs\architecture\PROJECT_SCRIPT_INVENTORY.json](D:\RAFA\docs\architecture\PROJECT_SCRIPT_INVENTORY.json)
+- [D:\RAFA\docs\architecture\PROJECT_REDUNDANCY_HOTSPOTS.md](D:\RAFA\docs\architecture\PROJECT_REDUNDANCY_HOTSPOTS.md)
+- [D:\RAFA\docs\architecture\PROJECT_SCAFFOLDING_GUIDE.md](D:\RAFA\docs\architecture\PROJECT_SCAFFOLDING_GUIDE.md)
+- [D:\RAFA\tools\audit_project_usage.py](D:\RAFA\tools\audit_project_usage.py)
+- [D:\RAFA\docs\architecture\PROJECT_USAGE_MAP.md](D:\RAFA\docs\architecture\PROJECT_USAGE_MAP.md)
+- [D:\RAFA\docs\architecture\PROJECT_USAGE_MAP.json](D:\RAFA\docs\architecture\PROJECT_USAGE_MAP.json)
+- [D:\RAFA\docs\architecture\PROJECT_ARTIFACT_INVENTORY.md](D:\RAFA\docs\architecture\PROJECT_ARTIFACT_INVENTORY.md)
+
+Every large experiment burst should regenerate the inventory before cleanup
+or promotion decisions:
+
+```powershell
+python tools/audit_project_scripts.py
+python tools/audit_project_usage.py
+```
+
+The inventory does not authorize deletion. It classifies scripts by lane, role,
+lifecycle, manifest/documentation visibility, and redundancy hotspots so cleanup
+can be staged without breaking historical artifacts.
+
+The usage map adds static evidence for imports, manifest/report references,
+artifact groups, and cold artifact candidates. It normalizes common top-level
+artifact aliases such as `outputs/`, `eval/`, `logs/`, and `checkpoints_*`
+into the consolidated `artifacts/` tree when possible, but it still remains a
+static analysis layer rather than proof that a file is safe to remove.
+
+The `project_cartography/` root folder is a convenience mirror for navigation.
+The canonical generated outputs remain under `docs/architecture/` and
+`docs/reports/`, and the runnable auditors remain under `tools/`.
+
+Future scripts should follow the identity contract in
+`PROJECT_SCAFFOLDING_GUIDE.md`: declare runtime/lane, role, outputs,
+provenance inputs, and future-access stance for audio experiments. Helper
+logic repeated across three or more scripts should be marked for extraction;
+helper logic repeated across five or more scripts should generally be extracted
+before adding another one-off variant.

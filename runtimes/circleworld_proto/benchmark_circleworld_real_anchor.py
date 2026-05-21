@@ -6,7 +6,7 @@ import json
 import sys
 import wave
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 import numpy as np
 
@@ -16,6 +16,14 @@ for path in (ROOT, RUNTIME):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
+from benchmark_audio_continuity import (
+    DEFAULT_CONTINUITY_VIEW_SECONDS,
+    DEFAULT_CONTINUITY_WINDOWS_SECONDS,
+    analyze_wav,
+    compare_continuity_summaries,
+    parse_seconds_csv,
+    summarize_continuity_rows,
+)
 from export_circleworld_audio import render_circleworld_audio, render_reference_audio
 
 
@@ -33,6 +41,18 @@ def _load_cases_json(path: Path | None) -> dict[str, Path]:
         return dict(DEFAULT_CASES)
     payload = json.loads(path.read_text(encoding="utf-8-sig"))
     return {str(name): Path(str(wav_path)) for name, wav_path in payload.items()}
+
+
+def _normalize_seconds(values: Sequence[float] | None, default: Sequence[float]) -> tuple[float, ...]:
+    normalized: list[float] = []
+    for raw in values if values is not None else default:
+        value = float(raw)
+        if value <= 0.0:
+            continue
+        if any(abs(value - prev) <= 1e-9 for prev in normalized):
+            continue
+        normalized.append(value)
+    return tuple(sorted(normalized))
 
 
 def _wav_bytes(path: Path) -> bytes:
@@ -94,10 +114,20 @@ def run_benchmark(
     phase_blend: float,
     rerender_check: bool = True,
     cases: dict[str, Path] | None = None,
+    include_continuity_diagnostics: bool = True,
+    continuity_min_loop_seconds: float = 0.5,
+    continuity_max_loop_seconds: float = 4.0,
+    continuity_chunk_seconds: float = 2.0,
+    continuity_windows: Sequence[float] | None = None,
+    continuity_view_seconds: Sequence[float] | None = None,
 ) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
+    reference_continuity_rows: list[dict[str, Any]] = []
+    circleworld_continuity_rows: list[dict[str, Any]] = []
     active_cases = dict(cases or DEFAULT_CASES)
+    normalized_continuity_windows = _normalize_seconds(continuity_windows, DEFAULT_CONTINUITY_WINDOWS_SECONDS)
+    normalized_continuity_views = _normalize_seconds(continuity_view_seconds, DEFAULT_CONTINUITY_VIEW_SECONDS)
 
     for name, wav_path in active_cases.items():
         ref_path = out_dir / f"{name}_reference.wav"
@@ -133,6 +163,31 @@ def run_benchmark(
             rerender_hash = _sha256(rerender_path)
             rerender_match = rerender_hash == _sha256(cw_path)
 
+        macro_time_profile = None
+        if include_continuity_diagnostics:
+            reference_continuity = analyze_wav(
+                wav_path=ref_path,
+                min_loop_seconds=continuity_min_loop_seconds,
+                max_loop_seconds=continuity_max_loop_seconds,
+                chunk_seconds=continuity_chunk_seconds,
+                continuity_windows=normalized_continuity_windows,
+                view_seconds=normalized_continuity_views,
+            )
+            circleworld_continuity = analyze_wav(
+                wav_path=cw_path,
+                min_loop_seconds=continuity_min_loop_seconds,
+                max_loop_seconds=continuity_max_loop_seconds,
+                chunk_seconds=continuity_chunk_seconds,
+                continuity_windows=normalized_continuity_windows,
+                view_seconds=normalized_continuity_views,
+            )
+            reference_continuity_rows.append(reference_continuity)
+            circleworld_continuity_rows.append(circleworld_continuity)
+            macro_time_profile = {
+                "reference": reference_continuity,
+                "circleworld": circleworld_continuity,
+            }
+
         row = {
             "name": name,
             "source_wav": str(wav_path),
@@ -146,6 +201,8 @@ def run_benchmark(
             "circleworld_meta": cw_meta,
             "reference_meta": ref_meta,
         }
+        if macro_time_profile is not None:
+            row["macro_time_profile"] = macro_time_profile
         rows.append(row)
 
     summary = {
@@ -164,6 +221,39 @@ def run_benchmark(
         "all_circleworld_bitwise_stable": bool(all(bool(r["circleworld_bitwise_stable"]) for r in rows if r["circleworld_bitwise_stable"] is not None)),
         "rows": rows,
     }
+    if include_continuity_diagnostics and reference_continuity_rows and circleworld_continuity_rows:
+        reference_summary = summarize_continuity_rows(
+            reference_continuity_rows,
+            folder=out_dir,
+            pattern="*_reference.wav",
+            min_loop_seconds=continuity_min_loop_seconds,
+            max_loop_seconds=continuity_max_loop_seconds,
+            chunk_seconds=continuity_chunk_seconds,
+            continuity_windows=normalized_continuity_windows,
+            view_seconds=normalized_continuity_views,
+        )
+        circleworld_summary = summarize_continuity_rows(
+            circleworld_continuity_rows,
+            folder=out_dir,
+            pattern="*_circleworld.wav",
+            min_loop_seconds=continuity_min_loop_seconds,
+            max_loop_seconds=continuity_max_loop_seconds,
+            chunk_seconds=continuity_chunk_seconds,
+            continuity_windows=normalized_continuity_windows,
+            view_seconds=normalized_continuity_views,
+        )
+        summary["macro_time_diagnostics"] = {
+            "continuity_windows_seconds": [float(v) for v in normalized_continuity_windows],
+            "continuity_view_seconds": [float(v) for v in normalized_continuity_views],
+            "reference": reference_summary,
+            "circleworld": circleworld_summary,
+            "delta": compare_continuity_summaries(
+                circleworld_summary,
+                reference_summary,
+                lhs_label="circleworld",
+                rhs_label="reference",
+            ),
+        }
     (out_dir / "benchmark_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return summary
 
@@ -177,6 +267,20 @@ def main() -> None:
     ap.add_argument("--phase-blend", type=float, default=1.0)
     ap.add_argument("--no-rerender-check", action="store_true")
     ap.add_argument("--cases-json", default=None, help="Optional JSON file mapping case names to WAV paths.")
+    ap.add_argument("--no-continuity-diagnostics", action="store_true")
+    ap.add_argument("--continuity-min-loop-seconds", type=float, default=0.5)
+    ap.add_argument("--continuity-max-loop-seconds", type=float, default=4.0)
+    ap.add_argument("--continuity-chunk-seconds", type=float, default=2.0)
+    ap.add_argument(
+        "--continuity-windows",
+        default="1,2,4",
+        help="Comma-separated chunk sizes for additive continuity summaries.",
+    )
+    ap.add_argument(
+        "--continuity-view-seconds",
+        default="4,10",
+        help="Comma-separated macro-time views to compute for each rendered clip.",
+    )
     args = ap.parse_args()
 
     summary = run_benchmark(
@@ -187,6 +291,12 @@ def main() -> None:
         phase_blend=args.phase_blend,
         rerender_check=not bool(args.no_rerender_check),
         cases=_load_cases_json(Path(args.cases_json)) if args.cases_json else None,
+        include_continuity_diagnostics=not bool(args.no_continuity_diagnostics),
+        continuity_min_loop_seconds=float(args.continuity_min_loop_seconds),
+        continuity_max_loop_seconds=float(args.continuity_max_loop_seconds),
+        continuity_chunk_seconds=float(args.continuity_chunk_seconds),
+        continuity_windows=parse_seconds_csv(args.continuity_windows, DEFAULT_CONTINUITY_WINDOWS_SECONDS),
+        continuity_view_seconds=parse_seconds_csv(args.continuity_view_seconds, DEFAULT_CONTINUITY_VIEW_SECONDS),
     )
     print(json.dumps(summary, indent=2))
 
