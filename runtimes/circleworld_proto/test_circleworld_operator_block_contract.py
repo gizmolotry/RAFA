@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -28,6 +29,7 @@ from profile_registry import (  # noqa: E402
     validate_route_policy_id,
 )
 from run_circleworld_operator_block import select_route_from_policy_payload  # noqa: E402
+import score_phase_native_audio_prefix_router_scout as prefix_router_scout  # noqa: E402
 import train_phase_native_audio_objective_route_policy as objective_trainer  # noqa: E402
 
 
@@ -173,6 +175,54 @@ def test_objective_resonant_memory_v1_is_registered() -> None:
     assert "objective_resonant_memory_v1" in objective_trainer.OBJECTIVE_ROUTE_MODELS
     assert "objective_resonant_memory_v1" in PHASE_NATIVE_AUDIO_OBJECTIVE_ROUTE_MODELS
     assert validate_route_policy_id("objective_resonant_memory_v1") == "objective_resonant_memory_v1"
+
+
+def test_prefix_case_features_add_no_future_reentry_query_signals() -> None:
+    payload = {
+        "cases": [
+            {
+                "name": "family__case001",
+                "circleworld_meta": {"phase_agreement": 0.25},
+                "prefix_stft_frames": 10,
+                "future_stft_frames": 10,
+                "rows": [
+                    {
+                        "mechanism_flags": {
+                            "mean_phase_velocity_coherence": 0.75,
+                            "mean_prefix_magnitude_stability": 0.60,
+                            "mean_energy_weight": 0.40,
+                            "mean_abs_raw_delta": 0.12,
+                            "target_future_metric_used": False,
+                        },
+                    },
+                    {
+                        "mechanism_flags": {
+                            "mean_phase_velocity_coherence": 0.05,
+                            "mean_prefix_magnitude_stability": 0.05,
+                            "mean_energy_weight": 99.0,
+                            "mean_abs_raw_delta": 99.0,
+                            "target_future_stft_phase_accessed": True,
+                        },
+                    },
+                ],
+            }
+        ]
+    }
+    with tempfile.TemporaryDirectory(prefix="reentry_query_features_", dir=Path.cwd()) as out_dir:
+        delta_json = Path(out_dir) / "delta.json"
+        delta_json.write_text(json.dumps(payload), encoding="utf-8")
+        features = prefix_router_scout._case_features([delta_json])
+
+    row = features["family__case001"]
+    assert row["circleworld_meta.phase_agreement"] == pytest.approx(0.25)
+    assert row["circleworld_meta.reentry_query_phase_velocity_coherence_mean"] == pytest.approx(0.75)
+    assert row["circleworld_meta.reentry_query_phase_velocity_incoherence_mean"] == pytest.approx(0.25)
+    assert row["circleworld_meta.reentry_query_prefix_magnitude_stability_mean"] == pytest.approx(0.60)
+    assert row["circleworld_meta.reentry_query_prefix_magnitude_instability_mean"] == pytest.approx(0.40)
+    assert row["circleworld_meta.reentry_query_prefix_energy_weight_mean"] == pytest.approx(0.40)
+    assert row["circleworld_meta.reentry_query_circleworld_raw_delta_abs_mean"] == pytest.approx(0.12)
+    assert objective_trainer._feature_group("circleworld_meta.reentry_query_phase_velocity_incoherence_mean") == "reentry"
+    assert not any("target_" in key for key in row)
 
 
 def test_objective_mlp_v1_training_emits_case_table_policy(

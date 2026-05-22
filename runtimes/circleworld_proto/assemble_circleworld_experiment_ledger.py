@@ -16,6 +16,7 @@ OUTPUTS_DIR = ROOT / "outputs" / "circleworld_proto"
 DEFAULT_OUTPUT_MD = REPORTS_DIR / "CIRCLEWORLD_EXPERIMENT_LEDGER_2026-05-13.md"
 DEFAULT_OUTPUT_JSONL = REPORTS_DIR / "CIRCLEWORLD_EXPERIMENT_LEDGER_2026-05-13.jsonl"
 DEFAULT_SINCE = "2026-04-20"
+REPORT_GLOBS = ("CIRCLEWORLD*.md", "RAFA_PHASE_NATIVE*.md")
 
 DATE_RE = re.compile(r"(20\d{2}-\d{2}-\d{2})")
 WINDOWS_PATH_RE = re.compile(r"D:\\RAFA\\[^\s`\r\n,;)]+")
@@ -402,11 +403,13 @@ def _entry_from_report(path: Path, max_json_bytes: int) -> LedgerEntry:
 def _report_paths(reports_dir: Path, since: str, max_reports: int) -> list[Path]:
     if not reports_dir.exists():
         return []
-    paths = [
-        path
-        for path in reports_dir.glob("CIRCLEWORLD*.md")
-        if _date_from_path(path) >= since and path.name != DEFAULT_OUTPUT_MD.name
-    ]
+    paths: list[Path] = []
+    for pattern in REPORT_GLOBS:
+        paths.extend(
+            path
+            for path in reports_dir.glob(pattern)
+            if _date_from_path(path) >= since and path.name != DEFAULT_OUTPUT_MD.name
+        )
     return sorted(paths, key=lambda p: (_date_from_path(p), p.stat().st_mtime), reverse=True)[:max_reports]
 
 

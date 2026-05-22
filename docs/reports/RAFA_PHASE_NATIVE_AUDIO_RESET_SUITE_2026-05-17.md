@@ -1239,3 +1239,92 @@ Interpretation:
   add explicit no-future reentry/query features to `_case_features`, or build
   an abstaining resonant-memory head that defers to `objective_knn5_v1` unless
   route activation margin and component coverage are source-validated.
+
+## Reentry Query Feature Router Attempts - 2026-05-22
+
+This pass rejected KNN fallback as a development path and instead tested whether
+the non-KNN learned/resonant route heads were missing a no-future replay query
+surface.
+
+Implementation change:
+
+- `score_phase_native_audio_prefix_router_scout.py` now extracts explicit
+  no-future reentry-query features from per-row `mechanism_flags`, ignoring any
+  row that declares future/target leakage.
+- `train_phase_native_audio_objective_route_policy.py` now prioritizes
+  `reentry`/`loop`/`temporal` feature grouping before generic `phase`, so
+  `reentry_query_phase_*` features actually land in the reentry component.
+
+New reentry-query features:
+
+- `circleworld_meta.reentry_query_circleworld_raw_delta_abs_mean`
+- `circleworld_meta.reentry_query_phase_velocity_coherence_mean`
+- `circleworld_meta.reentry_query_phase_velocity_incoherence_mean`
+- `circleworld_meta.reentry_query_prefix_energy_weight_mean`
+- `circleworld_meta.reentry_query_prefix_magnitude_instability_mean`
+- `circleworld_meta.reentry_query_prefix_magnitude_stability_mean`
+
+Artifacts:
+
+- Enriched resonant policy:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-22_objective_resonant_memory_v1_reentry_features_original_fresh_third_to_fourth\phase_native_audio_objective_route_policy.json`
+- Enriched resonant selected-route:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_selected_route_2026-05-22_objective_resonant_memory_v1_reentry_features_fourth_full\phase_native_audio_selected_route.json`
+- Enriched resonant operator-block:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-22_objective_resonant_memory_v1_reentry_features_fourth_full\circleworld_operator_block_v1.json`
+- Enriched classifier MLP policy:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-22_objective_mlp_v1_reentry_features_original_fresh_third_to_fourth\phase_native_audio_objective_route_policy.json`
+- Enriched classifier MLP operator-block:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-22_objective_mlp_v1_reentry_features_fourth_full\circleworld_operator_block_v1.json`
+- Enriched score MLP policy:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-22_objective_score_mlp_v1_reentry_features_original_fresh_third_to_fourth\phase_native_audio_objective_route_policy.json`
+- Enriched score MLP operator-block:
+  `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-22_objective_score_mlp_v1_reentry_features_fourth_full\circleworld_operator_block_v1.json`
+- Six-run comparison:
+  `D:\RAFA\outputs\circleworld_proto\phase_native_audio_route_policy_comparison_2026-05-22_reentry_feature_attempts_fourth\phase_native_audio_route_policy_comparison.json`
+
+Feature-surface audit:
+
+| Check | Result |
+| --- | ---: |
+| Fourth-lockbox cases | `62` |
+| Feature count after extraction | `124` |
+| Reentry feature count before | `0` |
+| Reentry feature count after | `6` |
+| Enriched resonant leave-one route-label accuracy | `0.118279570` |
+
+Fourth-lockbox operator-block comparison:
+
+| Router | Strict | Future clean | Beats raw | Corr-copy | MSE-copy | Loop-copy | Reentry-copy | Harm-delta | Corr-gain0 | Row objective |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `old_objective_mlp_v1` | `true` | `true` | `true` | `+0.092800381` | `-0.030052639` | `-0.078464776` | `+0.026755963` | `-0.010494122` | `+0.092788538` | `+0.082267108` |
+| `old_objective_score_mlp_v1` | `false` | `true` | `false` | `+0.053442600` | `-0.023873799` | `-0.070617068` | `+0.044122135` | `+0.006819712` | `+0.054797230` | `+0.022061384` |
+| `old_objective_resonant_memory_v1` | `false` | `true` | `false` | `+0.036257724` | `-0.022778305` | `-0.043177264` | `+0.042260223` | `+0.000573753` | `+0.034580908` | `+0.001308486` |
+| `reentry_objective_mlp_v1` | `true` | `true` | `true` | `+0.093308172` | `-0.028538295` | `-0.083435935` | `+0.027583936` | `-0.010720389` | `+0.092690453` | `+0.083630860` |
+| `reentry_objective_score_mlp_v1` | `true` | `true` | `true` | `+0.063773463` | `-0.026760185` | `-0.068364567` | `+0.038347875` | `-0.001291646` | `+0.062323908` | `+0.032522740` |
+| `reentry_objective_resonant_memory_v1` | `true` | `true` | `false` | `+0.028939929` | `-0.023032581` | `-0.040554935` | `+0.040479539` | `-0.000899973` | `+0.027263112` | `-0.004733058` |
+
+Interpretation:
+
+- The missing reentry/query surface was a real bottleneck. After adding it,
+  `objective_score_mlp_v1` and `objective_resonant_memory_v1` both flip from
+  strict-failing to strict-clean on the fourth lockbox operator block.
+- The best current non-KNN learned route head is
+  `reentry_objective_mlp_v1`. It slightly improves correlation, loop reduction,
+  harmful replay excess, and row objective over the earlier classifier MLP,
+  though MSE is slightly worse.
+- The resonant-memory head is philosophically closer to RAFA attention/memory,
+  but remains weaker as an audio route selector. Its strict-clean flip is
+  evidence that the architecture should keep developing, not evidence that this
+  v1 memory is promotional.
+- KNN remains only a historical/reference baseline for this note. The active
+  development path is non-KNN learned/resonant routing with stronger query
+  features and source-validated component coverage.
+
+Next action:
+
+- Test a non-KNN margin/coverage-aware route head that uses reentry/q/phase
+  component coverage and activation margin directly, without abstaining back to
+  KNN.
+- Test pairwise/ranking objective training against the balanced row objective
+  instead of either best-route classification or naive scalar score regression.

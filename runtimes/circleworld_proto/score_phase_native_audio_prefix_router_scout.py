@@ -21,6 +21,28 @@ from score_phase_native_audio_target_replay_oracle import (
 OUTPUT_JSON = "phase_native_audio_prefix_router_scout.json"
 OUTPUT_MD = "PHASE_NATIVE_AUDIO_PREFIX_ROUTER_SCOUT.md"
 
+NO_FUTURE_ROW_FLAG_KEYS = (
+    "future_target_audio_used",
+    "future_target_magnitude_used",
+    "future_target_magnitude_reused",
+    "future_target_phase_used",
+    "future_target_phase_reused",
+    "future_target_metric_used",
+    "target_future_audio_used",
+    "target_future_magnitude_used",
+    "target_future_stft_magnitude_accessed",
+    "target_future_phase_used",
+    "target_future_stft_phase_accessed",
+    "target_future_metric_used",
+)
+
+REENTRY_MECHANISM_FLAG_KEYS = (
+    "mean_phase_velocity_coherence",
+    "mean_prefix_magnitude_stability",
+    "mean_energy_weight",
+    "mean_abs_raw_delta",
+)
+
 
 def _json_load(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8-sig"))
@@ -82,6 +104,71 @@ def _select_row_for_key(
     return max(fallback, key=_row_objective), True
 
 
+def _finite_float(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return float(value)
+    if isinstance(value, (int, float)) and math.isfinite(float(value)):
+        return float(value)
+    return None
+
+
+def _row_has_future_leakage(row: dict[str, Any]) -> bool:
+    for key in NO_FUTURE_ROW_FLAG_KEYS:
+        if bool(row.get(key, False)):
+            return True
+    for section_name in ("mechanism_flags", "mask_flags", "phase_seed_flags", "magnitude_flags"):
+        section = row.get(section_name, {})
+        if not isinstance(section, dict):
+            continue
+        for key in NO_FUTURE_ROW_FLAG_KEYS:
+            if bool(section.get(key, False)):
+                return True
+    return False
+
+
+def _row_section_values(case: dict[str, Any], section_name: str, key: str) -> list[float]:
+    values: list[float] = []
+    for row in case.get("rows", []):
+        if not isinstance(row, dict) or _row_has_future_leakage(row):
+            continue
+        section = row.get(section_name, {})
+        if not isinstance(section, dict):
+            continue
+        value = _finite_float(section.get(key))
+        if value is not None:
+            values.append(value)
+    return values
+
+
+def _add_reentry_query_features(out: dict[str, float], case: dict[str, Any]) -> None:
+    """Expose prefix/Circleworld route-query signals without target-future metrics."""
+    observed: dict[str, float] = {}
+    for key in REENTRY_MECHANISM_FLAG_KEYS:
+        values = _row_section_values(case, "mechanism_flags", key)
+        if values:
+            observed[key] = _mean(values)
+
+    phase_coherence = observed.get("mean_phase_velocity_coherence")
+    if phase_coherence is not None:
+        clipped = max(0.0, min(1.0, phase_coherence))
+        out["circleworld_meta.reentry_query_phase_velocity_coherence_mean"] = clipped
+        out["circleworld_meta.reentry_query_phase_velocity_incoherence_mean"] = 1.0 - clipped
+
+    magnitude_stability = observed.get("mean_prefix_magnitude_stability")
+    if magnitude_stability is not None:
+        clipped = max(0.0, min(1.0, magnitude_stability))
+        out["circleworld_meta.reentry_query_prefix_magnitude_stability_mean"] = clipped
+        out["circleworld_meta.reentry_query_prefix_magnitude_instability_mean"] = 1.0 - clipped
+
+    energy_weight = observed.get("mean_energy_weight")
+    if energy_weight is not None:
+        out["circleworld_meta.reentry_query_prefix_energy_weight_mean"] = energy_weight
+
+    raw_delta = observed.get("mean_abs_raw_delta")
+    if raw_delta is not None:
+        out["circleworld_meta.reentry_query_circleworld_raw_delta_abs_mean"] = raw_delta
+
+
 def _case_features(delta_jsons: Sequence[Path]) -> dict[str, dict[str, float]]:
     features: dict[str, dict[str, float]] = {}
     for delta_json in delta_jsons:
@@ -93,14 +180,14 @@ def _case_features(delta_jsons: Sequence[Path]) -> dict[str, dict[str, float]]:
             meta = case.get("circleworld_meta", {})
             row: dict[str, float] = {}
             for key, value in sorted(meta.items()):
-                if isinstance(value, bool):
-                    row[f"circleworld_meta.{key}"] = float(value)
-                elif isinstance(value, (int, float)) and math.isfinite(float(value)):
-                    row[f"circleworld_meta.{key}"] = float(value)
+                numeric = _finite_float(value)
+                if numeric is not None:
+                    row[f"circleworld_meta.{key}"] = numeric
+            _add_reentry_query_features(row, case)
             for key in ("prefix_stft_frames", "future_stft_frames", "prefix_samples", "future_samples"):
-                value = case.get(key)
-                if isinstance(value, (int, float)) and math.isfinite(float(value)):
-                    row[f"case.{key}"] = float(value)
+                numeric = _finite_float(case.get(key))
+                if numeric is not None:
+                    row[f"case.{key}"] = numeric
             features[name] = row
     return features
 

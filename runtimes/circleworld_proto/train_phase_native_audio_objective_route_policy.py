@@ -116,6 +116,8 @@ def _distance(a: Sequence[float], b: Sequence[float]) -> float:
 
 def _feature_group(key: str) -> str:
     lower = str(key).lower()
+    if "reentry" in lower or "loop" in lower or "temporal" in lower or "time" in lower:
+        return "reentry"
     if "phase" in lower or "phasor" in lower:
         return "phase"
     if "ramanujan" in lower or lower.startswith("q_") or "_q_" in lower or lower.endswith("_q"):
@@ -126,8 +128,6 @@ def _feature_group(key: str) -> str:
         return "support"
     if "branch" in lower or "child" in lower or "mode" in lower:
         return "branch"
-    if "reentry" in lower or "loop" in lower or "temporal" in lower or "time" in lower:
-        return "reentry"
     if "case" in lower or "horizon" in lower:
         return "case"
     return "other"
