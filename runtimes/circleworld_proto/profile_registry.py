@@ -59,6 +59,7 @@ PHASE_NATIVE_AUDIO_OBJECTIVE_ROUTE_MODELS: tuple[str, ...] = (
     "objective_mlp_v1",
     "objective_score_mlp_v1",
     "objective_rank_mlp_v1",
+    "objective_rank_embed_mlp_v1",
     "objective_resonant_memory_v1",
 )
 

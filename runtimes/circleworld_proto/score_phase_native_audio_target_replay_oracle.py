@@ -22,6 +22,7 @@ from score_phase_native_audio_reentry_metric_audit import _wave_metrics  # noqa:
 
 OUTPUT_JSON = "phase_native_audio_target_replay_oracle_score.json"
 OUTPUT_MD = "PHASE_NATIVE_AUDIO_TARGET_REPLAY_ORACLE_SCORE.md"
+UNSPECIFIED_SOURCE = "<unspecified>"
 
 
 def _json_load(path: Path) -> dict[str, Any]:
@@ -112,6 +113,11 @@ def _dedupe_best_by_case(rows: Sequence[dict[str, Any]]) -> list[dict[str, Any]]
     return [best_by_case[name] for name in sorted(best_by_case)]
 
 
+def _source_count_key(row: dict[str, Any]) -> str:
+    source = str(row.get("delta_source", "")).strip()
+    return source if source else UNSPECIFIED_SOURCE
+
+
 def _aggregate_selected(rows: Sequence[dict[str, Any]], label: str) -> dict[str, Any]:
     raw_row_count = len(rows)
     rows = _dedupe_best_by_case(rows)
@@ -129,7 +135,7 @@ def _aggregate_selected(rows: Sequence[dict[str, Any]], label: str) -> dict[str,
     for row in rows:
         key_counts[" / ".join(str(part) for part in _key(row))] += 1
         group_counts[str(row.get("group", _case_group(str(row.get("case_name", "")))))] += 1
-        source_counts[str(row.get("delta_source", ""))] += 1
+        source_counts[_source_count_key(row)] += 1
     strict = bool(
         rows
         and _mean(corr) > 0.0

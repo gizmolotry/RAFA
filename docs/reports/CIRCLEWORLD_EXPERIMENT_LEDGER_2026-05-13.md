@@ -1,12 +1,12 @@
 # Circleworld Experiment Ledger - 2026-05-13
 
 - Schema: `circleworld_experiment_ledger_v1`
-- Generated at: `2026-05-22T09:16:47Z`
+- Generated at: `2026-05-22T09:46:26Z`
 - Report scan root: `docs\reports`
 - Output scan root: `D:\RAFA\outputs\circleworld_proto`
-- JSONL sidecar: `D:\RAFA_worktrees\circleworld\docs\reports\CIRCLEWORLD_EXPERIMENT_LEDGER_2026-05-13.jsonl`
+- JSONL sidecar: `docs\reports\CIRCLEWORLD_EXPERIMENT_LEDGER_2026-05-13.jsonl`
 - Since: `2026-05-17`
-- Entries: `23` total, `3` report-derived, `20` output-only
+- Entries: `24` total, `4` report-derived, `20` output-only
 
 ## Scope
 
@@ -16,6 +16,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 
 | date | source | claim/test | key metrics | artifacts |
 | --- | --- | --- | --- | ---: |
+| 2026-05-22 | report | This pass tested two learned Circleworld components without returning to KNN: | `final_mean_mae`=6.584e-05; `max_holdout_mae`=0.00175647; `mean_holdout_mae`=0.00037802; `sibling_case_count`=12 | 9 |
 | 2026-05-22 | report | Two non-KNN GPU-backed Circleworld attempts were tested: | `training_pair_accuracy`=0.77504; `training_top1_accuracy`=0.737179; `reentry_objective_score_mlp_v1`=[0.0637735, -0.0267602, -0.0683646]; `training_diagnostics.route_label_accuracy`=0.737179 | 7 |
 | 2026-05-22 | report | Adding explicit no-future reentry/query features to the Circleworld phase-native route feature surface improves non-KNN learned/resonant... | `old_objective_score_mlp_v1`=[0.0534426, -0.0238738, -0.0706171]; `reentry_objective_score_mlp_v1`=[0.0637735, -0.0267602, -0.0683646]; `training_diagnostics.training_accuracy`=1; `training_diagnostics.route_label_accuracy`=1 | 7 |
 | 2026-05-21 | output_json | Output artifact scan: phase_native_audio_objective_policy_audit_v1 | `training_diagnostics.route_label_accuracy`=0.102151 | 1 |
@@ -42,7 +43,45 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 
 ## Ledger Entries
 
-### 1. 2026-05-22 - Two non-KNN GPU-backed Circleworld attempts were tested:
+### 1. 2026-05-22 - This pass tested two learned Circleworld components without returning to KNN:
+
+- Source kind: `report`
+- Source path: `docs\reports\CIRCLEWORLD_PHASE_NATIVE_RANK_EMBED_AND_LEARNED_BRANCH_LAW_2026-05-22.md`
+- Claim/test: This pass tested two learned Circleworld components without returning to KNN:
+- Interpretation: The route-embedding head is a valid non-KNN learned route candidate, but not a promotion over the reentry-feature MLP. It should stay as an architectural candidate because it is closer to "score candidate law objects" than a plain classifier, but the current metric leader remains reentry_objective_mlp_v1.
+- Limitations: Not explicitly reconstructed from this report.
+- Next action: Review source report and linked artifacts before promotion.
+- Metrics:
+  - `final_mean_mae`: `6.584e-05`
+  - `max_holdout_mae`: `0.00175647`
+  - `mean_holdout_mae`: `0.00037802`
+  - `sibling_case_count`: `12`
+  - `objective_score_mlp_v1`: `[0.0637735, -0.0267602, -0.0683646]`
+  - `training_pair_accuracy`: `0.750401`
+  - `training_top1_accuracy`: `0.74359`
+  - `mean_isolated_coherence`: `0.67626`
+  - `mean_sibling_phase_delta`: `0.451748`
+  - `sandbox_mean_writeback_delta`: `3e-08`
+  - `mean_parent_writeback_divergence`: `1.16e-06`
+  - `training_diagnostics.route_label_accuracy`: `0.74359`
+  - `training_diagnostics.training_pair_accuracy`: `0.750401`
+  - `training_diagnostics.training_top1_accuracy`: `0.74359`
+  - `training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||1`: `156`
+  - `training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||2`: `156`
+  - `training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||3`: `156`
+  - `training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||4`: `156`
+- Artifact paths:
+  - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-22_objective_rank_embed_mlp_v1_cuda_reentry_features_original_fresh_third_to_fourth\phase_native_audio_objective_route_policy.json`
+  - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_selected_route_2026-05-22_objective_rank_embed_mlp_v1_cuda_reentry_features_fourth_full\phase_native_audio_selected_route.json`
+  - `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-22_objective_rank_embed_mlp_v1_cuda_reentry_features_fourth_full\circleworld_operator_block_v1.json`
+  - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_route_policy_comparison_2026-05-22_rank_embed_vs_reentry_attempts_fourth\phase_native_audio_route_policy_comparison.json`
+  - `D:\RAFA\outputs\circleworld_proto\shadow_learned_branch_law_2026-05-22_cuda_h1024_e30000\shadow_branch_law_training.json`
+  - `D:\RAFA\outputs\circleworld_proto\learned_branch_law_child_ifs_assay_2026-05-22_causal_guarded_hi\learned_branch_law_assay.json`
+  - `D:\RAFA\outputs\circleworld_proto\learned_branch_law_child_ifs_assay_2026-05-22_causal_guarded_gain0p5\learned_branch_law_assay.json`
+  - `D:\RAFA\outputs\circleworld_proto\learned_branch_law_child_ifs_assay_2026-05-22_causal_guarded_gain3p0\learned_branch_law_assay.json`
+  - `D:\RAFA\outputs\circleworld_proto\learned_branch_law_child_ifs_assay_2026-05-22_causal_guarded_gain6p0\learned_branch_law_assay.json`
+
+### 2. 2026-05-22 - Two non-KNN GPU-backed Circleworld attempts were tested:
 
 - Source kind: `report`
 - Source path: `docs\reports\CIRCLEWORLD_PHASE_NATIVE_RANK_ROUTER_AND_GPU_CEM_2026-05-22.md`
@@ -78,7 +117,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
   - `D:\RAFA\outputs\circleworld_proto\real_anchor_cem_2026-05-22_gpu_rank_followup\search_history.json`
   - `D:\RAFA\checkpoints_circleworld_proto\real_anchor_cem_2026-05-22_gpu_rank_followup\circleworld_real_anchor_config_cem_v1.json`
 
-### 2. 2026-05-22 - Adding explicit no-future reentry/query features to the Circleworld phase-native route feature surface improves non-K...
+### 3. 2026-05-22 - Adding explicit no-future reentry/query features to the Circleworld phase-native route feature surface improves non-K...
 
 - Source kind: `report`
 - Source path: `docs\reports\CIRCLEWORLD_PHASE_NATIVE_REENTRY_QUERY_ROUTER_2026-05-22.md`
@@ -114,7 +153,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
   - `D:\RAFA\outputs\circleworld_proto\circleworld_operator_block_v1_2026-05-22_objective_resonant_memory_v1_reentry_features_fourth_full\circleworld_operator_block_v1.json`
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_route_policy_comparison_2026-05-22_reentry_feature_attempts_fourth\phase_native_audio_route_policy_comparison.json`
 
-### 3. 2026-05-21 - Output artifact scan: phase_native_audio_objective_policy_audit_v1
+### 4. 2026-05-21 - Output artifact scan: phase_native_audio_objective_policy_audit_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_resonant_memory_v1_original_fresh_third_to_fourth\phase_native_audio_objective_resonant_memory_v1_policy_audit.json`
@@ -127,7 +166,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_resonant_memory_v1_original_fresh_third_to_fourth\phase_native_audio_objective_resonant_memory_v1_policy_audit.json`
 
-### 4. 2026-05-21 - Output artifact scan: phase_native_audio_objective_policy_audit_v1
+### 5. 2026-05-21 - Output artifact scan: phase_native_audio_objective_policy_audit_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_score_mlp_v1_original_fresh_third_to_fourth\phase_native_audio_objective_score_mlp_v1_policy_audit.json`
@@ -141,7 +180,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_score_mlp_v1_original_fresh_third_to_fourth\phase_native_audio_objective_score_mlp_v1_policy_audit.json`
 
-### 5. 2026-05-21 - Output artifact scan: phase_native_audio_objective_policy_audit_v1
+### 6. 2026-05-21 - Output artifact scan: phase_native_audio_objective_policy_audit_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_mlp_v1_original_fresh_third_to_fourth\phase_native_audio_objective_mlp_v1_policy_audit.json`
@@ -155,7 +194,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_route_policy_2026-05-21_objective_mlp_v1_original_fresh_third_to_fourth\phase_native_audio_objective_mlp_v1_policy_audit.json`
 
-### 6. 2026-05-21 - Output artifact scan: phase_native_audio_route_selector_contract_audit_v1
+### 7. 2026-05-21 - Output artifact scan: phase_native_audio_route_selector_contract_audit_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_knn5_contract_audit_2026-05-21_final_check\phase_native_audio_route_selector_contract_audit.json`
@@ -175,7 +214,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_knn5_contract_audit_2026-05-21_final_check\phase_native_audio_route_selector_contract_audit.json`
 
-### 7. 2026-05-21 - Output artifact scan: phase_native_audio_route_selector_contract_audit_v1
+### 8. 2026-05-21 - Output artifact scan: phase_native_audio_route_selector_contract_audit_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_knn5_contract_audit_2026-05-21_reverify_after_patch\phase_native_audio_route_selector_contract_audit.json`
@@ -195,7 +234,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_knn5_contract_audit_2026-05-21_reverify_after_patch\phase_native_audio_route_selector_contract_audit.json`
 
-### 8. 2026-05-21 - Output artifact scan: phase_native_audio_route_selector_contract_audit_v1
+### 9. 2026-05-21 - Output artifact scan: phase_native_audio_route_selector_contract_audit_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_knn5_contract_audit_2026-05-21_reverify\phase_native_audio_route_selector_contract_audit.json`
@@ -215,7 +254,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_knn5_contract_audit_2026-05-21_reverify\phase_native_audio_route_selector_contract_audit.json`
 
-### 9. 2026-05-20 - Output artifact scan: rafa_cpu_phase_heat_worker_v1
+### 10. 2026-05-20 - Output artifact scan: rafa_cpu_phase_heat_worker_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\heat_training_2026-05-20\cpu_phase_heat_worker_hot\rafa_cpu_phase_heat_summary.json`
@@ -228,7 +267,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\heat_training_2026-05-20\cpu_phase_heat_worker_hot\rafa_cpu_phase_heat_summary.json`
 
-### 10. 2026-05-20 - Output artifact scan: circleworld_internal_phase_law_variant_compare_v0
+### 11. 2026-05-20 - Output artifact scan: circleworld_internal_phase_law_variant_compare_v0
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\codebase_cleanup_2026-05-20_common_io_smoke\variant_compare\internal_phase_law_variant_compare.json`
@@ -256,7 +295,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\codebase_cleanup_2026-05-20_common_io_smoke\variant_compare\internal_phase_law_variant_compare.json`
 
-### 11. 2026-05-18 - Output artifact scan: phase_native_audio_route_selector_contract_audit_v1
+### 12. 2026-05-18 - Output artifact scan: phase_native_audio_route_selector_contract_audit_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_knn5_contract_audit_2026-05-18\phase_native_audio_route_selector_contract_audit.json`
@@ -276,7 +315,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_objective_knn5_contract_audit_2026-05-18\phase_native_audio_route_selector_contract_audit.json`
 
-### 12. 2026-05-17 - The rebuilt 2026-05-17 lockbox selected 62 cases from 10 predeclared groups with no unmet minimum groups:
+### 13. 2026-05-17 - The rebuilt 2026-05-17 lockbox selected 62 cases from 10 predeclared groups with no unmet minimum groups:
 
 - Source kind: `report`
 - Source path: `docs\reports\RAFA_PHASE_NATIVE_AUDIO_RESET_SUITE_2026-05-17.md`
@@ -317,7 +356,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reentry_guard_2026-05-17_full_lockbox\phase_native_audio_reentry_guard_score.json`
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_seed_reentry_ablation_2026-05-17_full_lockbox\audio_phase_seed_ablation.json`
 
-### 13. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
+### 14. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_fourth_seed20260520_full\continuation_flat_copyphase\audio_continuation_summary.json`
@@ -346,7 +385,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_fourth_seed20260520_full\continuation_flat_copyphase\audio_continuation_summary.json`
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_fourth_seed20260520_full\continuation_flat_copyphase`
 
-### 14. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
+### 15. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_third_seed20260519_full\continuation_flat_copyphase\audio_continuation_summary.json`
@@ -375,7 +414,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_third_seed20260519_full\continuation_flat_copyphase\audio_continuation_summary.json`
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_third_seed20260519_full\continuation_flat_copyphase`
 
-### 15. 2026-05-17 - Output artifact scan: phase_native_audio_prefix_router_scout_v1
+### 16. 2026-05-17 - Output artifact scan: phase_native_audio_prefix_router_scout_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_prefix_router_scout_2026-05-17_fresh_seed20260518_full\phase_native_audio_prefix_router_scout.json`
@@ -403,7 +442,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_prefix_router_scout_2026-05-17_fresh_seed20260518_full\phase_native_audio_prefix_router_scout.json`
 
-### 16. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
+### 17. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_fresh_seed20260518_full\continuation_flat_copyphase\audio_continuation_summary.json`
@@ -432,7 +471,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_fresh_seed20260518_full\continuation_flat_copyphase\audio_continuation_summary.json`
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_fresh_seed20260518_full\continuation_flat_copyphase`
 
-### 17. 2026-05-17 - Output artifact scan: phase_native_audio_prefix_router_scout_v1
+### 18. 2026-05-17 - Output artifact scan: phase_native_audio_prefix_router_scout_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_prefix_router_scout_2026-05-17_fresh_seed20260518\phase_native_audio_prefix_router_scout.json`
@@ -460,7 +499,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_prefix_router_scout_2026-05-17_fresh_seed20260518\phase_native_audio_prefix_router_scout.json`
 
-### 18. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
+### 19. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_fresh_seed20260518\continuation_flat_copyphase\audio_continuation_summary.json`
@@ -489,7 +528,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_fresh_seed20260518\continuation_flat_copyphase\audio_continuation_summary.json`
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_fresh_seed20260518\continuation_flat_copyphase`
 
-### 19. 2026-05-17 - Output artifact scan: phase_native_audio_prefix_router_scout_v1
+### 20. 2026-05-17 - Output artifact scan: phase_native_audio_prefix_router_scout_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_prefix_router_scout_2026-05-17_full_lockbox\phase_native_audio_prefix_router_scout.json`
@@ -517,7 +556,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_prefix_router_scout_2026-05-17_full_lockbox\phase_native_audio_prefix_router_scout.json`
 
-### 20. 2026-05-17 - Output artifact scan: phase_native_audio_reentry_metric_audit_v1
+### 21. 2026-05-17 - Output artifact scan: phase_native_audio_reentry_metric_audit_v1
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reentry_metric_audit_2026-05-17_full_lockbox\phase_native_audio_reentry_metric_audit.json`
@@ -545,7 +584,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 - Artifact paths:
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reentry_metric_audit_2026-05-17_full_lockbox\phase_native_audio_reentry_metric_audit.json`
 
-### 21. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
+### 22. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_full_lockbox\continuation_flat_copyphase\audio_continuation_summary.json`
@@ -574,7 +613,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_full_lockbox\continuation_flat_copyphase\audio_continuation_summary.json`
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_full_lockbox\continuation_flat_copyphase`
 
-### 22. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
+### 23. 2026-05-17 - Output artifact scan: circleworld_audio_continuation_v0
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_smoke_cpu\continuation_flat_copyphase\audio_continuation_summary.json`
@@ -603,7 +642,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_smoke_cpu\continuation_flat_copyphase\audio_continuation_summary.json`
   - `D:\RAFA\outputs\circleworld_proto\phase_native_audio_reset_2026-05-17_smoke_cpu\continuation_flat_copyphase`
 
-### 23. 2026-04-28 - Output artifact scan: dag_health_audit_2026-04-28
+### 24. 2026-04-28 - Output artifact scan: dag_health_audit_2026-04-28
 
 - Source kind: `output_json`
 - Source path: `D:\RAFA\outputs\circleworld_proto\dag_health_audit_2026-04-28.json`
@@ -621,6 +660,7 @@ This ledger reconstructs recent Circleworld experiment claims from Markdown repo
 Each line below is a compact JSON object with the required ledger fields.
 
 ```jsonl
+{"artifact_paths": ["D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_objective_route_policy_2026-05-22_objective_rank_embed_mlp_v1_cuda_reentry_features_original_fresh_third_to_fourth\\phase_native_audio_objective_route_policy.json", "D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_selected_route_2026-05-22_objective_rank_embed_mlp_v1_cuda_reentry_features_fourth_full\\phase_native_audio_selected_route.json", "D:\\RAFA\\outputs\\circleworld_proto\\circleworld_operator_block_v1_2026-05-22_objective_rank_embed_mlp_v1_cuda_reentry_features_fourth_full\\circleworld_operator_block_v1.json", "D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_route_policy_comparison_2026-05-22_rank_embed_vs_reentry_attempts_fourth\\phase_native_audio_route_policy_comparison.json", "D:\\RAFA\\outputs\\circleworld_proto\\shadow_learned_branch_law_2026-05-22_cuda_h1024_e30000\\shadow_branch_law_training.json", "D:\\RAFA\\outputs\\circleworld_proto\\learned_branch_law_child_ifs_assay_2026-05-22_causal_guarded_hi\\learned_branch_law_assay.json", "D:\\RAFA\\outputs\\circleworld_proto\\learned_branch_law_child_ifs_assay_2026-05-22_causal_guarded_gain0p5\\learned_branch_law_assay.json", "D:\\RAFA\\outputs\\circleworld_proto\\learned_branch_law_child_ifs_assay_2026-05-22_causal_guarded_gain3p0\\learned_branch_law_assay.json", "D:\\RAFA\\outputs\\circleworld_proto\\learned_branch_law_child_ifs_assay_2026-05-22_causal_guarded_gain6p0\\learned_branch_law_assay.json"], "claim_test": "This pass tested two learned Circleworld components without returning to KNN:", "date": "2026-05-22", "interpretation": "The route-embedding head is a valid non-KNN learned route candidate, but not a promotion over the reentry-feature MLP. It should stay as an architectural candidate because it is closer to \"score candidate law objects\" than a plain classifier, but the current metric leader remains reentry_objective_mlp_v1.", "limitations": "Not explicitly reconstructed from this report.", "metrics": {"final_mean_mae": 6.584e-05, "max_holdout_mae": 0.00175647, "mean_holdout_mae": 0.00037802, "mean_isolated_coherence": 0.67626039, "mean_parent_writeback_divergence": 1.16e-06, "mean_sibling_phase_delta": 0.45174796, "objective_score_mlp_v1": [0.06377346, -0.02676018, -0.06836457], "sandbox_mean_writeback_delta": 3e-08, "sibling_case_count": 12, "training_diagnostics.route_label_accuracy": 0.74358974, "training_diagnostics.training_pair_accuracy": 0.75040064, "training_diagnostics.training_top1_accuracy": 0.74358974, "training_pair_accuracy": 0.75040064, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||1": 156.0, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||2": 156.0, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||3": 156.0, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||4": 156.0, "training_top1_accuracy": 0.74358974}, "next_action": "Review source report and linked artifacts before promotion.", "source_kind": "report", "source_path": "docs\\reports\\CIRCLEWORLD_PHASE_NATIVE_RANK_EMBED_AND_LEARNED_BRANCH_LAW_2026-05-22.md"}
 {"artifact_paths": ["D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_objective_route_policy_2026-05-22_objective_rank_mlp_v1_cuda_reentry_features_original_fresh_third_to_fourth\\phase_native_audio_objective_route_policy.json", "D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_selected_route_2026-05-22_objective_rank_mlp_v1_cuda_reentry_features_fourth_full\\phase_native_audio_selected_route.json", "D:\\RAFA\\outputs\\circleworld_proto\\circleworld_operator_block_v1_2026-05-22_objective_rank_mlp_v1_cuda_reentry_features_fourth_full\\circleworld_operator_block_v1.json", "D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_route_policy_comparison_2026-05-22_rank_mlp_vs_reentry_attempts_fourth\\phase_native_audio_route_policy_comparison.json", "D:\\RAFA\\outputs\\circleworld_proto\\real_anchor_cem_2026-05-22_gpu_rank_followup\\train_summary.json", "D:\\RAFA\\outputs\\circleworld_proto\\real_anchor_cem_2026-05-22_gpu_rank_followup\\search_history.json", "D:\\RAFA\\checkpoints_circleworld_proto\\real_anchor_cem_2026-05-22_gpu_rank_followup\\circleworld_real_anchor_config_cem_v1.json"], "claim_test": "Two non-KNN GPU-backed Circleworld attempts were tested:", "date": "2026-05-22", "interpretation": "objective_rank_mlp_v1 is a valid non-KNN learned route head. It passes the selected-route and operator-block strict replay guards, remains future-clean, and beats raw Circleworld.", "limitations": "Not explicitly reconstructed from this report.", "metrics": {"reentry_objective_score_mlp_v1": [0.06377346, -0.02676018, -0.06836457], "route_centroids.flat|||all_bins|||anti_reentry_late_decorrelator|||1.route.gain": 1.0, "route_centroids.flat|||all_bins|||anti_reentry_late_decorrelator|||2.route.gain": 2.0, "route_centroids.flat|||all_bins|||anti_reentry_late_decorrelator|||3.route.gain": 3.0, "route_centroids.flat|||all_bins|||anti_reentry_late_decorrelator|||4.route.gain": 4.0, "route_centroids.flat|||all_bins|||anti_reentry_late_decorrelator|||6.route.gain": 6.0, "training_diagnostics.route_label_accuracy": 0.73717949, "training_diagnostics.training_pair_accuracy": 0.77504006, "training_diagnostics.training_top1_accuracy": 0.73717949, "training_pair_accuracy": 0.77504006, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||0.5": 156.0, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||1": 156.0, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||2": 156.0, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||3": 156.0, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||4": 156.0, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||6": 156.0, "training_route_counts.flat|||all_bins|||anti_reentry_late_decorrelator|||8": 156.0, "training_top1_accuracy": 0.73717949}, "next_action": "Review source report and linked artifacts before promotion.", "source_kind": "report", "source_path": "docs\\reports\\CIRCLEWORLD_PHASE_NATIVE_RANK_ROUTER_AND_GPU_CEM_2026-05-22.md"}
 {"artifact_paths": ["D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_objective_route_policy_2026-05-22_objective_mlp_v1_reentry_features_original_fresh_third_to_fourth\\phase_native_audio_objective_route_policy.json", "D:\\RAFA\\outputs\\circleworld_proto\\circleworld_operator_block_v1_2026-05-22_objective_mlp_v1_reentry_features_fourth_full\\circleworld_operator_block_v1.json", "D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_objective_route_policy_2026-05-22_objective_score_mlp_v1_reentry_features_original_fresh_third_to_fourth\\phase_native_audio_objective_route_policy.json", "D:\\RAFA\\outputs\\circleworld_proto\\circleworld_operator_block_v1_2026-05-22_objective_score_mlp_v1_reentry_features_fourth_full\\circleworld_operator_block_v1.json", "D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_objective_route_policy_2026-05-22_objective_resonant_memory_v1_reentry_features_original_fresh_third_to_fourth\\phase_native_audio_objective_route_policy.json", "D:\\RAFA\\outputs\\circleworld_proto\\circleworld_operator_block_v1_2026-05-22_objective_resonant_memory_v1_reentry_features_fourth_full\\circleworld_operator_block_v1.json", "D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_route_policy_comparison_2026-05-22_reentry_feature_attempts_fourth\\phase_native_audio_route_policy_comparison.json"], "claim_test": "Adding explicit no-future reentry/query features to the Circleworld phase-native route feature surface improves non-KNN learned/resonant route heads on the fourth lockbox.", "date": "2026-05-22", "interpretation": "The missing reentry/query surface was a real bottleneck. With the new features, the score MLP and resonant-memory route heads both flip from strict-failing to strict-clean in the canonical circleworld_operator_block_v1 path.", "limitations": "The reentry-query features are still shallow scalar summaries, not a full; The route policy is still emitted as a case table for the lockbox run.; The fourth lockbox is one held-out battlefield; broader source families and", "metrics": {"enriched_resonant_leave_one_route_label_accuracy": 0.11827957, "old_objective_score_mlp_v1": [0.0534426, -0.0238738, -0.07061707], "predicted_route_counts.flat|||all_bins|||anti_reentry_delta_decorrelator_mix|||4": 1.0, "predicted_route_counts.flat|||all_bins|||anti_reentry_staggered_decorrelator|||6": 1.0, "predicted_route_counts.flat|||phase_router_bins|||anti_reentry_late_decorrelator|||8": 1.0, "predicted_route_counts.prefix_hold|||all_bins|||anti_reentry_late_decorrelator|||8": 2.0, "reentry_objective_score_mlp_v1": [0.06377346, -0.02676018, -0.06836457], "route_centroids.flat|||all_bins|||anti_reentry_delta_decorrelator_mix|||4.route.gain": 4.0, "route_centroids.flat|||all_bins|||anti_reentry_delta_decorrelator_mix|||6.route.gain": 6.0, "training_diagnostics.route_label_accuracy": 1.0, "training_diagnostics.training_accuracy": 1.0, "training_route_counts.flat|||all_bins|||anti_reentry_delta_decorrelator_mix|||4": 2.0, "training_route_counts.flat|||all_bins|||anti_reentry_delta_decorrelator_mix|||6": 3.0, "training_route_counts.flat|||all_bins|||anti_reentry_staggered_decorrelator|||6": 2.0, "training_route_counts.flat|||phase_router_bins|||anti_reentry_late_decorrelator|||8": 2.0, "training_route_counts.prefix_hold|||all_bins|||anti_reentry_late_decorrelator|||4": 1.0, "training_route_counts.prefix_hold|||all_bins|||anti_reentry_late_decorrelator|||6": 3.0, "training_route_counts.prefix_hold|||all_bins|||anti_reentry_late_decorrelator|||8": 4.0}, "next_action": "Review source report and linked artifacts before promotion.", "source_kind": "report", "source_path": "docs\\reports\\CIRCLEWORLD_PHASE_NATIVE_REENTRY_QUERY_ROUTER_2026-05-22.md"}
 {"artifact_paths": ["D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_objective_route_policy_2026-05-21_objective_resonant_memory_v1_original_fresh_third_to_fourth\\phase_native_audio_objective_resonant_memory_v1_policy_audit.json"], "claim_test": "Output artifact scan: phase_native_audio_objective_policy_audit_v1", "date": "2026-05-21", "interpretation": "Output JSON was found without a paired report entry in this ledger window.", "limitations": "Metrics are mechanically extracted; interpretation must be confirmed from reports or manual artifact review.", "metrics": {"training_diagnostics.route_label_accuracy": 0.10215054}, "next_action": "Pair this artifact with a narrative report before using it as claim evidence.", "source_kind": "output_json", "source_path": "D:\\RAFA\\outputs\\circleworld_proto\\phase_native_audio_objective_route_policy_2026-05-21_objective_resonant_memory_v1_original_fresh_third_to_fourth\\phase_native_audio_objective_resonant_memory_v1_policy_audit.json"}
