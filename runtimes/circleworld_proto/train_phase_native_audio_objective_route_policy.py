@@ -31,6 +31,7 @@ OBJECTIVE_ROUTE_MODELS = (
     "objective_knn5_v1",
     "objective_mlp_v1",
     "objective_score_mlp_v1",
+    "objective_rank_mlp_v1",
     "objective_resonant_memory_v1",
 )
 
@@ -56,6 +57,7 @@ RESONANT_COMPONENT_WEIGHTS: dict[str, float] = {
     "other": 0.35,
 }
 RESONANT_ROUTE_TOP_M = 5
+RANK_MLP_MAX_PAIRS_PER_CASE = 64
 
 
 def _parse_train_set(raw: str) -> tuple[Path, list[Path]]:
@@ -542,18 +544,28 @@ def _predict_knn(
     return route_id, sum(distance for distance, _, _ in nearest) / float(len(nearest))
 
 
+def _resolve_torch_device(torch: Any, requested_device: str) -> Any:
+    raw = str(requested_device or "cpu").strip() or "cpu"
+    if raw.startswith("cuda") and not bool(torch.cuda.is_available()):
+        raise RuntimeError(f"Requested Torch device {raw!r}, but CUDA is not available")
+    return torch.device(raw)
+
+
 def _fit_mlp_route_classifier(
     training_rows: Sequence[dict[str, Any]],
     *,
     means: Sequence[float],
     stds: Sequence[float],
     fallback_route_id: str,
+    device: str = "cpu",
 ) -> dict[str, Any]:
     route_ids = sorted({str(row["route_id"]) for row in training_rows})
     diagnostics: dict[str, Any] = {
         "model_family": "mlp",
+        "device": str(device or "cpu"),
         "class_count": len(route_ids),
         "epochs": 0,
+        "loss": None,
         "final_loss": None,
         "training_accuracy": 0.0,
         "route_label_accuracy": 0.0,
@@ -593,7 +605,11 @@ def _fit_mlp_route_classifier(
         )
         return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
 
+    torch_device = _resolve_torch_device(torch, device)
+    diagnostics["device"] = str(torch_device)
     torch.manual_seed(int(diagnostics["seed"]))
+    if str(torch_device).startswith("cuda"):
+        torch.cuda.manual_seed_all(int(diagnostics["seed"]))
     try:
         torch.use_deterministic_algorithms(True)
     except Exception:
@@ -603,8 +619,13 @@ def _fit_mlp_route_classifier(
     x = torch.tensor(
         [_scale(row["vector"], means, stds) for row in training_rows],
         dtype=torch.float32,
+        device=torch_device,
     )
-    y = torch.tensor([class_index[str(row["route_id"])] for row in training_rows], dtype=torch.long)
+    y = torch.tensor(
+        [class_index[str(row["route_id"])] for row in training_rows],
+        dtype=torch.long,
+        device=torch_device,
+    )
     if not bool(torch.isfinite(x).all()):
         diagnostics.update(
             {
@@ -620,7 +641,7 @@ def _fit_mlp_route_classifier(
         torch.nn.Linear(input_dim, hidden_dim),
         torch.nn.Tanh(),
         torch.nn.Linear(hidden_dim, len(route_ids)),
-    )
+    ).to(torch_device)
     optimizer = torch.optim.AdamW(mlp.parameters(), lr=0.03, weight_decay=1.0e-4)
     final_loss = float("nan")
     for _ in range(epochs):
@@ -648,6 +669,7 @@ def _fit_mlp_route_classifier(
     diagnostics.update(
         {
             "epochs": epochs,
+            "loss": final_loss,
             "final_loss": final_loss,
             "training_accuracy": accuracy,
             "route_label_accuracy": accuracy,
@@ -661,6 +683,7 @@ def _fit_mlp_route_classifier(
         "route_ids": route_ids,
         "diagnostics": diagnostics,
         "torch": torch,
+        "torch_device": torch_device,
     }
 
 
@@ -675,9 +698,10 @@ def _predict_mlp(
         return str(mlp_state["fallback_route_id"]), 1.0
     torch = mlp_state["torch"]
     model = mlp_state["model"]
+    torch_device = mlp_state.get("torch_device", torch.device("cpu"))
     model.eval()
     with torch.no_grad():
-        x = torch.tensor([_scale(vector, means, stds)], dtype=torch.float32)
+        x = torch.tensor([_scale(vector, means, stds)], dtype=torch.float32, device=torch_device)
         logits = model(x)
         probs = torch.softmax(logits, dim=1)[0]
         class_idx = int(torch.argmax(probs).cpu())
@@ -718,6 +742,7 @@ def _fit_mlp_score_regressor(
     means: Sequence[float],
     stds: Sequence[float],
     fallback_route_id: str,
+    device: str = "cpu",
 ) -> dict[str, Any]:
     route_ids = sorted({str(row["route_id"]) for row in training_rows})
     targets = [_as_float(row.get("row_objective")) for row in training_rows]
@@ -726,9 +751,11 @@ def _fit_mlp_score_regressor(
     target_std = math.sqrt(target_var) if target_var > 1.0e-18 else 1.0
     diagnostics: dict[str, Any] = {
         "model_family": "score_mlp",
+        "device": str(device or "cpu"),
         "candidate_row_count": len(training_rows),
         "candidate_route_count": len(route_ids),
         "epochs": 0,
+        "loss": None,
         "final_loss": None,
         "training_mse": None,
         "route_label_accuracy": 0.0,
@@ -768,7 +795,11 @@ def _fit_mlp_score_regressor(
         )
         return {"mode": "fallback", "fallback_route_id": fallback_route_id, "diagnostics": diagnostics}
 
+    torch_device = _resolve_torch_device(torch, device)
+    diagnostics["device"] = str(torch_device)
     torch.manual_seed(int(diagnostics["seed"]))
+    if str(torch_device).startswith("cuda"):
+        torch.cuda.manual_seed_all(int(diagnostics["seed"]))
     try:
         torch.set_num_threads(1)
     except Exception:
@@ -784,8 +815,13 @@ def _fit_mlp_score_regressor(
             for row in training_rows
         ],
         dtype=torch.float32,
+        device=torch_device,
     )
-    y = torch.tensor([[(target - target_mean) / target_std] for target in targets], dtype=torch.float32)
+    y = torch.tensor(
+        [[(target - target_mean) / target_std] for target in targets],
+        dtype=torch.float32,
+        device=torch_device,
+    )
     if not bool(torch.isfinite(x).all()) or not bool(torch.isfinite(y).all()):
         diagnostics.update(
             {
@@ -802,7 +838,7 @@ def _fit_mlp_score_regressor(
         torch.nn.Linear(input_dim, hidden_dim),
         torch.nn.Tanh(),
         torch.nn.Linear(hidden_dim, 1),
-    )
+    ).to(torch_device)
     optimizer = torch.optim.AdamW(mlp.parameters(), lr=0.02, weight_decay=1.0e-4)
     final_loss = float("nan")
     for epoch in range(epochs):
@@ -824,12 +860,13 @@ def _fit_mlp_score_regressor(
 
     with torch.no_grad():
         predicted = (mlp(x)[:, 0] * target_std) + target_mean
-        target_tensor = torch.tensor(targets, dtype=torch.float32)
+        target_tensor = torch.tensor(targets, dtype=torch.float32, device=torch_device)
         training_mse = float(torch.mean((predicted - target_tensor) ** 2).cpu())
 
     diagnostics.update(
         {
             "epochs": epochs,
+            "loss": final_loss,
             "final_loss": final_loss,
             "training_mse": training_mse,
             "hidden_dim": hidden_dim,
@@ -843,6 +880,7 @@ def _fit_mlp_score_regressor(
         "target_std": target_std,
         "diagnostics": diagnostics,
         "torch": torch,
+        "torch_device": torch_device,
     }
 
 
@@ -857,18 +895,269 @@ def _predict_score_mlp(
         return str(score_mlp_state["fallback_route_id"]), 1.0
     torch = score_mlp_state["torch"]
     model = score_mlp_state["model"]
+    torch_device = score_mlp_state.get("torch_device", torch.device("cpu"))
     route_ids = [str(route_id) for route_id in score_mlp_state["route_ids"]]
     model.eval()
     with torch.no_grad():
         x = torch.tensor(
             [_score_input(vector, route_id, route_ids=route_ids, means=means, stds=stds) for route_id in route_ids],
             dtype=torch.float32,
+            device=torch_device,
         )
         scores = (model(x)[:, 0] * float(score_mlp_state["target_std"])) + float(score_mlp_state["target_mean"])
         best_idx = int(torch.argmax(scores).cpu())
         best_score = float(scores[best_idx].cpu())
     if best_idx < 0 or best_idx >= len(route_ids):
         return str(score_mlp_state["fallback_route_id"]), 1.0
+    return route_ids[best_idx], -best_score
+
+
+def _case_candidate_batches(training_rows: Sequence[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    by_case: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in training_rows:
+        by_case[str(row["case_name"])].append(row)
+    return [
+        sorted(rows, key=lambda row: (str(row["route_id"]), -_as_float(row.get("row_objective"))))
+        for _, rows in sorted(by_case.items())
+        if rows
+    ]
+
+
+def _rank_pair_indices(objectives: Sequence[float], *, max_pairs: int = RANK_MLP_MAX_PAIRS_PER_CASE) -> list[tuple[int, int]]:
+    ranked = sorted(range(len(objectives)), key=lambda idx: (-float(objectives[idx]), idx))
+    pairs: list[tuple[int, int]] = []
+    seen: set[tuple[int, int]] = set()
+
+    def add_pair(left_idx: int, right_idx: int) -> None:
+        if left_idx == right_idx:
+            return
+        if float(objectives[left_idx]) <= float(objectives[right_idx]) + 1.0e-12:
+            return
+        pair = (int(left_idx), int(right_idx))
+        if pair in seen:
+            return
+        seen.add(pair)
+        pairs.append(pair)
+
+    if len(ranked) < 2:
+        return []
+    best_idx = ranked[0]
+    for idx in ranked[1:]:
+        add_pair(best_idx, idx)
+        if len(pairs) >= max_pairs // 2:
+            break
+    for left_idx, right_idx in zip(ranked, ranked[1:]):
+        add_pair(left_idx, right_idx)
+        if len(pairs) >= max_pairs:
+            break
+    return pairs[:max_pairs]
+
+
+def _fit_mlp_route_ranker(
+    training_rows: Sequence[dict[str, Any]],
+    *,
+    means: Sequence[float],
+    stds: Sequence[float],
+    device: str = "cpu",
+) -> dict[str, Any]:
+    route_ids = sorted({str(row["route_id"]) for row in training_rows})
+    case_batches = _case_candidate_batches(training_rows)
+    pair_count = sum(
+        len(_rank_pair_indices([_as_float(row.get("row_objective")) for row in rows]))
+        for rows in case_batches
+    )
+    objectives_all = [_as_float(row.get("row_objective")) for row in training_rows]
+    objective_mean = sum(objectives_all) / float(len(objectives_all)) if objectives_all else 0.0
+    objective_var = (
+        sum((objective - objective_mean) ** 2 for objective in objectives_all) / float(len(objectives_all))
+        if objectives_all
+        else 0.0
+    )
+    objective_std = math.sqrt(objective_var) if objective_var > 1.0e-18 else 1.0
+    diagnostics: dict[str, Any] = {
+        "model_family": "rank_mlp",
+        "device": str(device or "cpu"),
+        "candidate_row_count": len(training_rows),
+        "candidate_case_count": len(case_batches),
+        "candidate_route_count": len(route_ids),
+        "candidate_pair_count": pair_count,
+        "max_pairs_per_case": RANK_MLP_MAX_PAIRS_PER_CASE,
+        "epochs": 0,
+        "loss": None,
+        "final_loss": None,
+        "training_pair_accuracy": 0.0,
+        "training_top1_accuracy": 0.0,
+        "route_label_accuracy": 0.0,
+        "hidden_dim": 0,
+        "seed": 3701,
+        "route_ids": route_ids,
+        "objective_mean": objective_mean,
+        "objective_std": objective_std,
+    }
+    if not route_ids:
+        raise RuntimeError("objective_rank_mlp_v1 needs at least one candidate route")
+    if len(route_ids) == 1:
+        diagnostics.update(
+            {
+                "mode": "constant_route",
+                "constant_route_reason": "single_candidate_route",
+                "training_top1_accuracy": 1.0 if training_rows else 0.0,
+                "route_label_accuracy": 1.0 if training_rows else 0.0,
+            }
+        )
+        return {"mode": "constant_route", "route_id": route_ids[0], "route_ids": route_ids, "diagnostics": diagnostics}
+    if len(case_batches) <= 0:
+        raise RuntimeError("objective_rank_mlp_v1 needs at least one candidate case")
+
+    try:
+        import torch
+    except ImportError as exc:
+        raise RuntimeError("objective_rank_mlp_v1 requires torch") from exc
+
+    torch_device = _resolve_torch_device(torch, device)
+    diagnostics["device"] = str(torch_device)
+    torch.manual_seed(int(diagnostics["seed"]))
+    if str(torch_device).startswith("cuda"):
+        torch.cuda.manual_seed_all(int(diagnostics["seed"]))
+    try:
+        torch.set_num_threads(1)
+    except Exception:
+        diagnostics["set_num_threads_unavailable"] = True
+    try:
+        torch.use_deterministic_algorithms(True)
+    except Exception:
+        diagnostics["deterministic_algorithms_unavailable"] = True
+
+    case_tensors: list[tuple[Any, Any, Any, Any, list[float], list[str]]] = []
+    for rows in case_batches:
+        objectives = [_as_float(row.get("row_objective")) for row in rows]
+        pair_indices = _rank_pair_indices(objectives)
+        pair_left = torch.tensor([left for left, _ in pair_indices], dtype=torch.long, device=torch_device)
+        pair_right = torch.tensor([right for _, right in pair_indices], dtype=torch.long, device=torch_device)
+        pair_gaps = torch.tensor(
+            [min(0.25, max(0.01, objectives[left] - objectives[right])) for left, right in pair_indices],
+            dtype=torch.float32,
+            device=torch_device,
+        )
+        pair_weights = torch.tensor(
+            [math.sqrt(min(1.0, max(0.01, objectives[left] - objectives[right]))) for left, right in pair_indices],
+            dtype=torch.float32,
+            device=torch_device,
+        )
+        x = torch.tensor(
+            [
+                _score_input(row["vector"], str(row["route_id"]), route_ids=route_ids, means=means, stds=stds)
+                for row in rows
+            ],
+            dtype=torch.float32,
+            device=torch_device,
+        )
+        y = torch.tensor(
+            [(_as_float(row.get("row_objective")) - objective_mean) / objective_std for row in rows],
+            dtype=torch.float32,
+            device=torch_device,
+        )
+        row_route_ids = [str(row["route_id"]) for row in rows]
+        if not bool(torch.isfinite(x).all()) or not bool(torch.isfinite(y).all()):
+            raise RuntimeError("objective_rank_mlp_v1 encountered nonfinite ranking training data")
+        case_tensors.append((x, y, pair_left, pair_right, pair_gaps, pair_weights, objectives, row_route_ids))
+
+    input_dim = len(means) + len(route_ids)
+    hidden_dim = min(24, max(4, len(route_ids) * 2, input_dim))
+    epochs = 128
+    mlp = torch.nn.Sequential(
+        torch.nn.Linear(input_dim, hidden_dim),
+        torch.nn.Tanh(),
+        torch.nn.Linear(hidden_dim, 1),
+    ).to(torch_device)
+    optimizer = torch.optim.AdamW(mlp.parameters(), lr=0.02, weight_decay=1.0e-4)
+    final_loss = float("nan")
+    for epoch in range(epochs):
+        optimizer.zero_grad(set_to_none=True)
+        list_losses = []
+        pair_losses = []
+        for x, y, pair_left, pair_right, pair_gaps, pair_weights, _, _ in case_tensors:
+            scores = mlp(x)[:, 0]
+            target_probs = torch.softmax(y, dim=0)
+            list_losses.append(-(target_probs * torch.nn.functional.log_softmax(scores, dim=0)).sum())
+            if int(pair_left.numel()) > 0:
+                pair_delta = scores[pair_left] - scores[pair_right]
+                pair_losses.append((pair_weights * torch.nn.functional.softplus(pair_gaps - pair_delta)).mean())
+        list_loss = torch.stack(list_losses).mean()
+        if pair_losses:
+            loss = list_loss + 0.5 * torch.stack(pair_losses).mean()
+        else:
+            loss = list_loss
+        if not bool(torch.isfinite(loss)):
+            raise RuntimeError(f"objective_rank_mlp_v1 produced nonfinite training loss at epoch {epoch}")
+        loss.backward()
+        optimizer.step()
+        final_loss = float(loss.detach().cpu())
+
+    top1_correct = 0
+    pair_correct = 0
+    pair_total = 0
+    with torch.no_grad():
+        for x, _, pair_left, pair_right, _, _, objectives, row_route_ids in case_tensors:
+            scores = mlp(x)[:, 0]
+            predicted_idx = int(torch.argmax(scores).cpu())
+            best_idx = max(range(len(objectives)), key=lambda idx: (objectives[idx], row_route_ids[idx]))
+            top1_correct += int(row_route_ids[predicted_idx] == row_route_ids[best_idx])
+            if int(pair_left.numel()) > 0:
+                pair_delta = scores[pair_left] - scores[pair_right]
+                pair_correct += int((pair_delta > 0.0).to(torch.long).sum().cpu())
+                pair_total += int(pair_left.numel())
+    top1_accuracy = top1_correct / float(len(case_tensors)) if case_tensors else 0.0
+    pair_accuracy = pair_correct / float(pair_total) if pair_total else 0.0
+
+    diagnostics.update(
+        {
+            "epochs": epochs,
+            "loss": final_loss,
+            "final_loss": final_loss,
+            "training_pair_accuracy": pair_accuracy,
+            "training_top1_accuracy": top1_accuracy,
+            "route_label_accuracy": top1_accuracy,
+            "hidden_dim": hidden_dim,
+        }
+    )
+    return {
+        "mode": "mlp",
+        "model": mlp,
+        "route_ids": route_ids,
+        "diagnostics": diagnostics,
+        "torch": torch,
+        "torch_device": torch_device,
+    }
+
+
+def _predict_rank_mlp(
+    vector: Sequence[float],
+    *,
+    means: Sequence[float],
+    stds: Sequence[float],
+    rank_mlp_state: dict[str, Any],
+) -> tuple[str, float]:
+    if rank_mlp_state.get("mode") == "constant_route":
+        return str(rank_mlp_state["route_id"]), 0.0
+    if rank_mlp_state.get("mode") != "mlp":
+        raise RuntimeError("objective_rank_mlp_v1 has no trained ranking model")
+    torch = rank_mlp_state["torch"]
+    model = rank_mlp_state["model"]
+    torch_device = rank_mlp_state.get("torch_device", torch.device("cpu"))
+    route_ids = [str(route_id) for route_id in rank_mlp_state["route_ids"]]
+    model.eval()
+    with torch.no_grad():
+        x = torch.tensor(
+            [_score_input(vector, route_id, route_ids=route_ids, means=means, stds=stds) for route_id in route_ids],
+            dtype=torch.float32,
+            device=torch_device,
+        )
+        scores = model(x)[:, 0]
+        best_idx = int(torch.argmax(scores).cpu())
+        best_score = float(scores[best_idx].cpu())
+    if best_idx < 0 or best_idx >= len(route_ids):
+        raise RuntimeError("objective_rank_mlp_v1 produced an invalid route index")
     return route_ids[best_idx], -best_score
 
 
@@ -882,6 +1171,7 @@ def _predict(
     centroids: dict[str, list[float]],
     mlp_state: dict[str, Any] | None = None,
     score_mlp_state: dict[str, Any] | None = None,
+    rank_mlp_state: dict[str, Any] | None = None,
 ) -> tuple[str, float]:
     if model == "objective_centroid_v1":
         return _predict_centroid(vector, means=means, stds=stds, centroids=centroids)
@@ -897,6 +1187,10 @@ def _predict(
         if score_mlp_state is None:
             raise ValueError("objective_score_mlp_v1 requires a trained score_mlp_state")
         return _predict_score_mlp(vector, means=means, stds=stds, score_mlp_state=score_mlp_state)
+    if model == "objective_rank_mlp_v1":
+        if rank_mlp_state is None:
+            raise ValueError("objective_rank_mlp_v1 requires a trained rank_mlp_state")
+        return _predict_rank_mlp(vector, means=means, stds=stds, rank_mlp_state=rank_mlp_state)
     raise ValueError(f"Unknown objective route model: {model}")
 
 
@@ -961,12 +1255,13 @@ def train_objective_route_policy(
     out_dir: Path,
     model: str,
     margin: float,
+    device: str = "cpu",
 ) -> dict[str, Any]:
     train_feature_sets = [_case_features([delta_jsons[0]]) for _, delta_jsons in train_sets]
     target_features = _case_features([target_delta_json])
     keys = _feature_keys([*train_feature_sets, target_features])
     candidate_diagnostics: dict[str, Any] | None = None
-    if model == "objective_score_mlp_v1":
+    if model in {"objective_score_mlp_v1", "objective_rank_mlp_v1"}:
         training_rows, candidate_diagnostics = _candidate_training_rows(train_sets, keys, margin=margin)
     else:
         training_rows = _training_rows(train_sets, keys, margin=margin)
@@ -976,7 +1271,7 @@ def train_objective_route_policy(
     centroids = _fit_route_centroids(training_rows, means, stds)
     fallback_route_id = (
         _best_mean_objective_route_id(training_rows)
-        if model in {"objective_score_mlp_v1", "objective_resonant_memory_v1"}
+        if model in {"objective_score_mlp_v1", "objective_rank_mlp_v1", "objective_resonant_memory_v1"}
         else Counter(str(row["route_id"]) for row in training_rows).most_common(1)[0][0]
     )
     mlp_state = (
@@ -985,6 +1280,7 @@ def train_objective_route_policy(
             means=means,
             stds=stds,
             fallback_route_id=fallback_route_id,
+            device=device,
         )
         if model == "objective_mlp_v1"
         else None
@@ -995,8 +1291,19 @@ def train_objective_route_policy(
             means=means,
             stds=stds,
             fallback_route_id=fallback_route_id,
+            device=device,
         )
         if model == "objective_score_mlp_v1"
+        else None
+    )
+    rank_mlp_state = (
+        _fit_mlp_route_ranker(
+            training_rows,
+            means=means,
+            stds=stds,
+            device=device,
+        )
+        if model == "objective_rank_mlp_v1"
         else None
     )
     resonant_state = (
@@ -1012,6 +1319,8 @@ def train_objective_route_policy(
     valid_route_ids = set(centroids)
     if score_mlp_state is not None:
         valid_route_ids.update(str(route_id) for route_id in score_mlp_state.get("route_ids", ()))
+    if rank_mlp_state is not None:
+        valid_route_ids.update(str(route_id) for route_id in rank_mlp_state.get("route_ids", ()))
     if resonant_state is not None:
         valid_route_ids.update(str(route_id) for route_id in resonant_state.get("route_ids", ()))
 
@@ -1046,6 +1355,7 @@ def train_objective_route_policy(
                 centroids=centroids,
                 mlp_state=mlp_state,
                 score_mlp_state=score_mlp_state,
+                rank_mlp_state=rank_mlp_state,
             )
         if route_id not in valid_route_ids:
             route_id = fallback_route_id
@@ -1078,6 +1388,15 @@ def train_objective_route_policy(
             "total": len(training_rows),
             "fallback_prediction_count": fallback_prediction_count,
             "candidate_diagnostics": candidate_diagnostics or {},
+            "source_future_access_clean": bool((candidate_diagnostics or {}).get("source_future_access_clean")),
+        }
+    elif rank_mlp_state is not None:
+        diagnostics = {
+            **rank_mlp_state["diagnostics"],
+            "total": len(training_rows),
+            "fallback_prediction_count": fallback_prediction_count,
+            "candidate_diagnostics": candidate_diagnostics or {},
+            "source_future_access_clean": bool((candidate_diagnostics or {}).get("source_future_access_clean")),
         }
     elif resonant_state is not None:
         resonant_accuracy = _leave_one_resonant_accuracy(training_rows, keys=keys)
@@ -1156,6 +1475,7 @@ def main() -> None:
         default="objective_knn5_v1",
     )
     parser.add_argument("--target-margin", type=float, default=0.01)
+    parser.add_argument("--device", default="cpu", help="Torch device for MLP models, for example cpu or cuda")
     args = parser.parse_args()
     summary = train_objective_route_policy(
         train_sets=[_parse_train_set(raw) for raw in args.train_set],
@@ -1163,6 +1483,7 @@ def main() -> None:
         out_dir=args.out_dir,
         model=str(args.model),
         margin=float(args.target_margin),
+        device=str(args.device),
     )
     print(
         json.dumps(

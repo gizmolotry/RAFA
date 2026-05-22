@@ -171,6 +171,12 @@ def test_objective_score_mlp_v1_is_registered() -> None:
     assert validate_route_policy_id("objective_score_mlp_v1") == "objective_score_mlp_v1"
 
 
+def test_objective_rank_mlp_v1_is_registered() -> None:
+    assert "objective_rank_mlp_v1" in objective_trainer.OBJECTIVE_ROUTE_MODELS
+    assert "objective_rank_mlp_v1" in PHASE_NATIVE_AUDIO_OBJECTIVE_ROUTE_MODELS
+    assert validate_route_policy_id("objective_rank_mlp_v1") == "objective_rank_mlp_v1"
+
+
 def test_objective_resonant_memory_v1_is_registered() -> None:
     assert "objective_resonant_memory_v1" in objective_trainer.OBJECTIVE_ROUTE_MODELS
     assert "objective_resonant_memory_v1" in PHASE_NATIVE_AUDIO_OBJECTIVE_ROUTE_MODELS
@@ -411,6 +417,119 @@ def test_objective_score_mlp_v1_training_uses_candidate_objectives(
     assert candidate_diagnostics["source_future_access_clean"] is True
     route = select_route_from_policy_payload(summary, "family__target001", route_policy="case_table")
     assert route == summary["case_routes"]["family__target001"]
+
+
+def test_objective_rank_mlp_v1_training_uses_candidate_rank_objective(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    route_a = ("prefix_hold", "phase_router_bins", "anti_reentry_delta_shear_mix", 16.0)
+    route_b = ("flat", "all_bins", "raw", 0.5)
+
+    def fake_case_features(paths: list[Path]) -> dict[str, dict[str, float]]:
+        if paths == [Path("target_delta.json")]:
+            return {
+                "family__target001": {"x": 0.05, "y": 0.10},
+                "family__target002": {"x": 0.95, "y": 0.90},
+            }
+        return {
+            "family__source001": {"x": 0.00, "y": 0.00},
+            "family__source002": {"x": 0.10, "y": 0.05},
+            "family__source003": {"x": 1.00, "y": 1.00},
+            "family__source004": {"x": 0.90, "y": 0.95},
+        }
+
+    def row(case_name: str, route: tuple[str, str, str, float], objective: float) -> dict[str, object]:
+        return {
+            "case_name": case_name,
+            "group": "family",
+            "magnitude_mode": route[0],
+            "mask_mode": route[1],
+            "mechanism": route[2],
+            "gain": route[3],
+            "corr_delta_vs_copy_last": objective,
+            "mse_delta_vs_copy_last": 0.0,
+            "loop_delta_vs_copy_last": 0.0,
+            "harmful_replay_excess_delta_vs_copy_last": 0.0,
+            "corr_delta_vs_gain0": 0.0,
+        }
+
+    def fake_collect_rows(
+        suite_json: Path,
+        delta_jsons: list[Path],
+        margin: float,
+    ) -> tuple[dict[str, object], list[dict[str, object]]]:
+        del suite_json, delta_jsons, margin
+        return {"future_access_clean": True}, [
+            row("family__source001", route_a, 1.00),
+            row("family__source001", route_b, 0.05),
+            row("family__source002", route_a, 0.90),
+            row("family__source002", route_b, 0.10),
+            row("family__source003", route_a, 0.10),
+            row("family__source003", route_b, 1.20),
+            row("family__source004", route_a, 0.10),
+            row("family__source004", route_b, 1.10),
+        ]
+
+    monkeypatch.setattr(objective_trainer, "_case_features", fake_case_features)
+    monkeypatch.setattr(objective_trainer, "_collect_rows", fake_collect_rows)
+
+    with tempfile.TemporaryDirectory(prefix="objective_rank_mlp_v1_", dir=Path.cwd()) as out_dir:
+        summary = objective_trainer.train_objective_route_policy(
+            train_sets=[(Path("suite.json"), [Path("source_delta.json")])],
+            target_delta_json=Path("target_delta.json"),
+            out_dir=Path(out_dir),
+            model="objective_rank_mlp_v1",
+            margin=0.01,
+            device="cpu",
+        )
+
+    assert summary["schema"] == "phase_native_audio_objective_route_policy_v1"
+    assert summary["model"] == "objective_rank_mlp_v1"
+    assert summary["feature_keys"] == ["x", "y"]
+    assert summary["source_future_metrics_used_for_route_training_labels"] is True
+    assert summary["target_future_audio_used_for_route_selection"] is False
+    assert summary["target_future_metrics_used_for_route_selection"] is False
+    assert not any(
+        token in key
+        for key in summary["feature_keys"]
+        for token in (
+            "target_",
+            "future_target",
+            "copy_last",
+            "row_objective",
+            "selected_route",
+            "corr_delta",
+            "mse_delta",
+            "loop_delta",
+        )
+    )
+    assert set(summary["case_routes"]) == {"family__target001", "family__target002"}
+    assert len(summary["predictions"]) == 2
+    assert sum(summary["predicted_route_counts"].values()) == 2
+    assert set(summary["training_route_counts"]) == {
+        objective_trainer._route_id(route_a),
+        objective_trainer._route_id(route_b),
+    }
+    assert all("future_target" not in key for prediction in summary["predictions"] for key in prediction)
+    route = select_route_from_policy_payload(summary, "family__target001", route_policy="case_table")
+    assert route == summary["case_routes"]["family__target001"]
+
+    diagnostics = summary["training_diagnostics"]
+    assert diagnostics["model_family"] == "rank_mlp"
+    assert diagnostics["device"] == "cpu"
+    assert diagnostics["candidate_row_count"] == 8
+    assert diagnostics["candidate_case_count"] == 4
+    assert diagnostics["candidate_route_count"] == 2
+    assert diagnostics["candidate_pair_count"] == 4
+    assert diagnostics["epochs"] > 0
+    assert diagnostics["loss"] is not None
+    assert diagnostics["fallback_prediction_count"] == 0
+    assert diagnostics["source_future_access_clean"] is True
+    candidate_diagnostics = diagnostics["candidate_diagnostics"]
+    assert candidate_diagnostics["raw_candidate_row_count"] == 8
+    assert candidate_diagnostics["candidate_row_count"] == 8
+    assert candidate_diagnostics["candidate_route_count"] == 2
+    assert candidate_diagnostics["source_future_access_clean"] is True
 
 
 def test_objective_resonant_memory_v1_training_emits_component_diagnostics(
